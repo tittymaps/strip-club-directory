@@ -14,9 +14,9 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidGl0dHltYXBzIiwiYSI6ImNtbm02eTdjMTFqazIycG9vc
 export default function Home() {
   const mapContainer = useRef(null)
   const map = useRef(null)
-  const [clubs, setClubs] = useState([])
+  const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
-  const markers = useRef([])
+  const markers = useRef<any[]>([])
 
   useEffect(() => {
     fetchClubs()
