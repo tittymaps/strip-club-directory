@@ -12,8 +12,8 @@ const supabase = createClient(
 mapboxgl.accessToken = 'pk.eyJ1IjoidGl0dHltYXBzIiwiYSI6ImNtbm02eTdjMTFqazIycG9vc2VjdGdkMTYifQ.XDY64xb5xbETWpquWKhKvQ'
 
 export default function Home() {
-  const mapContainer = useRef(null)
-  const map = useRef(null)
+  const mapContainer = useRef<any>(null)
+  const map = useRef<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const markers = useRef<any[]>([])
@@ -33,7 +33,7 @@ export default function Home() {
     initMap(data || [])
   }
 
-  function initMap(clubData) {
+  function initMap(clubData: any[]) {
     if (map.current) return
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -54,7 +54,7 @@ export default function Home() {
     map.current.on('load', () => addMarkers(clubData))
   }
 
-  function addMarkers(clubData) {
+  function addMarkers(clubData: any[]) {
     markers.current.forEach((m) => m.remove())
     markers.current = []
     const filtered = clubData.filter((c) => {
