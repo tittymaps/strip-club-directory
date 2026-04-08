@@ -1,113 +1,174 @@
-import Image from 'next/image';
+'use client'
+import { useEffect, useRef, useState } from 'react'
+import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://ssruvoxuwlksmbmubcfv.supabase.co',
+  'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
+)
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidGl0dHltYXBzIiwiYSI6ImNtbm02eTdjMTFqazIycG9vc2VjdGdkMTYifQ.XDY64xb5xbETWpquWKhKvQ'
 
 export default function Home() {
+  const mapContainer = useRef(null)
+  const map = useRef(null)
+  const [clubs, setClubs] = useState([])
+  const [filter, setFilter] = useState('all')
+  const markers = useRef([])
+
+  useEffect(() => {
+    fetchClubs()
+  }, [])
+
+  useEffect(() => {
+    if (!map.current || clubs.length === 0) return
+    addMarkers(clubs)
+  }, [clubs, filter])
+
+  async function fetchClubs() {
+    const { data } = await supabase.from('clubs').select('*')
+    setClubs(data || [])
+    initMap(data || [])
+  }
+
+  function initMap(clubData) {
+    if (map.current) return
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/dark-v11',
+      zoom: 12,
+    })
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          map.current.setCenter([pos.coords.longitude, pos.coords.latitude])
+        },
+        () => {
+          map.current.setCenter([-70.2568, 43.6591])
+        }
+      )
+    }
+    map.current.on('load', () => addMarkers(clubData))
+  }
+
+  function addMarkers(clubData) {
+    markers.current.forEach((m) => m.remove())
+    markers.current = []
+    const filtered = clubData.filter((c) => {
+      if (filter === 'all') return true
+      if (filter === 'full_nude') return c.nude_level === 'full_nude'
+      if (filter === 'topless') return c.nude_level === 'topless'
+      if (filter === 'full_bar') return c.bar_type === 'full_bar'
+      if (filter === 'byob') return c.bar_type === 'byob'
+      if (filter === 'featured') return c.is_featured
+      return true
+    })
+    filtered.forEach((club) => {
+      const el = document.createElement('div')
+      el.style.cssText = `
+        width:28px;height:28px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+        background:${club.is_featured ? '#FFD700' : club.nude_level === 'topless' ? '#7B2FBE' : '#FF2D78'};
+        border:2px solid white;cursor:pointer;display:flex;align-items:center;
+        justify-content:center;font-size:11px;color:white;font-weight:bold;
+      `
+      el.innerHTML = club.is_featured ? '★' : '♦'
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([club.longitude, club.latitude])
+        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(`
+          <div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;">
+            <div style="font-weight:600;font-size:14px;margin-bottom:4px;">${club.name}</div>
+            <div style="font-size:11px;color:#aaa;margin-bottom:6px;">${club.city}, ${club.state}</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+              <span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">
+                ${club.nude_level === 'full_nude' ? 'Full nude' : 'Topless'}
+              </span>
+              <span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">
+                ${club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB'}
+              </span>
+            </div>
+          </div>
+        `))
+        .addTo(map.current)
+      markers.current.push(marker)
+    })
+  }
+
+  const filtered = clubs.filter((c) => {
+    if (filter === 'all') return true
+    if (filter === 'full_nude') return c.nude_level === 'full_nude'
+    if (filter === 'topless') return c.nude_level === 'topless'
+    if (filter === 'full_bar') return c.bar_type === 'full_bar'
+    if (filter === 'byob') return c.bar_type === 'byob'
+    if (filter === 'featured') return c.is_featured
+    return true
+  })
+
+  const chips = [
+    { key: 'all', label: 'All' },
+    { key: 'full_nude', label: 'Full nude' },
+    { key: 'topless', label: 'Topless' },
+    { key: 'full_bar', label: 'Full bar' },
+    { key: 'byob', label: 'BYOB' },
+    { key: 'featured', label: '★ Featured' },
+  ]
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 18 }}>📍</span>
+        </div>
+        <div style={{ flex: 1 }}>
+          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 18 }}>Titty</span>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>Maps</span>
+          <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <div ref={mapContainer} style={{ height: '45vh', width: '100%' }} />
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
+        {chips.map((c) => (
+          <button key={c.key} onClick={() => { setFilter(c.key); addMarkers(clubs) }}
+            style={{
+              borderRadius: 20, padding: '5px 14px', fontSize: 12, whiteSpace: 'nowrap',
+              border: '1px solid', cursor: 'pointer', flexShrink: 0,
+              background: filter === c.key ? (c.key === 'featured' ? '#FFD700' : '#FF2D78') : 'transparent',
+              borderColor: filter === c.key ? (c.key === 'featured' ? '#FFD700' : '#FF2D78') : '#3a3d60',
+              color: filter === c.key ? (c.key === 'featured' ? '#0D0F1E' : 'white') : '#8890c0',
+            }}>
+            {c.label}
+          </button>
+        ))}
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div style={{ padding: '8px 12px' }}>
+        <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>{filtered.length} clubs nearby</div>
+        {filtered.map((club) => (
+          <div key={club.id} style={{
+            background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
+            border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
+            display: 'flex', gap: 10, alignItems: 'flex-start'
+          }}>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+              {club.is_featured ? '🌟' : '💜'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
+              <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                  {club.nude_level === 'full_nude' ? 'Full nude' : 'Topless'}
+                </span>
+                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                  {club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB'}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    </main>
-  );
+    </div>
+  )
 }
