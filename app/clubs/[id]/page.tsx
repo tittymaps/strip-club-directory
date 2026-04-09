@@ -21,13 +21,20 @@ export default function ClubDetail() {
   }, [id])
 
   async function fetchClub() {
-    const { data } = await supabase
-      .from('clubs')
+  const { data } = await supabase
+    .from('clubs')
+    .select('*')
+    .eq('id', id)
+    .single()
+  setClub(data)
+  if (data) {
+    const { data: dancerData } = await supabase
+      .from('dancers')
       .select('*')
-      .eq('id', id)
-      .single()
-    setClub(data)
+      .contains('club_ids', [data.id])
+    setDancers(dancerData || [])
   }
+}
 
   if (!club) return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -110,14 +117,16 @@ export default function ClubDetail() {
             </div>
           ) : (
             dancers.map(dancer => (
-              <div key={dancer.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 12, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#2a1a40', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>💃</div>
-                <div>
-                  <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{dancer.name}</div>
-                  <div style={{ color: '#FFD700', fontSize: 11 }}>★ Featured</div>
-                </div>
-              </div>
-            ))
+  <div key={dancer.id}
+    onClick={() => window.location.href = `/dancers/${dancer.id}`}
+    style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 12, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+    <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#2a1a40', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>💃</div>
+    <div>
+      <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{dancer.stage_name}</div>
+      <div style={{ color: '#FF2D78', fontSize: 11 }}>★ Featured · View profile →</div>
+    </div>
+  </div>
+))
           )}
         </div>
 
