@@ -102,7 +102,7 @@ export default function BecomeADancer() {
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How it works</div>
 
         {[
-          { icon: '💋', title: 'Sign up for Fansly through our link', body: 'We partner with Fansly to bring you more fans. Signing up through our link costs you nothing extra — you make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.' },
+          { icon: '💋', title: 'Sign up for Fansly through our link', body: 'We partner with Fansly to bring you more fans. Signing up through our link costs you nothing extra. You make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.' },
           { icon: '📍', title: 'Your profile gets pinned to the map', body: 'Once approved, your dancer profile appears on TittyMaps linked to the clubs you perform at. Club-goers planning their night out will see your profile before they even walk in the door.' },
           { icon: '🌟', title: 'Featured badge on your profile', body: 'You get a Featured badge, your own profile page, and a direct link to your Fansly — driving real fans to your content.' },
         ].map((item, i) => (
@@ -122,7 +122,7 @@ export default function BecomeADancer() {
       <div style={{ padding: '20px' }}>
         <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #FF2D78', padding: '20px', marginBottom: 24, textAlign: 'center' }}>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Step 1 — Sign up for Fansly</div>
-          <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Use our link so we can feature you for free. It takes 2 minutes and doesn't cost you anything.</div>
+          <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Use our link so we can feature you for free. It takes 2 minutes and does not cost you anything.</div>
           <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
             style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
             💋 Sign up for Fansly through our link
@@ -157,7 +157,7 @@ export default function BecomeADancer() {
           <input
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="We'll contact you when you're approved"
+            placeholder="We will contact you when you are approved"
             type="email"
             style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }}
           />
@@ -199,7 +199,7 @@ export default function BecomeADancer() {
         </button>
 
         <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginTop: 12 }}>
-          By applying you confirm you are 18+ and agree to our terms.
+          By applying you confirm you are 18 or older and agree to our terms.
         </div>
       </div>
     </div>
