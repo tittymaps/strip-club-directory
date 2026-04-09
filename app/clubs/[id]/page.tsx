@@ -11,10 +11,12 @@ const supabase = createClient(
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 export default function ClubDetail() {
+  const [fullPhoto, setFullPhoto] = useState<string | null>(null)
   const { id } = useParams()
   const router = useRouter()
   const [club, setClub] = useState<any>(null)
   const [dancers, setDancers] = useState<any[]>([])
+  const [fullPhoto, setFullPhoto] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) fetchClub()
@@ -44,6 +46,17 @@ export default function ClubDetail() {
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 40 }}>
+      
+      {fullPhoto && (
+    <div onClick={() => setFullPhoto(null)}
+    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+    <img src={fullPhoto} alt="full size" style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain' }} />
+    <button onClick={() => setFullPhoto(null)}
+      style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', width: 36, height: 36, fontSize: 16, cursor: 'pointer' }}>
+      ✕
+    </button>
+  </div>
+)}
 
       {/* Header */}
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
