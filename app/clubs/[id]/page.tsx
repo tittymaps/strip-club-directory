@@ -120,9 +120,10 @@ export default function ClubDetail() {
   <div key={dancer.id}
     onClick={() => window.location.href = `/dancers/${dancer.id}`}
     style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 12, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-    <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-  {dancer.photo_url
-    ? <img src={dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    <div style={{ width: 56, height: 56, borderRadius: 10, background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0, cursor: 'pointer' }}
+  onClick={(e) => { e.stopPropagation(); setFullPhoto((dancer.photo_urls?.[0] || dancer.photo_url) || null) }}>
+  {(dancer.photo_urls?.[0] || dancer.photo_url)
+    ? <img src={dancer.photo_urls?.[0] || dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     : '💃'}
 </div>
     <div>
