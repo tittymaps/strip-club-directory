@@ -154,7 +154,7 @@ export default function Home() {
               {club.is_featured ? '🌟' : '💜'}
             </div>
             <div style={{ flex: 1 }}>
-              <div style="font-weight:600;font-size:14px;margin-bottom:4px;cursor:pointer;" onclick="window.location.href='/clubs/${club.id}'">${club.name} →</div>
+              <a href="/clubs/${club.id}" style="font-weight:600;font-size:14px;margin-bottom:4px;color:white;text-decoration:none;display:block;">${club.name} →</a>
               <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
