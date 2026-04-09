@@ -9,7 +9,7 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
-mapboxgl.accessToken = 'pk.eyJ1IjoidGl0dHltYXBzIiwiYSI6ImNtbm02eTdjMTFqazIycG9vc2VjdGdkMTYifQ.XDY64xb5xbETWpquWKhKvQ'
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
 
 export default function Home() {
   const mapContainer = useRef<any>(null)
