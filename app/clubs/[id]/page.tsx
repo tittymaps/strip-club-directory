@@ -11,7 +11,6 @@ const supabase = createClient(
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 export default function ClubDetail() {
-  const [fullPhoto, setFullPhoto] = useState<string | null>(null)
   const { id } = useParams()
   const router = useRouter()
   const [club, setClub] = useState<any>(null)
