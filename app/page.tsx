@@ -75,17 +75,16 @@ export default function Home() {
         justify-content:center;font-size:11px;color:white;font-weight:bold;
       `
       el.innerHTML = club.is_featured ? '★' : '♦'
+      const popupHTML = '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
+        '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
+        '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
+        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
+        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? 'Full nude' : 'Topless') + '</span>' +
+        '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB') + '</span>' +
+        '</div></div>'
       const marker = new mapboxgl.Marker(el)
         .setLngLat([club.longitude, club.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(
-          '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
-          '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
-          '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
-          '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-          '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? 'Full nude' : 'Topless') + '</span>' +
-          '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB') + '</span>' +
-          '</div></div>'
-        ))
+        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(popupHTML))
         .addTo(map.current)
       markers.current.push(marker)
     })
@@ -140,16 +139,18 @@ export default function Home() {
       <div style={{ padding: '8px 12px' }}>
         <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>{filtered.length} clubs nearby</div>
         {filtered.map((club) => (
-          <div key={club.id} onClick={() => window.location.href=`/clubs/${club.id}`} style={{
-            background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
-            border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
-            display: 'flex', gap: 10, alignItems: 'flex-start'
-          }}>
+          <div key={club.id}
+            onClick={() => window.location.href = `/clubs/${club.id}`}
+            style={{
+              background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
+              border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
+              display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
+            }}>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
               {club.is_featured ? '🌟' : '💜'}
             </div>
             <div style={{ flex: 1 }}>
-              <a href="/clubs/${club.id}" style="font-weight:600;font-size:14px;margin-bottom:4px;color:white;text-decoration:none;display:block;">${club.name} →</a>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
               <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
