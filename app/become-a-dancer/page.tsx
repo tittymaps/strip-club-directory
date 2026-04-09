@@ -12,10 +12,13 @@ const FANSLY_SIGNUP = `https://fansly.com/signup?ref=${FANSLY_REF}`
 
 export default function BecomeADancer() {
   const [clubs, setClubs] = useState<any[]>([])
+  const [clubSearch, setClubSearch] = useState('')
   const [selectedClubs, setSelectedClubs] = useState<string[]>([])
   const [stageName, setStageName] = useState('')
   const [fanslyUsername, setFanslyUsername] = useState('')
   const [email, setEmail] = useState('')
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,6 +40,13 @@ export default function BecomeADancer() {
     })
   }
 
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhoto(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
   async function handleSubmit() {
     if (!stageName || !fanslyUsername || !email || selectedClubs.length === 0) {
       setError('Please fill out all fields and select at least one club.')
@@ -44,12 +54,33 @@ export default function BecomeADancer() {
     }
     setLoading(true)
     setError('')
+
+    let photoUrl = ''
+    if (photo) {
+      const fileExt = photo.name.split('.').pop()
+      const fileName = `${Date.now()}.${fileExt}`
+      const { error: uploadError } = await supabase.storage
+        .from('dancer-photos')
+        .upload(fileName, photo)
+      if (uploadError) {
+        setError('Photo upload failed. Please try again.')
+        setLoading(false)
+        return
+      }
+      const { data: urlData } = supabase.storage
+        .from('dancer-photos')
+        .getPublicUrl(fileName)
+      photoUrl = urlData.publicUrl
+    }
+
     const { error: dbError } = await supabase.from('dancer_applications').insert({
       stage_name: stageName,
       fansly_username: fanslyUsername,
       club_names: selectedClubs,
       email: email,
+      photo_url: photoUrl || null,
     })
+
     setLoading(false)
     if (dbError) {
       setError('Something went wrong. Please try again.')
@@ -57,6 +88,11 @@ export default function BecomeADancer() {
       setSubmitted(true)
     }
   }
+
+  const filteredClubs = clubs.filter(c =>
+    c.name.toLowerCase().includes(clubSearch.toLowerCase()) ||
+    c.city.toLowerCase().includes(clubSearch.toLowerCase())
+  )
 
   if (submitted) return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'sans-serif' }}>
@@ -77,7 +113,7 @@ export default function BecomeADancer() {
     {
       icon: '💋',
       title: 'Sign up for Fansly through our link',
-      body: 'We partner with Fansly to bring you more fans. Signing up through our link costs you nothing extra. You make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.'
+      body: 'Signing up through our link costs you nothing extra. You make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.'
     },
     {
       icon: '📍',
@@ -140,6 +176,24 @@ export default function BecomeADancer() {
 
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Step 2 — Submit your info</div>
 
+        {/* Photo upload */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Profile photo (optional)</div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#131629', border: `2px dashed ${photoPreview ? '#FF2D78' : '#3a3d60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+              {photoPreview
+                ? <img src={photoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ fontSize: 28 }}>📷</span>
+              }
+            </div>
+            <div>
+              <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{photoPreview ? 'Photo selected' : 'Tap to upload a photo'}</div>
+              <div style={{ color: '#8890c0', fontSize: 11 }}>This will appear on your profile page</div>
+            </div>
+            <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
+          </label>
+        </div>
+
         <div style={{ marginBottom: 14 }}>
           <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Stage name</div>
           <input value={stageName} onChange={e => setStageName(e.target.value)} placeholder="Your stage name"
@@ -160,16 +214,34 @@ export default function BecomeADancer() {
 
         <div style={{ marginBottom: 24 }}>
           <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Which clubs do you perform at? (pick up to 3)</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {clubs.map(club => {
+          <input
+            value={clubSearch}
+            onChange={e => setClubSearch(e.target.value)}
+            placeholder="Search clubs by name or city..."
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 8 }}
+          />
+          {selectedClubs.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+              {selectedClubs.map(name => (
+                <span key={name} onClick={() => toggleClub(name)} style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '3px 10px', fontSize: 11, cursor: 'pointer' }}>
+                  {name} ✕
+                </span>
+              ))}
+            </div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto' }}>
+            {filteredClubs.length === 0 ? (
+              <div style={{ color: '#8890c0', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>No clubs found</div>
+            ) : filteredClubs.map(club => {
               const selected = selectedClubs.includes(club.name)
               return (
                 <div key={club.id} onClick={() => toggleClub(club.name)}
                   style={{
                     background: selected ? '#1a0d2e' : '#131629',
                     border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`,
-                    borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                    borderRadius: 10, padding: '12px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1
                   }}>
                   <div>
                     <div style={{ color: 'white', fontSize: 14 }}>{club.name}</div>
