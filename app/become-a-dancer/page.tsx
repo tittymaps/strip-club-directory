@@ -17,15 +17,13 @@ export default function BecomeADancer() {
   const [stageName, setStageName] = useState('')
   const [fanslyUsername, setFanslyUsername] = useState('')
   const [email, setEmail] = useState('')
-  const [photo, setPhoto] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState('')
+  const [photos, setPhotos] = useState<File[]>([])
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    fetchClubs()
-  }, [])
+  useEffect(() => { fetchClubs() }, [])
 
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('id, name, city, state').order('name')
@@ -41,10 +39,16 @@ export default function BecomeADancer() {
   }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setPhoto(file)
-    setPhotoPreview(URL.createObjectURL(file))
+    const files = Array.from(e.target.files || [])
+    const remaining = 3 - photos.length
+    const newFiles = files.slice(0, remaining)
+    setPhotos(prev => [...prev, ...newFiles])
+    setPhotoPreviews(prev => [...prev, ...newFiles.map(f => URL.createObjectURL(f))])
+  }
+
+  function removePhoto(index: number) {
+    setPhotos(prev => prev.filter((_, i) => i !== index))
+    setPhotoPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit() {
@@ -55,10 +59,10 @@ export default function BecomeADancer() {
     setLoading(true)
     setError('')
 
-    let photoUrl = ''
-    if (photo) {
+    const uploadedUrls: string[] = []
+    for (const photo of photos) {
       const fileExt = photo.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
       const { error: uploadError } = await supabase.storage
         .from('dancer-photos')
         .upload(fileName, photo)
@@ -67,10 +71,8 @@ export default function BecomeADancer() {
         setLoading(false)
         return
       }
-      const { data: urlData } = supabase.storage
-        .from('dancer-photos')
-        .getPublicUrl(fileName)
-      photoUrl = urlData.publicUrl
+      const { data: urlData } = supabase.storage.from('dancer-photos').getPublicUrl(fileName)
+      uploadedUrls.push(urlData.publicUrl)
     }
 
     const { error: dbError } = await supabase.from('dancer_applications').insert({
@@ -78,7 +80,8 @@ export default function BecomeADancer() {
       fansly_username: fanslyUsername,
       club_names: selectedClubs,
       email: email,
-      photo_url: photoUrl || null,
+      photo_url: uploadedUrls[0] || null,
+      photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
     })
 
     setLoading(false)
@@ -110,30 +113,15 @@ export default function BecomeADancer() {
   )
 
   const howItWorks = [
-    {
-      icon: '💋',
-      title: 'Sign up for Fansly through our link',
-      body: 'Signing up through our link costs you nothing extra. You make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.'
-    },
-    {
-      icon: '📍',
-      title: 'Your profile gets pinned to the map',
-      body: 'Once approved, your dancer profile appears on TittyMaps linked to the clubs you perform at. Club-goers planning their night out will see your profile before they even walk in the door.'
-    },
-    {
-      icon: '🌟',
-      title: 'Featured badge on your profile',
-      body: 'You get a Featured badge, your own profile page, and a direct link to your Fansly driving real fans to your content.'
-    },
+    { icon: '💋', title: 'Sign up for Fansly through our link', body: 'Signing up through our link costs you nothing extra. You make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.' },
+    { icon: '📍', title: 'Your profile gets pinned to the map', body: 'Once approved, your dancer profile appears on TittyMaps linked to the clubs you perform at. Club-goers planning their night out will see your profile before they even walk in the door.' },
+    { icon: '🌟', title: 'Featured badge on your profile', body: 'You get a Featured badge, your own profile page, and a direct link to your Fansly driving real fans to your content.' },
   ]
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 60 }}>
-
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>
-          Back
-        </button>
+        <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Back</button>
         <div style={{ flex: 1 }}>
           <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
           <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
@@ -144,18 +132,14 @@ export default function BecomeADancer() {
       <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
         <div style={{ fontSize: 44, marginBottom: 12 }}>💃</div>
         <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>Get Featured on TittyMaps</h1>
-        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto' }}>
-          Reach thousands of club-goers in your area looking for performers near them.
-        </p>
+        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto' }}>Reach thousands of club-goers in your area looking for performers near them.</p>
       </div>
 
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How it works</div>
         {howItWorks.map((item, i) => (
           <div key={i} style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: '#131629', border: '1px solid #1e2140', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-              {item.icon}
-            </div>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: '#131629', border: '1px solid #1e2140', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{item.icon}</div>
             <div>
               <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{item.title}</div>
               <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>{item.body}</div>
@@ -178,20 +162,27 @@ export default function BecomeADancer() {
 
         {/* Photo upload */}
         <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Profile photo (optional)</div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#131629', border: `2px dashed ${photoPreview ? '#FF2D78' : '#3a3d60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-              {photoPreview
-                ? <img src={photoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ fontSize: 28 }}>📷</span>
-              }
-            </div>
-            <div>
-              <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{photoPreview ? 'Photo selected' : 'Tap to upload a photo'}</div>
-              <div style={{ color: '#8890c0', fontSize: 11 }}>This will appear on your profile page</div>
-            </div>
-            <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
-          </label>
+          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Photos (up to 3)</div>
+          <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>First photo becomes your profile picture. All photos appear on your profile page.</div>
+          <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+            {photoPreviews.map((preview, i) => (
+              <div key={i} style={{ position: 'relative', width: 80, height: 80, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                <img src={preview} alt={`photo ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <button onClick={() => removePhoto(i)}
+                  style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', color: 'white', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  ✕
+                </button>
+                {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,45,120,0.8)', color: 'white', fontSize: 9, textAlign: 'center', padding: '2px 0' }}>Profile pic</div>}
+              </div>
+            ))}
+            {photos.length < 3 && (
+              <label style={{ width: 80, height: 80, borderRadius: 10, background: '#131629', border: '2px dashed #3a3d60', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 24 }}>📷</span>
+                <span style={{ color: '#8890c0', fontSize: 9 }}>Add photo</span>
+                <input type="file" accept="image/*" multiple onChange={handlePhotoChange} style={{ display: 'none' }} />
+              </label>
+            )}
+          </div>
         </div>
 
         <div style={{ marginBottom: 14 }}>
@@ -214,12 +205,8 @@ export default function BecomeADancer() {
 
         <div style={{ marginBottom: 24 }}>
           <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Which clubs do you perform at? (pick up to 3)</div>
-          <input
-            value={clubSearch}
-            onChange={e => setClubSearch(e.target.value)}
-            placeholder="Search clubs by name or city..."
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 8 }}
-          />
+          <input value={clubSearch} onChange={e => setClubSearch(e.target.value)} placeholder="Search clubs by name or city..."
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 8 }} />
           {selectedClubs.length > 0 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
               {selectedClubs.map(name => (
@@ -230,27 +217,21 @@ export default function BecomeADancer() {
             </div>
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto' }}>
-            {filteredClubs.length === 0 ? (
-              <div style={{ color: '#8890c0', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>No clubs found</div>
-            ) : filteredClubs.map(club => {
-              const selected = selectedClubs.includes(club.name)
-              return (
-                <div key={club.id} onClick={() => toggleClub(club.name)}
-                  style={{
-                    background: selected ? '#1a0d2e' : '#131629',
-                    border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`,
-                    borderRadius: 10, padding: '12px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1
-                  }}>
-                  <div>
-                    <div style={{ color: 'white', fontSize: 14 }}>{club.name}</div>
-                    <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+            {filteredClubs.length === 0
+              ? <div style={{ color: '#8890c0', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>No clubs found</div>
+              : filteredClubs.map(club => {
+                const selected = selectedClubs.includes(club.name)
+                return (
+                  <div key={club.id} onClick={() => toggleClub(club.name)}
+                    style={{ background: selected ? '#1a0d2e' : '#131629', border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`, borderRadius: 10, padding: '12px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1 }}>
+                    <div>
+                      <div style={{ color: 'white', fontSize: 14 }}>{club.name}</div>
+                      <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+                    </div>
+                    {selected && <span style={{ color: '#FF2D78', fontSize: 18 }}>✓</span>}
                   </div>
-                  {selected && <span style={{ color: '#FF2D78', fontSize: 18 }}>✓</span>}
-                </div>
-              )
-            })}
+                )
+              })}
           </div>
         </div>
 
