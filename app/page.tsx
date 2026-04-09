@@ -145,7 +145,7 @@ export default function Home() {
       <div style={{ padding: '8px 12px' }}>
         <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>{filtered.length} clubs nearby</div>
         {filtered.map((club) => (
-          <div key={club.id} style={{
+          <div key={club.id} onClick={() => window.location.href=`/clubs/${club.id}`} style={{
             background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
             border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
             display: 'flex', gap: 10, alignItems: 'flex-start'
