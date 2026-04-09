@@ -54,10 +54,10 @@ export default function Dancers() {
                 display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer'
               }}>
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
-                {dancer.photo_url
-                 ? <img src={dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : '💃'}
-           </div>
+              {(dancer.photo_urls?.[0] || dancer.photo_url)
+              ? <img src={dancer.photo_urls?.[0] || dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : '💃'}
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                   <span style={{ color: 'white', fontWeight: 600, fontSize: 16 }}>{dancer.stage_name}</span>
