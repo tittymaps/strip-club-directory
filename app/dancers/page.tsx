@@ -7,8 +7,6 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
-const FANSLY_REF = 'YOUR_REF_CODE_HERE'
-
 export default function Dancers() {
   const [dancers, setDancers] = useState<any[]>([])
 
@@ -27,46 +25,48 @@ export default function Dancers() {
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 40 }}>
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 18 }}>📍</span>
-        </div>
+        <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
         <div style={{ flex: 1 }}>
-          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 18 }}>Titty</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>Maps</span>
-          <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
+          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
+          <span style={{ color: '#FFD700', fontSize: 11 }}>.com</span>
         </div>
+        <a href="/become-a-dancer"
+          style={{ background: '#FF2D78', color: 'white', borderRadius: 20, padding: '5px 12px', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>
+          Get Featured
+        </a>
       </div>
 
       <div style={{ padding: '16px' }}>
-        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers</div>
+        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>
+          Featured Dancers
+        </div>
+
         {dancers.length === 0 ? (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 32, textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>💃</div>
             <div style={{ color: '#8890c0', fontSize: 14 }}>No featured dancers yet</div>
           </div>
         ) : (
-          dancers.map((dancer) => (
-            <div key={dancer.id}
-              onClick={() => window.location.href = `/dancers/${dancer.id}`}
-              style={{
-                background: '#131629', borderRadius: 12, marginBottom: 10, padding: 16,
-                border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}`,
-                display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer'
-              }}>
-              <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
-              {(dancer.photo_urls?.[0] || dancer.photo_url)
-              ? <img src={dancer.photo_urls?.[0] || dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : '💃'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span style={{ color: 'white', fontWeight: 600, fontSize: 16 }}>{dancer.stage_name}</span>
-                  {dancer.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {dancers.map(dancer => {
+              const photo = dancer.photo_urls?.[0] || dancer.photo_url
+              return (
+                <div key={dancer.id}
+                  onClick={() => window.location.href = `/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                  {photo
+                    ? <img src={photo} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>💃</div>
+                  }
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', padding: '24px 12px 12px' }}>
+                    <div style={{ color: 'white', fontSize: 15, fontWeight: 600 }}>{dancer.stage_name}</div>
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 11 }}>★ Featured</div>}
+                  </div>
                 </div>
-                <div style={{ color: '#FF2D78', fontSize: 12 }}>View profile →</div>
-              </div>
-            </div>
-          ))
+              )
+            })}
+          </div>
         )}
       </div>
     </div>
