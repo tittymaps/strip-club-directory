@@ -1,7 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -9,161 +7,67 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
-
-export default function Home() {
-  const mapContainer = useRef<any>(null)
-  const map = useRef<any>(null)
-  const [clubs, setClubs] = useState<any[]>([])
-  const [filter, setFilter] = useState('all')
-  const markers = useRef<any[]>([])
+export default function Dancers() {
+  const [dancers, setDancers] = useState<any[]>([])
 
   useEffect(() => {
-    fetchClubs()
+    fetchDancers()
   }, [])
 
-  useEffect(() => {
-    if (!map.current || clubs.length === 0) return
-    addMarkers(clubs)
-  }, [clubs, filter])
-
-  async function fetchClubs() {
-    const { data } = await supabase.from('clubs').select('*')
-    setClubs(data || [])
-    initMap(data || [])
+  async function fetchDancers() {
+    const { data } = await supabase
+      .from('dancers')
+      .select('*')
+      .order('is_featured', { ascending: false })
+    setDancers(data || [])
   }
-
-  function initMap(clubData: any[]) {
-    if (map.current) return
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      zoom: 12,
-    })
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          map.current.setCenter([pos.coords.longitude, pos.coords.latitude])
-        },
-        () => {
-          map.current.setCenter([-70.2568, 43.6591])
-        }
-      )
-    }
-    map.current.on('load', () => addMarkers(clubData))
-  }
-
-  function addMarkers(clubData: any[]) {
-    markers.current.forEach((m) => m.remove())
-    markers.current = []
-    const filtered = clubData.filter((c) => {
-      if (filter === 'all') return true
-      if (filter === 'full_nude') return c.nude_level === 'full_nude'
-      if (filter === 'topless') return c.nude_level === 'topless'
-      if (filter === 'full_bar') return c.bar_type === 'full_bar'
-      if (filter === 'byob') return c.bar_type === 'byob'
-      if (filter === 'featured') return c.is_featured
-      return true
-    })
-    filtered.forEach((club) => {
-      const el = document.createElement('div')
-      el.style.cssText = `
-        width:28px;height:28px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
-        background:${club.is_featured ? '#FFD700' : club.nude_level === 'topless' ? '#7B2FBE' : '#FF2D78'};
-        border:2px solid white;cursor:pointer;display:flex;align-items:center;
-        justify-content:center;font-size:11px;color:white;font-weight:bold;
-      `
-      el.innerHTML = club.is_featured ? '★' : '♦'
-      const popupHTML = '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
-        '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
-        '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
-        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? 'Full nude' : 'Topless') + '</span>' +
-        '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB') + '</span>' +
-        '</div></div>'
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([club.longitude, club.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(popupHTML))
-        .addTo(map.current)
-      markers.current.push(marker)
-    })
-  }
-
-  const filtered = clubs.filter((c) => {
-    if (filter === 'all') return true
-    if (filter === 'full_nude') return c.nude_level === 'full_nude'
-    if (filter === 'topless') return c.nude_level === 'topless'
-    if (filter === 'full_bar') return c.bar_type === 'full_bar'
-    if (filter === 'byob') return c.bar_type === 'byob'
-    if (filter === 'featured') return c.is_featured
-    return true
-  })
-
-  const chips = [
-    { key: 'all', label: 'All' },
-    { key: 'full_nude', label: 'Full nude' },
-    { key: 'topless', label: 'Topless' },
-    { key: 'full_bar', label: 'Full bar' },
-    { key: 'byob', label: 'BYOB' },
-    { key: 'featured', label: '★ Featured' },
-  ]
 
   return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 40 }}>
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 18 }}>📍</span>
-        </div>
+        <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
         <div style={{ flex: 1 }}>
-          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 18 }}>Titty</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>Maps</span>
-          <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
+          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
+          <span style={{ color: '#FFD700', fontSize: 11 }}>.com</span>
         </div>
+        <a href="/become-a-dancer"
+          style={{ background: '#FF2D78', color: 'white', borderRadius: 20, padding: '5px 12px', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>
+          Get Featured
+        </a>
       </div>
-      <div ref={mapContainer} style={{ height: '45vh', width: '100%' }} />
-      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
-        {chips.map((c) => (
-          <button key={c.key} onClick={() => { setFilter(c.key); addMarkers(clubs) }}
-            style={{
-              borderRadius: 20, padding: '5px 14px', fontSize: 12, whiteSpace: 'nowrap',
-              border: '1px solid', cursor: 'pointer', flexShrink: 0,
-              background: filter === c.key ? (c.key === 'featured' ? '#FFD700' : '#FF2D78') : 'transparent',
-              borderColor: filter === c.key ? (c.key === 'featured' ? '#FFD700' : '#FF2D78') : '#3a3d60',
-              color: filter === c.key ? (c.key === 'featured' ? '#0D0F1E' : 'white') : '#8890c0',
-            }}>
-            {c.label}
-          </button>
-        ))}
-      </div>
-      <div style={{ padding: '8px 12px' }}>
-        <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>{filtered.length} clubs nearby</div>
-        {filtered.map((club) => (
-          <div key={club.id}
-            onClick={() => window.location.href = `/clubs/${club.id}`}
-            style={{
-              background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
-              border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
-              display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
-            }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
-              {club.is_featured ? '🌟' : '💜'}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
-              <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
-              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
-                <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.nude_level === 'full_nude' ? 'Full nude' : 'Topless'}
-                </span>
-                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB'}
-                </span>
-              </div>
-            </div>
+
+      <div style={{ padding: '16px' }}>
+        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>
+          Featured Dancers
+        </div>
+
+        {dancers.length === 0 ? (
+          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 32, textAlign: 'center' }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>💃</div>
+            <div style={{ color: '#8890c0', fontSize: 14 }}>No featured dancers yet</div>
           </div>
-        ))}
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {dancers.map(dancer => {
+              const photo = dancer.photo_urls?.[0] || dancer.photo_url
+              return (
+                <div key={dancer.id}
+                  onClick={() => window.location.href = `/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                  {photo
+                    ? <img src={photo} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>💃</div>
+                  }
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', padding: '24px 12px 12px' }}>
+                    <div style={{ color: 'white', fontSize: 15, fontWeight: 600 }}>{dancer.stage_name}</div>
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 11 }}>★ Featured</div>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
