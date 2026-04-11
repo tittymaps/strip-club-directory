@@ -31,6 +31,8 @@ export default function AdminPage() {
   })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [clubPhoto, setClubPhoto] = useState<File | null>(null)
+  const [clubPhotoPreview, setClubPhotoPreview] = useState('')
 
   useEffect(() => {
     if (authed) {
@@ -77,15 +79,26 @@ export default function AdminPage() {
     fetchApplications()
   }
 
+  function handleClubPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  setClubPhoto(file)
+  setClubPhotoPreview(URL.createObjectURL(file))
+}
+  
   function openAddClub() {
-    setEditClub(null)
-    setClubForm({ name: '', address: '', city: '', state: '', latitude: '', longitude: '', nude_level: 'full_nude', bar_type: 'full_bar', cover_charge: '', is_featured: false, hours: { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' } })
-    setShowAddClub(true)
-  }
+  setEditClub(null)
+  setClubPhoto(null)
+  setClubPhotoPreview('')
+  setClubForm({ name: '', address: '', city: '', state: '', latitude: '', longitude: '', nude_level: 'full_nude', bar_type: 'full_bar', cover_charge: '', is_featured: false, hours: { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' } })
+  setShowAddClub(true)
+}
 
   function openEditClub(club: any) {
-    setEditClub(club)
-    setClubForm({
+  setEditClub(club)
+  setClubPhoto(null)
+  setClubPhotoPreview('')
+  setClubForm({
       name: club.name || '',
       address: club.address || '',
       city: club.city || '',
@@ -102,8 +115,23 @@ export default function AdminPage() {
   }
 
   async function saveClub() {
-    setSaving(true)
-    const payload = {
+  setSaving(true)
+  let photoUrl = editClub?.photo_url || ''
+  if (clubPhoto) {
+    const fileExt = clubPhoto.name.split('.').pop()
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+    const { error: uploadError } = await supabase.storage
+      .from('club-photos')
+      .upload(fileName, clubPhoto)
+    if (uploadError) {
+      setMessage('Photo upload failed. Please try again.')
+      setSaving(false)
+      return
+    }
+    const { data: urlData } = supabase.storage.from('club-photos').getPublicUrl(fileName)
+    photoUrl = urlData.publicUrl
+  }
+  const payload = {
       name: clubForm.name,
       address: clubForm.address,
       city: clubForm.city,
@@ -115,6 +143,7 @@ export default function AdminPage() {
       cover_charge: clubForm.cover_charge,
       is_featured: clubForm.is_featured,
       hours: clubForm.hours,
+      photo_url: photoUrl || null,
     }
     if (editClub) {
       await supabase.from('clubs').update(payload).eq('id', editClub.id)
@@ -291,6 +320,24 @@ export default function AdminPage() {
                   style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }}
                 />
               </div>
+              <div style={{ marginBottom: 12 }}>
+  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Club photo</div>
+  <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+    <div style={{ width: 72, height: 72, borderRadius: 10, background: '#131629', border: `2px dashed ${clubPhotoPreview || editClub?.photo_url ? '#FF2D78' : '#3a3d60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+      {clubPhotoPreview
+        ? <img src={clubPhotoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : editClub?.photo_url
+        ? <img src={editClub.photo_url} alt="current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : <span style={{ fontSize: 28 }}>📷</span>
+      }
+    </div>
+    <div>
+      <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{clubPhotoPreview || editClub?.photo_url ? 'Change photo' : 'Tap to upload a photo'}</div>
+      <div style={{ color: '#8890c0', fontSize: 11 }}>Appears on club card and profile</div>
+    </div>
+    <input type="file" accept="image/*" onChange={handleClubPhotoChange} style={{ display: 'none' }} />
+  </label>
+</div>
             ))}
 
             <div style={{ marginBottom: 12 }}>
