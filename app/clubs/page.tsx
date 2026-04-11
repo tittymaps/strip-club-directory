@@ -27,7 +27,7 @@ export default function ClubsPage() {
     { key: 'topless', label: '👙 Topless' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
-    { key: 'featured', label: '★ Featured' },
+    { key: 'featured', label: '🌟 Featured' },
   ]
 
   const filtered = clubs.filter(c => {
