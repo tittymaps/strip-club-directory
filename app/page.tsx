@@ -74,7 +74,7 @@ export default function Home() {
         border:2px solid white;cursor:pointer;display:flex;align-items:center;
         justify-content:center;font-size:11px;color:white;font-weight:bold;
       `
-      el.innerHTML = club.is_featured ? '★' : (club.nude_level === 'full_nude' ? '🐱' : '👙')
+      el.innerHTML = club.is_featured ? '🌟' : (club.nude_level === 'full_nude' ? '🐱' : '👙')
       const popupHTML = '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
         '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
         '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
@@ -106,7 +106,7 @@ export default function Home() {
     { key: 'topless', label: '👙 Topless' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
-    { key: 'featured', label: '★ Featured' },
+    { key: 'featured', label: '🌟 Featured' },
   ]
 
   return (
