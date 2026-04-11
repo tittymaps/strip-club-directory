@@ -106,9 +106,12 @@ export default function ClubsPage() {
                 }}>
 
                 {/* Club icon / placeholder */}
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, background: club.is_featured ? '#1a1200' : '#131629' }}>
-                  {club.is_featured ? '🌟' : '💜'}
-                </div>
+                {club.photo_url
+                 ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                 : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, background: club.is_featured ? '#1a1200' : '#131629' }}>
+                 {club.is_featured ? '🌟' : '💜'}
+                 </div>
+                 }
 
                 {/* Overlay */}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
