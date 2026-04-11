@@ -1,0 +1,343 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://ssruvoxuwlksmbmubcfv.supabase.co',
+  'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
+)
+
+const ADMIN_PASSWORD = 'titty2026maps'
+
+export default function AdminPage() {
+  const [authed, setAuthed] = useState(false)
+  const [password, setPassword] = useState('')
+  const [pwError, setPwError] = useState('')
+  const [tab, setTab] = useState<'applications' | 'clubs'>('applications')
+
+  // Applications state
+  const [applications, setApplications] = useState<any[]>([])
+
+  // Clubs state
+  const [clubs, setClubs] = useState<any[]>([])
+  const [showAddClub, setShowAddClub] = useState(false)
+  const [editClub, setEditClub] = useState<any>(null)
+  const [clubForm, setClubForm] = useState({
+    name: '', address: '', city: '', state: '',
+    latitude: '', longitude: '',
+    nude_level: 'full_nude', bar_type: 'full_bar',
+    cover_charge: '', is_featured: false,
+    hours: { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' }
+  })
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (authed) {
+      fetchApplications()
+      fetchClubs()
+    }
+  }, [authed])
+
+  async function fetchApplications() {
+    const { data } = await supabase
+      .from('dancer_applications')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setApplications(data || [])
+  }
+
+  async function fetchClubs() {
+    const { data } = await supabase
+      .from('clubs')
+      .select('*')
+      .order('name')
+    setClubs(data || [])
+  }
+
+  async function approveApplication(app: any) {
+    // Add to dancers table
+    const { error } = await supabase.from('dancers').insert({
+      stage_name: app.stage_name,
+      fansly_username: app.fansly_username,
+      photo_url: app.photo_url || null,
+      photo_urls: app.photo_urls || null,
+      is_featured: true,
+    })
+    if (error) { setMessage('Error approving dancer'); return }
+    // Update application status
+    await supabase.from('dancer_applications').update({ status: 'approved' }).eq('id', app.id)
+    setMessage(`${app.stage_name} approved and added as featured dancer!`)
+    fetchApplications()
+  }
+
+  async function rejectApplication(id: string) {
+    await supabase.from('dancer_applications').update({ status: 'rejected' }).eq('id', id)
+    setMessage('Application rejected.')
+    fetchApplications()
+  }
+
+  function openAddClub() {
+    setEditClub(null)
+    setClubForm({ name: '', address: '', city: '', state: '', latitude: '', longitude: '', nude_level: 'full_nude', bar_type: 'full_bar', cover_charge: '', is_featured: false, hours: { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' } })
+    setShowAddClub(true)
+  }
+
+  function openEditClub(club: any) {
+    setEditClub(club)
+    setClubForm({
+      name: club.name || '',
+      address: club.address || '',
+      city: club.city || '',
+      state: club.state || '',
+      latitude: club.latitude || '',
+      longitude: club.longitude || '',
+      nude_level: club.nude_level || 'full_nude',
+      bar_type: club.bar_type || 'full_bar',
+      cover_charge: club.cover_charge || '',
+      is_featured: club.is_featured || false,
+      hours: club.hours || { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' }
+    })
+    setShowAddClub(true)
+  }
+
+  async function saveClub() {
+    setSaving(true)
+    const payload = {
+      name: clubForm.name,
+      address: clubForm.address,
+      city: clubForm.city,
+      state: clubForm.state,
+      latitude: parseFloat(clubForm.latitude as string) || null,
+      longitude: parseFloat(clubForm.longitude as string) || null,
+      nude_level: clubForm.nude_level,
+      bar_type: clubForm.bar_type,
+      cover_charge: clubForm.cover_charge,
+      is_featured: clubForm.is_featured,
+      hours: clubForm.hours,
+    }
+    if (editClub) {
+      await supabase.from('clubs').update(payload).eq('id', editClub.id)
+      setMessage('Club updated!')
+    } else {
+      await supabase.from('clubs').insert(payload)
+      setMessage('Club added!')
+    }
+    setSaving(false)
+    setShowAddClub(false)
+    fetchClubs()
+  }
+
+  async function deleteClub(id: string, name: string) {
+    if (!confirm(`Delete ${name}?`)) return
+    await supabase.from('clubs').delete().eq('id', id)
+    setMessage(`${name} deleted.`)
+    fetchClubs()
+  }
+
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+  if (!authed) return (
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'sans-serif' }}>
+      <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
+      <h2 style={{ color: 'white', fontSize: 20, fontWeight: 700, marginBottom: 20 }}>Admin Access</h2>
+      <input
+        type="password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            if (password === ADMIN_PASSWORD) { setAuthed(true) } else { setPwError('Incorrect password') }
+          }
+        }}
+        placeholder="Enter password"
+        style={{ width: 260, background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, marginBottom: 10, boxSizing: 'border-box' }}
+      />
+      {pwError && <div style={{ color: '#ff4444', fontSize: 13, marginBottom: 10 }}>{pwError}</div>}
+      <button onClick={() => {
+        if (password === ADMIN_PASSWORD) { setAuthed(true) } else { setPwError('Incorrect password') }
+      }}
+        style={{ width: 260, background: '#FF2D78', color: 'white', border: 'none', borderRadius: 10, padding: '12px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+        Login
+      </button>
+    </div>
+  )
+
+  return (
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
+
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
+          <span style={{ color: '#FFD700', fontSize: 11 }}>.com</span>
+          <span style={{ color: '#8890c0', fontSize: 12 }}> — Admin</span>
+        </div>
+        <a href="/" style={{ color: '#8890c0', fontSize: 12, textDecoration: 'none' }}>← Back to site</a>
+      </div>
+
+      {message && (
+        <div style={{ background: '#1a2e1a', border: '1px solid #3acd60', borderRadius: 10, margin: '12px 16px', padding: '10px 14px', color: '#7aff9a', fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
+          {message}
+          <span onClick={() => setMessage('')} style={{ cursor: 'pointer' }}>✕</span>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #1e2140', margin: '0 16px' }}>
+        {(['applications', 'clubs'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? '#FF2D78' : 'transparent'}`, color: tab === t ? '#FF2D78' : '#8890c0', fontSize: 14, cursor: 'pointer', textTransform: 'capitalize' }}>
+            {t === 'applications' ? `Applications (${applications.filter(a => a.status === 'pending').length})` : `Clubs (${clubs.length})`}
+          </button>
+        ))}
+      </div>
+
+      {/* Applications tab */}
+      {tab === 'applications' && (
+        <div style={{ padding: '16px' }}>
+          {applications.length === 0 ? (
+            <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
+              <div style={{ color: '#8890c0', fontSize: 14 }}>No applications yet</div>
+            </div>
+          ) : applications.map(app => (
+            <div key={app.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${app.status === 'approved' ? '#3acd60' : app.status === 'rejected' ? '#ff4444' : '#1e2140'}`, padding: 16, marginBottom: 12 }}>
+              <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+                {app.photo_url && (
+                  <img src={app.photo_url} alt={app.stage_name} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{app.stage_name}</div>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 2 }}>Fansly: @{app.fansly_username}</div>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 2 }}>Email: {app.email}</div>
+                  <div style={{ color: '#8890c0', fontSize: 12 }}>Clubs: {app.club_names?.join(', ')}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, color: app.status === 'approved' ? '#7aff9a' : app.status === 'rejected' ? '#ff4444' : '#FFD700', textTransform: 'uppercase', letterSpacing: 1 }}>
+                  {app.status}
+                </span>
+                {app.status === 'pending' && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => rejectApplication(app.id)}
+                      style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}>
+                      Reject
+                    </button>
+                    <button onClick={() => approveApplication(app)}
+                      style={{ background: '#3acd60', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                      Approve
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Clubs tab */}
+      {tab === 'clubs' && (
+        <div style={{ padding: '16px' }}>
+          <button onClick={openAddClub}
+            style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}>
+            + Add New Club
+          </button>
+
+          {clubs.map(club => (
+            <div key={club.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{club.name}</div>
+                <div style={{ color: '#8890c0', fontSize: 12 }}>{club.city}, {club.state}</div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => openEditClub(club)}
+                  style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>
+                  Edit
+                </button>
+                <button onClick={() => deleteClub(club.id, club.name)}
+                  style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add/Edit club modal */}
+      {showAddClub && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 200, overflowY: 'auto', padding: 16 }}>
+          <div style={{ background: '#0D0F1E', borderRadius: 16, border: '1px solid #1e2140', padding: 20, maxWidth: 500, margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: 0 }}>{editClub ? 'Edit Club' : 'Add New Club'}</h2>
+              <button onClick={() => setShowAddClub(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+
+            {[
+              { label: 'Club name', key: 'name', placeholder: 'e.g. Platinum Palace' },
+              { label: 'Address', key: 'address', placeholder: 'Street address' },
+              { label: 'City', key: 'city', placeholder: 'City' },
+              { label: 'State', key: 'state', placeholder: 'e.g. ME' },
+              { label: 'Latitude', key: 'latitude', placeholder: 'e.g. 43.6591' },
+              { label: 'Longitude', key: 'longitude', placeholder: 'e.g. -70.2568' },
+              { label: 'Cover charge', key: 'cover_charge', placeholder: 'e.g. $10 weekdays' },
+            ].map(field => (
+              <div key={field.key} style={{ marginBottom: 12 }}>
+                <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>{field.label}</div>
+                <input
+                  value={(clubForm as any)[field.key]}
+                  onChange={e => setClubForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                  placeholder={field.placeholder}
+                  style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }}
+                />
+              </div>
+            ))}
+
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Nude level</div>
+              <select value={clubForm.nude_level} onChange={e => setClubForm(prev => ({ ...prev, nude_level: e.target.value }))}
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
+                <option value="full_nude">Full nude</option>
+                <option value="topless">Topless</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Bar type</div>
+              <select value={clubForm.bar_type} onChange={e => setClubForm(prev => ({ ...prev, bar_type: e.target.value }))}
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
+                <option value="full_bar">Full bar</option>
+                <option value="byob">BYOB</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Hours</div>
+              {DAYS.map(day => (
+                <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span style={{ color: '#8890c0', fontSize: 12, width: 30 }}>{day}</span>
+                  <input
+                    value={clubForm.hours[day as keyof typeof clubForm.hours]}
+                    onChange={e => setClubForm(prev => ({ ...prev, hours: { ...prev.hours, [day]: e.target.value } }))}
+                    placeholder='e.g. 8pm-2am or Closed'
+                    style={{ flex: 1, background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '7px 10px', color: 'white', fontSize: 12 }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <input type="checkbox" id="featured" checked={clubForm.is_featured} onChange={e => setClubForm(prev => ({ ...prev, is_featured: e.target.checked }))} />
+              <label htmlFor="featured" style={{ color: '#FFD700', fontSize: 13, cursor: 'pointer' }}>★ Mark as Featured</label>
+            </div>
+
+            <button onClick={saveClub} disabled={saving}
+              style={{ width: '100%', background: saving ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
+              {saving ? 'Saving...' : editClub ? 'Save Changes' : 'Add Club'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
