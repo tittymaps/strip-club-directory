@@ -74,13 +74,13 @@ export default function Home() {
         border:2px solid white;cursor:pointer;display:flex;align-items:center;
         justify-content:center;font-size:11px;color:white;font-weight:bold;
       `
-      el.innerHTML = club.is_featured ? '★' : '♦'
+      el.innerHTML = club.is_featured ? '★' : (club.nude_level === 'full_nude' ? '🐱' : '👙')
       const popupHTML = '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
         '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
         '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
         '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? 'Full nude' : 'Topless') + '</span>' +
-        '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? 'Full bar' : 'BYOB') + '</span>' +
+        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless') + '</span>' +
+        '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB') + '</span>' +
         '</div></div>'
       const marker = new mapboxgl.Marker(el)
         .setLngLat([club.longitude, club.latitude])
