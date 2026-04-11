@@ -58,7 +58,7 @@ export default function ClubDetail() {
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>{club.name}</h1>
-              {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+              {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🌟 Featured</span>}
             </div>
             <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 10 }}>{club.city}, {club.state}</div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
