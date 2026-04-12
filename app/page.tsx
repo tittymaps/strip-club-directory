@@ -29,8 +29,42 @@ export default function Home() {
 
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('*')
-    setClubs(data || [])
-    initMap(data || [])
+    const clubData = data || []
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const sorted = sortByDistance(clubData, pos.coords.latitude, pos.coords.longitude)
+          setClubs(sorted)
+          initMap(sorted)
+        },
+        () => {
+          setClubs(clubData)
+          initMap(clubData)
+        }
+      )
+    } else {
+      setClubs(clubData)
+      initMap(clubData)
+    }
+  }
+
+  function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 3958.8
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  }
+
+  function sortByDistance(clubs: any[], lat: number, lon: number) {
+    return [...clubs].sort((a, b) => {
+      if (!a.latitude || !a.longitude) return 1
+      if (!b.latitude || !b.longitude) return -1
+      return getDistance(lat, lon, a.latitude, a.longitude) -
+             getDistance(lat, lon, b.latitude, b.longitude)
+    })
   }
 
   function initMap(clubData: any[]) {
