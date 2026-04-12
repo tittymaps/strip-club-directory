@@ -43,7 +43,7 @@ export default function StatePage() {
       .eq('state', stateCode)
       .order('is_featured', { ascending: false })
     setClubs(clubData || [])
-    const uniqueCities = [...new Set((clubData || []).map((c: any) => c.city))].sort() as string[]
+    const uniqueCities = Array.from(new Set((clubData || []).map((c: any) => c.city))).sort() as string[]
     setCities(uniqueCities)
 
     const { data: dancerData } = await supabase
