@@ -63,7 +63,11 @@ export default function ClubDetail() {
               <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>{club.name}</h1>
               {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🌟 Featured</span>}
             </div>
-            <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 10 }}>{club.city}, {club.state}</div>
+            <div style={{ fontSize: 13, marginBottom: 10 }}>
+            <span onClick={() => window.location.href=`/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.city}</span>
+            <span style={{ color: '#8890c0' }}>, </span>
+            <span onClick={() => window.location.href=`/states/${club.state.toLowerCase()}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.state}</span>
+            </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>
                 {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
