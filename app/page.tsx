@@ -146,8 +146,11 @@ export default function Home() {
               border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
               display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
             }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
-              {club.is_featured ? '🌟' : '💜'}
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+            {club.photo_url
+            ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : (club.is_featured ? '🌟' : '💜')
+            }
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
