@@ -116,7 +116,11 @@ export default function ClubsPage() {
                 {/* Overlay */}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
                   <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{club.name}</div>
-                  <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {club.state}</div>
+                  <div style={{ fontSize: 12, marginBottom: 8 }}>
+                   <span onClick={(e) => { e.stopPropagation(); window.location.href=`/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}` }} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.city}</span>
+                   <span style={{ color: '#8890c0' }}>, </span>
+                   <span onClick={(e) => { e.stopPropagation(); window.location.href=`/states/${club.state.toLowerCase()}` }} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.state}</span>
+                  </div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
                       {club.nude_level === 'full_nude' ? 'Full nude' : 'Topless'}
