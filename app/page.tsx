@@ -16,6 +16,7 @@ export default function Home() {
   const map = useRef<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
+  const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null)
   const markers = useRef<any[]>([])
 
   useEffect(() => {
@@ -27,64 +28,58 @@ export default function Home() {
     addMarkers(clubs)
   }, [clubs, filter])
 
+  function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 3958.8
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2)
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  }
+
+  function sortByDistance(clubList: any[], lat: number, lon: number) {
+    return [...clubList].sort((a, b) => {
+      if (!a.latitude || !a.longitude) return 1
+      if (!b.latitude || !b.longitude) return -1
+      return getDistance(lat, lon, a.latitude, a.longitude) -
+        getDistance(lat, lon, b.latitude, b.longitude)
+    })
+  }
+
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('*')
     const clubData = data || []
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const sorted = sortByDistance(clubData, pos.coords.latitude, pos.coords.longitude)
+          const userLat = pos.coords.latitude
+          const userLon = pos.coords.longitude
+          setUserLocation({ lat: userLat, lon: userLon })
+          const sorted = sortByDistance(clubData, userLat, userLon)
           setClubs(sorted)
-          initMap(sorted)
+          initMap(sorted, userLat, userLon)
         },
         () => {
           setClubs(clubData)
-          initMap(clubData)
+          initMap(clubData, 39.5, -98.35)
         }
       )
     } else {
       setClubs(clubData)
-      initMap(clubData)
+      initMap(clubData, 39.5, -98.35)
     }
   }
 
-  function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-    const R = 3958.8
-    const dLat = (lat2 - lat1) * Math.PI / 180
-    const dLon = (lon2 - lon1) * Math.PI / 180
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2)
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-  }
-
-  function sortByDistance(clubs: any[], lat: number, lon: number) {
-    return [...clubs].sort((a, b) => {
-      if (!a.latitude || !a.longitude) return 1
-      if (!b.latitude || !b.longitude) return -1
-      return getDistance(lat, lon, a.latitude, a.longitude) -
-             getDistance(lat, lon, b.latitude, b.longitude)
-    })
-  }
-
-  function initMap(clubData: any[]) {
+  function initMap(clubData: any[], lat: number, lon: number) {
     if (map.current) return
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
+      center: [lon, lat],
       zoom: 12,
     })
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          map.current.setCenter([pos.coords.longitude, pos.coords.latitude])
-        },
-        () => {
-          map.current.setCenter([-70.2568, 43.6591])
-        }
-      )
-    }
     map.current.on('load', () => addMarkers(clubData))
   }
 
@@ -107,9 +102,15 @@ export default function Home() {
         background:${club.is_featured ? '#FFD700' : club.nude_level === 'topless' ? '#7B2FBE' : '#FF2D78'};
         border:2px solid white;cursor:pointer;display:flex;align-items:center;
         justify-content:center;font-size:11px;color:white;font-weight:bold;
+        overflow:hidden;
       `
-      el.innerHTML = club.is_featured ? '🌟' : (club.nude_level === 'full_nude' ? '🐱' : '👙')
-      const popupHTML = '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
+      if (club.photo_url) {
+        el.innerHTML = `<img src="${club.photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />`
+      } else {
+        el.innerHTML = club.nude_level === 'full_nude' ? '🐱' : '👙'
+      }
+      const popupHTML =
+        '<div style="background:#131629;color:white;padding:10px;border-radius:8px;min-width:160px;cursor:pointer;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
         '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
         '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
         '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
@@ -140,7 +141,7 @@ export default function Home() {
     { key: 'topless', label: '👙 Topless' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
-    { key: 'featured', label: '🌟 Featured' },
+    { key: 'featured', label: '★ Featured' },
   ]
 
   return (
@@ -181,14 +182,21 @@ export default function Home() {
               display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
             }}>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
-            {club.photo_url
-            ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : (club.is_featured ? '🌟' : '💜')
-            }
+              {club.photo_url
+                ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : (club.is_featured ? '🌟' : '💜')
+              }
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
-              <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
+              <div style={{ fontSize: 11, marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#8890c0' }}>{club.city}, {club.state}</span>
+                {userLocation && club.latitude && club.longitude && (
+                  <span style={{ color: '#8890c0' }}>
+                    {getDistance(userLocation.lat, userLocation.lon, club.latitude, club.longitude).toFixed(1)} mi
+                  </span>
+                )}
+              </div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
                 <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
