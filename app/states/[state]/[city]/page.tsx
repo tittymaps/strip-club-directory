@@ -29,7 +29,6 @@ export default function CityPage() {
   const stateName = STATE_NAMES[stateCode] || stateCode
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
-  const [tab, setTab] = useState<'clubs' | 'dancers'>('clubs')
 
   useEffect(() => {
     fetchData()
@@ -57,6 +56,7 @@ export default function CityPage() {
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
+
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
         <button onClick={() => window.location.href = `/states/${state}`}
           style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>
@@ -74,69 +74,67 @@ export default function CityPage() {
         <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>{stateName} · {clubs.length} clubs · {dancers.length} featured dancers</p>
       </div>
 
-      <div style={{ display: 'flex', borderBottom: '1px solid #1e2140', margin: '8px 16px 0' }}>
-        {(['clubs', 'dancers'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            style={{ flex: 1, padding: '10px', background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? '#FF2D78' : 'transparent'}`, color: tab === t ? '#FF2D78' : '#8890c0', fontSize: 14, cursor: 'pointer', textTransform: 'capitalize' }}>
-            {t === 'clubs' ? `Clubs (${clubs.length})` : `Dancers (${dancers.length})`}
-          </button>
+      {/* Clubs list */}
+      <div style={{ padding: '8px 16px' }}>
+        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Clubs</div>
+        {clubs.length === 0 ? (
+          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found in {cityName}</div>
+          </div>
+        ) : clubs.map(club => (
+          <div key={club.id}
+            onClick={() => window.location.href = `/clubs/${club.id}`}
+            style={{
+              background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
+              border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
+              display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
+            }}>
+            <div style={{ width: 48, height: 48, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+              {club.photo_url
+                ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : (club.is_featured ? '🌟' : '💜')
+              }
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
+              <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                  {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
+                </span>
+                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
+                </span>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 
-      {tab === 'clubs' && (
-        <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-          {clubs.length === 0 ? (
-            <div style={{ gridColumn: '1/-1', background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
-              <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found in {cityName}</div>
-            </div>
-          ) : clubs.map(club => (
-            <div key={club.id}
-              onClick={() => window.location.href = `/clubs/${club.id}`}
-              style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '1', background: '#131629', border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}` }}>
-              {club.photo_url
-                ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>{club.is_featured ? '🌟' : '💜'}</div>
-              }
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
-                <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{club.name}</div>
-                <div style={{ display: 'flex', gap: 3 }}>
-                  <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
-                    {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
-                  </span>
+      {/* Dancers grid */}
+      {dancers.length > 0 && (
+        <div style={{ padding: '8px 16px' }}>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {dancers.map(dancer => {
+              const photo = dancer.photo_urls?.[0] || dancer.photo_url
+              return (
+                <div key={dancer.id}
+                  onClick={() => window.location.href = `/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                  {photo
+                    ? <img src={photo} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
+                  }
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
+                    <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{dancer.stage_name}</div>
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
+                  </div>
                 </div>
-              </div>
-              {club.is_featured && (
-                <div style={{ position: 'absolute', top: 8, right: 8, background: '#FFD700', color: '#0D0F1E', borderRadius: 20, padding: '2px 8px', fontSize: 9, fontWeight: 700 }}>★ Featured</div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {tab === 'dancers' && (
-        <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-          {dancers.length === 0 ? (
-            <div style={{ gridColumn: '1/-1', background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>💃</div>
-              <div style={{ color: '#8890c0', fontSize: 14 }}>No featured dancers in {cityName} yet</div>
-            </div>
-          ) : dancers.map(dancer => {
-            const photo = dancer.photo_urls?.[0] || dancer.photo_url
-            return (
-              <div key={dancer.id}
-                onClick={() => window.location.href = `/dancers/${dancer.id}`}
-                style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '1', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
-                {photo
-                  ? <img src={photo} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
-                }
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
-                  <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{dancer.stage_name}</div>
-                  {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
