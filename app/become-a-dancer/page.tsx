@@ -7,7 +7,7 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
-const FANSLY_REF = 'YOUR_REF_CODE_HERE'
+const FANSLY_REF = 'tittymaps'
 const FANSLY_SIGNUP = `https://fansly.com/signup?ref=${FANSLY_REF}`
 
 export default function BecomeADancer() {
