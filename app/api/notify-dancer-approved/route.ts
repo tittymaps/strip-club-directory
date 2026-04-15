@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { stage_name, email, is_featured } = body
-
+  const { stage_name, email, is_featured, dancer_id } = body
+  
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
                 <p style="color: #8890c0; font-size: 13px; margin: 0;">Want to become a Featured Dancer and get priority placement? Sign up for Fansly through our link.</p>
               </div>
             `}
-            <a href="https://tittymaps.com/dancers" style="display: inline-block; background: #FF2D78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-bottom: 16px;">View your profile</a>
+            <a href="https://tittymaps.com/dancers/${dancer_id}" style="display: inline-block; background: #FF2D78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-bottom: 16px;">View your profile</a>
             <p style="color: #555; font-size: 12px; margin-top: 20px;">TittyMaps.com — The strip club directory</p>
           </div>
         `
