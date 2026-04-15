@@ -63,13 +63,13 @@ export default function AdminPage() {
   }
 
   async function approveApplication(app: any) {
-    const { error } = await supabase.from('dancers').insert({
+    const { data, error } = await supabase.from('dancers').insert({
       stage_name: app.stage_name,
       fansly_url: app.fansly_url || null,
       photo_url: app.photo_url || null,
       photo_urls: app.photo_urls || null,
       is_featured: true,
-    })
+    }).select().single()
     if (error) { setMessage('Error approving dancer'); return }
     await supabase.from('dancer_applications').update({ status: 'approved' }).eq('id', app.id)
     await fetch('/api/notify-dancer-approved', {
@@ -79,6 +79,7 @@ export default function AdminPage() {
         stage_name: app.stage_name,
         email: app.email,
         is_featured: true,
+        dancer_id: data.id,
       })
     })
     setMessage(`${app.stage_name} approved — confirmation email sent!`)
