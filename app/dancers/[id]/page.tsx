@@ -80,7 +80,7 @@ export default function DancerProfile() {
       <div style={{ padding: '16px' }}>
 
         {/* Fansly button */}
-        {dancer.fansly_username && (
+        {dancer.fansly_url && (
           <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
             style={{ display: 'block', background: '#FF2D78', color: 'white', textAlign: 'center', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', marginBottom: 16 }}>
             Follow on Fansly
