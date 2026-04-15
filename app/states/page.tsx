@@ -36,8 +36,12 @@ export default function StatesPage() {
       if (c.state) counts[c.state] = (counts[c.state] || 0) + 1
     })
     const sorted = Object.entries(counts)
-      .map(([state, count]) => ({ state, count }))
-      .sort((a, b) => a.state.localeCompare(b.state))
+  .map(([state, count]) => ({ state, count }))
+  .sort((a, b) => {
+    const nameA = STATE_NAMES[a.state] || a.state
+    const nameB = STATE_NAMES[b.state] || b.state
+    return nameA.localeCompare(nameB)
+  })
     setStates(sorted)
   }
 
