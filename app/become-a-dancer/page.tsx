@@ -84,6 +84,18 @@ export default function BecomeADancer() {
       photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
     })
 
+    if (!dbError) {
+      await fetch('/api/notify-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stage_name: stageName,
+          fansly_url: fanslyUsername,
+          email: email,
+          club_names: selectedClubs,
+        })
+      })
+    }
     setLoading(false)
     if (dbError) {
       setError('Something went wrong. Please try again.')
