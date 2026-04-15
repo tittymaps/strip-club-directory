@@ -77,7 +77,7 @@ export default function Home() {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       center: [lon, lat],
-      zoom: 12,
+      zoom: 4,
     })
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
     map.current.on('load', () => addMarkers(clubData))
@@ -141,7 +141,7 @@ export default function Home() {
     { key: 'topless', label: '👙 Topless' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
-    { key: 'featured', label: '★ Featured' },
+    { key: 'featured', label: '⭐ Featured' },
   ]
 
   return (
