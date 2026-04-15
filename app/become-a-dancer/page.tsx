@@ -159,7 +159,7 @@ export default function BecomeADancer() {
 </div>
 
 <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', marginBottom: 24 }}>
-  <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave the Fansly username blank or enter your existing username.</div>
+  <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link</div>
 </div>
 
 <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Your info</div>
