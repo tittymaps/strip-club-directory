@@ -101,11 +101,7 @@ export default function BecomeADancer() {
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'sans-serif' }}>
       <div style={{ fontSize: 56, marginBottom: 16 }}>💃</div>
       <h2 style={{ color: 'white', fontSize: 22, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>You are on the list!</h2>
-      <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', maxWidth: 300, marginBottom: 24 }}>We will review your application and get your profile live soon. Make sure you have signed up for Fansly through our link to be featured!</p>
-      <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-        style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '14px 28px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', marginBottom: 12 }}>
-        Sign up for Fansly
-      </a>
+      <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', maxWidth: 300, marginBottom: 24 }}>We will review your application and get your profile live soon!</p>
       <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 13, cursor: 'pointer', marginTop: 8 }}>
         Back to map
       </button>
