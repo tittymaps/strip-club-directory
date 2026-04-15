@@ -196,8 +196,8 @@ export default function BecomeADancer() {
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Fansly username</div>
-          <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="Your Fansly username"
+          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Fansly profile link</div>
+            <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="https://fansly.com/yourname"
             style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
