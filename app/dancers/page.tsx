@@ -23,13 +23,15 @@ export default function Dancers() {
   }
 
   return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 40 }}>
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
+        <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 18 }}>📍</span>
+        </div>
         <div style={{ flex: 1 }}>
-          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
-          <span style={{ color: '#FFD700', fontSize: 11 }}>.com</span>
+          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 18 }}>Titty</span>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>Maps</span>
+          <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
         </div>
         <a href="/become-a-dancer"
           style={{ background: '#FF2D78', color: 'white', borderRadius: 20, padding: '5px 12px', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>
@@ -39,13 +41,13 @@ export default function Dancers() {
 
       <div style={{ padding: '16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>
-          Featured Dancers
+          Dancers
         </div>
 
         {dancers.length === 0 ? (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 32, textAlign: 'center' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>💃</div>
-            <div style={{ color: '#8890c0', fontSize: 14 }}>No featured dancers yet</div>
+            <div style={{ color: '#8890c0', fontSize: 14 }}>No dancers yet</div>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
@@ -61,7 +63,7 @@ export default function Dancers() {
                   }
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', padding: '24px 12px 12px' }}>
                     <div style={{ color: 'white', fontSize: 15, fontWeight: 600 }}>{dancer.stage_name}</div>
-                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 11 }}>★ Featured</div>}
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
                   </div>
                 </div>
               )
