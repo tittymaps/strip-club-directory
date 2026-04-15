@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "mapbox-gl": "^3.0.0",
-    "resend": "^3.0.0",
 "@supabase/supabase-js": "^2.0.0",
     "@types/node": "20.6.2",
     "@types/react": "18.2.22",
