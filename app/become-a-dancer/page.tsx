@@ -77,7 +77,7 @@ export default function BecomeADancer() {
 
     const { error: dbError } = await supabase.from('dancer_applications').insert({
       stage_name: stageName,
-      fansly_username: fanslyUsername,
+      fansly_url: fanslyUsername,
       club_names: selectedClubs,
       email: email,
       photo_url: uploadedUrls[0] || null,
