@@ -66,7 +66,7 @@ export default function ClubsPage() {
     })
 
     // Match cities
-    const cities = [...new Set(clubs.map(c => c.city))] as string[]
+    const cities = Array.from(new Set(clubs.map(c => c.city))) as string[]
     cities.forEach(city => {
       if (city.toLowerCase().includes(q)) {
         const club = clubs.find(c => c.city === city)
