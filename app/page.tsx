@@ -77,7 +77,7 @@ export default function Home() {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       center: [lon, lat],
-      zoom: 4,
+      zoom: 5,
     })
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
     map.current.on('load', () => addMarkers(clubData))
