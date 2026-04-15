@@ -14,9 +14,10 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [password, setPassword] = useState('')
   const [pwError, setPwError] = useState('')
-  const [tab, setTab] = useState<'applications' | 'clubs'>('applications')
+  const [tab, setTab] = useState<'applications' | 'clubs' | 'dancers'>('applications')
   const [applications, setApplications] = useState<any[]>([])
   const [clubs, setClubs] = useState<any[]>([])
+  const [dancers, setDancers] = useState<any[]>([])
   const [showAddClub, setShowAddClub] = useState(false)
   const [editClub, setEditClub] = useState<any>(null)
   const [clubPhoto, setClubPhoto] = useState<File | null>(null)
@@ -28,6 +29,13 @@ export default function AdminPage() {
     cover_charge: '', is_featured: false,
     hours: { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' }
   })
+  const [showAddDancer, setShowAddDancer] = useState(false)
+  const [editDancer, setEditDancer] = useState<any>(null)
+  const [dancerPhoto, setDancerPhoto] = useState<File | null>(null)
+  const [dancerPhotoPreview, setDancerPhotoPreview] = useState('')
+  const [dancerForm, setDancerForm] = useState({
+    stage_name: '', fansly_username: '', is_featured: false, club_ids: [] as string[]
+  })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -35,6 +43,7 @@ export default function AdminPage() {
     if (authed) {
       fetchApplications()
       fetchClubs()
+      fetchDancers()
     }
   }, [authed])
 
@@ -46,6 +55,11 @@ export default function AdminPage() {
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('*').order('name')
     setClubs(data || [])
+  }
+
+  async function fetchDancers() {
+    const { data } = await supabase.from('dancers').select('*').order('stage_name')
+    setDancers(data || [])
   }
 
   async function approveApplication(app: any) {
@@ -60,6 +74,7 @@ export default function AdminPage() {
     await supabase.from('dancer_applications').update({ status: 'approved' }).eq('id', app.id)
     setMessage(`${app.stage_name} approved and added as featured dancer!`)
     fetchApplications()
+    fetchDancers()
   }
 
   async function rejectApplication(id: string) {
@@ -75,6 +90,13 @@ export default function AdminPage() {
     setClubPhotoPreview(URL.createObjectURL(file))
   }
 
+  function handleDancerPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setDancerPhoto(file)
+    setDancerPhotoPreview(URL.createObjectURL(file))
+  }
+
   function openAddClub() {
     setEditClub(null)
     setClubPhoto(null)
@@ -88,19 +110,43 @@ export default function AdminPage() {
     setClubPhoto(null)
     setClubPhotoPreview('')
     setClubForm({
-      name: club.name || '',
-      address: club.address || '',
-      city: club.city || '',
-      state: club.state || '',
-      latitude: club.latitude || '',
-      longitude: club.longitude || '',
-      nude_level: club.nude_level || 'full_nude',
-      bar_type: club.bar_type || 'full_bar',
-      cover_charge: club.cover_charge || '',
-      is_featured: club.is_featured || false,
+      name: club.name || '', address: club.address || '', city: club.city || '', state: club.state || '',
+      latitude: club.latitude || '', longitude: club.longitude || '',
+      nude_level: club.nude_level || 'full_nude', bar_type: club.bar_type || 'full_bar',
+      cover_charge: club.cover_charge || '', is_featured: club.is_featured || false,
       hours: club.hours || { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' }
     })
     setShowAddClub(true)
+  }
+
+  function openAddDancer() {
+    setEditDancer(null)
+    setDancerPhoto(null)
+    setDancerPhotoPreview('')
+    setDancerForm({ stage_name: '', fansly_username: '', is_featured: false, club_ids: [] })
+    setShowAddDancer(true)
+  }
+
+  function openEditDancer(dancer: any) {
+    setEditDancer(dancer)
+    setDancerPhoto(null)
+    setDancerPhotoPreview('')
+    setDancerForm({
+      stage_name: dancer.stage_name || '',
+      fansly_username: dancer.fansly_username || '',
+      is_featured: dancer.is_featured || false,
+      club_ids: dancer.club_ids || []
+    })
+    setShowAddDancer(true)
+  }
+
+  function toggleDancerClub(clubId: string) {
+    setDancerForm(prev => ({
+      ...prev,
+      club_ids: prev.club_ids.includes(clubId)
+        ? prev.club_ids.filter(id => id !== clubId)
+        : [...prev.club_ids, clubId]
+    }))
   }
 
   async function saveClub() {
@@ -110,27 +156,17 @@ export default function AdminPage() {
       const fileExt = clubPhoto.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
       const { error: uploadError } = await supabase.storage.from('club-photos').upload(fileName, clubPhoto)
-      if (uploadError) {
-        setMessage('Photo upload failed. Please try again.')
-        setSaving(false)
-        return
-      }
+      if (uploadError) { setMessage('Photo upload failed.'); setSaving(false); return }
       const { data: urlData } = supabase.storage.from('club-photos').getPublicUrl(fileName)
       photoUrl = urlData.publicUrl
     }
     const payload = {
-      name: clubForm.name,
-      address: clubForm.address,
-      city: clubForm.city,
-      state: clubForm.state,
+      name: clubForm.name, address: clubForm.address, city: clubForm.city, state: clubForm.state,
       latitude: parseFloat(clubForm.latitude as string) || null,
       longitude: parseFloat(clubForm.longitude as string) || null,
-      nude_level: clubForm.nude_level,
-      bar_type: clubForm.bar_type,
-      cover_charge: clubForm.cover_charge,
-      is_featured: clubForm.is_featured,
-      hours: clubForm.hours,
-      photo_url: photoUrl || null,
+      nude_level: clubForm.nude_level, bar_type: clubForm.bar_type,
+      cover_charge: clubForm.cover_charge, is_featured: clubForm.is_featured,
+      hours: clubForm.hours, photo_url: photoUrl || null,
     }
     if (editClub) {
       await supabase.from('clubs').update(payload).eq('id', editClub.id)
@@ -144,11 +180,51 @@ export default function AdminPage() {
     fetchClubs()
   }
 
+  async function saveDancer() {
+    setSaving(true)
+    let photoUrl = editDancer?.photo_url || ''
+    let photoUrls = editDancer?.photo_urls || []
+    if (dancerPhoto) {
+      const fileExt = dancerPhoto.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+      const { error: uploadError } = await supabase.storage.from('dancer-photos').upload(fileName, dancerPhoto)
+      if (uploadError) { setMessage('Photo upload failed.'); setSaving(false); return }
+      const { data: urlData } = supabase.storage.from('dancer-photos').getPublicUrl(fileName)
+      photoUrl = urlData.publicUrl
+      photoUrls = [photoUrl, ...photoUrls.slice(0, 2)]
+    }
+    const payload = {
+      stage_name: dancerForm.stage_name,
+      fansly_username: dancerForm.fansly_username || null,
+      is_featured: dancerForm.is_featured,
+      club_ids: dancerForm.club_ids.length > 0 ? dancerForm.club_ids : null,
+      photo_url: photoUrl || null,
+      photo_urls: photoUrls.length > 0 ? photoUrls : null,
+    }
+    if (editDancer) {
+      await supabase.from('dancers').update(payload).eq('id', editDancer.id)
+      setMessage('Dancer updated!')
+    } else {
+      await supabase.from('dancers').insert(payload)
+      setMessage('Dancer added!')
+    }
+    setSaving(false)
+    setShowAddDancer(false)
+    fetchDancers()
+  }
+
   async function deleteClub(id: string, name: string) {
     if (!confirm(`Delete ${name}?`)) return
     await supabase.from('clubs').delete().eq('id', id)
     setMessage(`${name} deleted.`)
     fetchClubs()
+  }
+
+  async function deleteDancer(id: string, name: string) {
+    if (!confirm(`Delete ${name}?`)) return
+    await supabase.from('dancers').delete().eq('id', id)
+    setMessage(`${name} deleted.`)
+    fetchDancers()
   }
 
   if (!authed) return (
@@ -187,15 +263,17 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid #1e2140', margin: '0 16px' }}>
-        {(['applications', 'clubs'] as const).map(t => (
+        {(['applications', 'clubs', 'dancers'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            style={{ flex: 1, padding: '12px', background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? '#FF2D78' : 'transparent'}`, color: tab === t ? '#FF2D78' : '#8890c0', fontSize: 14, cursor: 'pointer', textTransform: 'capitalize' }}>
-            {t === 'applications' ? `Applications (${applications.filter(a => a.status === 'pending').length})` : `Clubs (${clubs.length})`}
+            style={{ flex: 1, padding: '12px 4px', background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? '#FF2D78' : 'transparent'}`, color: tab === t ? '#FF2D78' : '#8890c0', fontSize: 13, cursor: 'pointer', textTransform: 'capitalize' }}>
+            {t === 'applications' ? `Applications (${applications.filter(a => a.status === 'pending').length})` : t === 'clubs' ? `Clubs (${clubs.length})` : `Dancers (${dancers.length})`}
           </button>
         ))}
       </div>
 
+      {/* Applications tab */}
       {tab === 'applications' && (
         <div style={{ padding: '16px' }}>
           {applications.length === 0 ? (
@@ -205,9 +283,7 @@ export default function AdminPage() {
           ) : applications.map(app => (
             <div key={app.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${app.status === 'approved' ? '#3acd60' : app.status === 'rejected' ? '#ff4444' : '#1e2140'}`, padding: 16, marginBottom: 12 }}>
               <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                {app.photo_url && (
-                  <img src={app.photo_url} alt={app.stage_name} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
-                )}
+                {app.photo_url && <img src={app.photo_url} alt={app.stage_name} style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />}
                 <div style={{ flex: 1 }}>
                   <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{app.stage_name}</div>
                   <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 2 }}>Fansly: @{app.fansly_username}</div>
@@ -216,19 +292,11 @@ export default function AdminPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 11, color: app.status === 'approved' ? '#7aff9a' : app.status === 'rejected' ? '#ff4444' : '#FFD700', textTransform: 'uppercase', letterSpacing: 1 }}>
-                  {app.status}
-                </span>
+                <span style={{ fontSize: 11, color: app.status === 'approved' ? '#7aff9a' : app.status === 'rejected' ? '#ff4444' : '#FFD700', textTransform: 'uppercase', letterSpacing: 1 }}>{app.status}</span>
                 {app.status === 'pending' && (
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => rejectApplication(app.id)}
-                      style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}>
-                      Reject
-                    </button>
-                    <button onClick={() => approveApplication(app)}
-                      style={{ background: '#3acd60', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-                      Approve
-                    </button>
+                    <button onClick={() => rejectApplication(app.id)} style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}>Reject</button>
+                    <button onClick={() => approveApplication(app)} style={{ background: '#3acd60', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>Approve</button>
                   </div>
                 )}
               </div>
@@ -237,36 +305,58 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Clubs tab */}
       {tab === 'clubs' && (
         <div style={{ padding: '16px' }}>
-          <button onClick={openAddClub}
-            style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}>
+          <button onClick={openAddClub} style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}>
             + Add New Club
           </button>
           {clubs.map(club => (
             <div key={club.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-              {club.photo_url && (
-                <img src={club.photo_url} alt={club.name} style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
-              )}
+              {club.photo_url && <img src={club.photo_url} alt={club.name} style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
               <div style={{ flex: 1 }}>
                 <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{club.name}</div>
                 <div style={{ color: '#8890c0', fontSize: 12 }}>{club.city}, {club.state}</div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => openEditClub(club)}
-                  style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>
-                  Edit
-                </button>
-                <button onClick={() => deleteClub(club.id, club.name)}
-                  style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>
-                  Delete
-                </button>
+                <button onClick={() => openEditClub(club)} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>Edit</button>
+                <button onClick={() => deleteClub(club.id, club.name)} style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>Delete</button>
               </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Dancers tab */}
+      {tab === 'dancers' && (
+        <div style={{ padding: '16px' }}>
+          <button onClick={openAddDancer} style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}>
+            + Add New Dancer
+          </button>
+          {dancers.map(dancer => (
+            <div key={dancer.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                {dancer.photo_url
+                  ? <img src={dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : '💃'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{dancer.stage_name}</div>
+                  {dancer.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '1px 6px', fontSize: 10 }}>★ Featured</span>}
+                </div>
+                {dancer.fansly_username && <div style={{ color: '#8890c0', fontSize: 12 }}>@{dancer.fansly_username}</div>}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => openEditDancer(dancer)} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>Edit</button>
+                <button onClick={() => deleteDancer(dancer.id, dancer.stage_name)} style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '6px 12px', fontSize: 12, cursor: 'pointer' }}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add/Edit club modal */}
       {showAddClub && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 200, overflowY: 'auto', padding: 16 }}>
           <div style={{ background: '#0D0F1E', borderRadius: 16, border: '1px solid #1e2140', padding: 20, maxWidth: 500, margin: '0 auto' }}>
@@ -274,27 +364,21 @@ export default function AdminPage() {
               <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: 0 }}>{editClub ? 'Edit Club' : 'Add New Club'}</h2>
               <button onClick={() => setShowAddClub(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-
-            {/* Photo upload */}
             <div style={{ marginBottom: 14 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Club photo</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
                 <div style={{ width: 72, height: 72, borderRadius: 10, background: '#131629', border: `2px dashed ${clubPhotoPreview || editClub?.photo_url ? '#FF2D78' : '#3a3d60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                  {clubPhotoPreview
-                    ? <img src={clubPhotoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : editClub?.photo_url
-                    ? <img src={editClub.photo_url} alt="current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ fontSize: 28 }}>📷</span>
-                  }
+                  {clubPhotoPreview ? <img src={clubPhotoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : editClub?.photo_url ? <img src={editClub.photo_url} alt="current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: 28 }}>📷</span>}
                 </div>
                 <div>
-                  <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{clubPhotoPreview || editClub?.photo_url ? 'Change photo' : 'Tap to upload a photo'}</div>
+                  <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{clubPhotoPreview || editClub?.photo_url ? 'Change photo' : 'Tap to upload'}</div>
                   <div style={{ color: '#8890c0', fontSize: 11 }}>Appears on club card and profile</div>
                 </div>
                 <input type="file" accept="image/*" onChange={handleClubPhotoChange} style={{ display: 'none' }} />
               </label>
             </div>
-
             {[
               { label: 'Club name', key: 'name', placeholder: 'e.g. Platinum Palace' },
               { label: 'Address', key: 'address', placeholder: 'Street address' },
@@ -311,7 +395,6 @@ export default function AdminPage() {
                   style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
               </div>
             ))}
-
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Nude level</div>
               <select value={clubForm.nude_level} onChange={e => setClubForm(prev => ({ ...prev, nude_level: e.target.value }))}
@@ -320,7 +403,6 @@ export default function AdminPage() {
                 <option value="topless">Topless</option>
               </select>
             </div>
-
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Bar type</div>
               <select value={clubForm.bar_type} onChange={e => setClubForm(prev => ({ ...prev, bar_type: e.target.value }))}
@@ -329,7 +411,6 @@ export default function AdminPage() {
                 <option value="byob">BYOB</option>
               </select>
             </div>
-
             <div style={{ marginBottom: 16 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Hours</div>
               {DAYS.map(day => (
@@ -342,15 +423,85 @@ export default function AdminPage() {
                 </div>
               ))}
             </div>
-
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
               <input type="checkbox" id="featured" checked={clubForm.is_featured} onChange={e => setClubForm(prev => ({ ...prev, is_featured: e.target.checked }))} />
               <label htmlFor="featured" style={{ color: '#FFD700', fontSize: 13, cursor: 'pointer' }}>★ Mark as Featured</label>
             </div>
-
             <button onClick={saveClub} disabled={saving}
               style={{ width: '100%', background: saving ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
               {saving ? 'Saving...' : editClub ? 'Save Changes' : 'Add Club'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit dancer modal */}
+      {showAddDancer && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 200, overflowY: 'auto', padding: 16 }}>
+          <div style={{ background: '#0D0F1E', borderRadius: 16, border: '1px solid #1e2140', padding: 20, maxWidth: 500, margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: 0 }}>{editDancer ? 'Edit Dancer' : 'Add New Dancer'}</h2>
+              <button onClick={() => setShowAddDancer(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+
+            {/* Photo */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Profile photo</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#131629', border: `2px dashed ${dancerPhotoPreview || editDancer?.photo_url ? '#FF2D78' : '#3a3d60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                  {dancerPhotoPreview ? <img src={dancerPhotoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : editDancer?.photo_url ? <img src={editDancer.photo_url} alt="current" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: 28 }}>📷</span>}
+                </div>
+                <div>
+                  <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{dancerPhotoPreview || editDancer?.photo_url ? 'Change photo' : 'Tap to upload'}</div>
+                  <div style={{ color: '#8890c0', fontSize: 11 }}>Profile picture</div>
+                </div>
+                <input type="file" accept="image/*" onChange={handleDancerPhotoChange} style={{ display: 'none' }} />
+              </label>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Stage name</div>
+              <input value={dancerForm.stage_name} onChange={e => setDancerForm(prev => ({ ...prev, stage_name: e.target.value }))}
+                placeholder="Stage name"
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Fansly username (optional)</div>
+              <input value={dancerForm.fansly_username} onChange={e => setDancerForm(prev => ({ ...prev, fansly_username: e.target.value }))}
+                placeholder="Fansly username"
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Clubs</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
+                {clubs.map(club => {
+                  const selected = dancerForm.club_ids.includes(club.id)
+                  return (
+                    <div key={club.id} onClick={() => toggleDancerClub(club.id)}
+                      style={{ background: selected ? '#1a0d2e' : '#131629', border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`, borderRadius: 8, padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
+                        <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+                      </div>
+                      {selected && <span style={{ color: '#FF2D78' }}>✓</span>}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <input type="checkbox" id="dancerFeatured" checked={dancerForm.is_featured} onChange={e => setDancerForm(prev => ({ ...prev, is_featured: e.target.checked }))} />
+              <label htmlFor="dancerFeatured" style={{ color: '#FFD700', fontSize: 13, cursor: 'pointer' }}>★ Mark as Featured (signed up via Fansly link)</label>
+            </div>
+
+            <button onClick={saveDancer} disabled={saving}
+              style={{ width: '100%', background: saving ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
+              {saving ? 'Saving...' : editDancer ? 'Save Changes' : 'Add Dancer'}
             </button>
           </div>
         </div>
