@@ -36,7 +36,9 @@ export default function DancerProfile() {
     </div>
   )
 
-  const fanslyUrl = dancer.fansly_url ? `${dancer.fansly_url}?r=${FANSLY_REF}` : ''
+  const fanslyUrl = dancer.is_featured
+    ? (dancer.fansly_url || '')
+    : `https://fansly.com/tittymaps?r=${FANSLY_REF}`
   const allPhotos: string[] = dancer.photo_urls || (dancer.photo_url ? [dancer.photo_url] : [])
 
   return (
@@ -81,11 +83,19 @@ export default function DancerProfile() {
 
         {/* Fansly button */}
         {dancer.fansly_url && (
-          <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'block', background: '#FF2D78', color: 'white', textAlign: 'center', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', marginBottom: 16 }}>
-            Follow on Fansly
-          </a>
-        )}
+  <div style={{ marginBottom: 16 }}>
+    {!dancer.is_featured && (
+      <div style={{ background: '#131629', borderRadius: 10, border: '1px solid #1e2140', padding: '10px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ color: '#8890c0', fontSize: 12 }}>Fansly:</span>
+        <span style={{ color: '#8890c0', fontSize: 13 }}>{dancer.fansly_url}</span>
+      </div>
+    )}
+    <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
+      style={{ display: 'block', background: '#FF2D78', color: 'white', textAlign: 'center', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
+      Follow on Fansly
+    </a>
+  </div>
+)}
 
         {/* Photo gallery */}
         {allPhotos.length > 0 && (
