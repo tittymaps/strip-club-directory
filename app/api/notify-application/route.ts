@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         from: 'TittyMaps <info@tittymaps.com>',
-        to: 'info@tittymaps.com',
+        to: 'lukeoconnell2@gmail.com',
         subject: `New dancer application — ${stage_name}`,
         html: `
           <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background: #0D0F1E; color: white; border-radius: 12px;">
