@@ -137,11 +137,11 @@ export default function Home() {
 
   const chips = [
     { key: 'all', label: 'All' },
+    { key: 'featured', label: '⭐ Featured' },
     { key: 'full_nude', label: '🐱 Full nude' },
     { key: 'topless', label: '👙 Topless' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
-    { key: 'featured', label: '⭐ Featured' },
   ]
 
   return (
