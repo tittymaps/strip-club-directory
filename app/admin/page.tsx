@@ -72,7 +72,16 @@ export default function AdminPage() {
     })
     if (error) { setMessage('Error approving dancer'); return }
     await supabase.from('dancer_applications').update({ status: 'approved' }).eq('id', app.id)
-    setMessage(`${app.stage_name} approved and added as featured dancer!`)
+    await fetch('/api/notify-dancer-approved', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stage_name: app.stage_name,
+        email: app.email,
+        is_featured: true,
+      })
+    })
+    setMessage(`${app.stage_name} approved — confirmation email sent!`)
     fetchApplications()
     fetchDancers()
   }
