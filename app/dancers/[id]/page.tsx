@@ -36,7 +36,7 @@ export default function DancerProfile() {
     </div>
   )
 
-  const fanslyUrl = dancer.fansly_url ? `${dancer.fansly_url}?ref=${FANSLY_REF}` : ''
+  const fanslyUrl = dancer.fansly_url ? `${dancer.fansly_url}?r=${FANSLY_REF}` : ''
   const allPhotos: string[] = dancer.photo_urls || (dancer.photo_url ? [dancer.photo_url] : [])
 
   return (
