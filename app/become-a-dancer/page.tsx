@@ -149,16 +149,20 @@ export default function BecomeADancer() {
       </div>
 
       <div style={{ padding: '20px' }}>
-        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #FF2D78', padding: '20px', marginBottom: 24, textAlign: 'center' }}>
-          <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Step 1 — Sign up for Fansly</div>
-          <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Use our link so we can feature you for free. It takes 2 minutes and does not cost you anything.</div>
-          <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
-            Sign up for Fansly through our link
-          </a>
-        </div>
+        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #FF2D78', padding: '20px', marginBottom: 16, textAlign: 'center' }}>
+  <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Want to be a Featured Dancer?</div>
+  <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Sign up for Fansly through our link to get your Featured badge and priority placement. It does not cost you anything extra.</div>
+  <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+    style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+    Sign up for Fansly through our link
+  </a>
+</div>
 
-        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Step 2 — Submit your info</div>
+<div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', marginBottom: 24 }}>
+  <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave the Fansly username blank or enter your existing username.</div>
+</div>
+
+<div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Your info</div>
 
         {/* Photo upload */}
         <div style={{ marginBottom: 14 }}>
