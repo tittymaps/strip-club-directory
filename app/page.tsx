@@ -146,6 +146,11 @@ export default function Home() {
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
+      <style>{`
+        .mapboxgl-popup-content { background: transparent !important; padding: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+        .mapboxgl-popup-tip { display: none !important; }
+        .mapboxgl-popup-close-button { display: none !important; }
+      `}</style>
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: 18 }}>📍</span>
