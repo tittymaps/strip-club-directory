@@ -26,9 +26,14 @@ export default function BottomNav() {
         const active = isActive(tab.href)
         return (
           <a key={tab.key} href={tab.href}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 0 10px', textDecoration: 'none', gap: 3 }}>
-            <span style={{ fontSize: 22 }}>{tab.emoji}</span>
-            <span style={{ fontSize: 10, color: active ? '#FF2D78' : '#8890c0', fontFamily: 'sans-serif' }}>
+            style={{
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', padding: '8px 0 10px', textDecoration: 'none', gap: 3,
+              borderTop: active ? '2px solid #FF2D78' : '2px solid transparent',
+              background: active ? 'rgba(255,45,120,0.06)' : 'transparent',
+            }}>
+            <span style={{ fontSize: active ? 24 : 20, transition: 'font-size 0.15s' }}>{tab.emoji}</span>
+            <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, color: active ? '#FF2D78' : '#555e7a', fontFamily: 'sans-serif' }}>
               {tab.label}
             </span>
           </a>
