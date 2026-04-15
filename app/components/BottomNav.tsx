@@ -33,9 +33,11 @@ export default function BottomNav() {
       label: 'Dancers',
       href: '/dancers',
       icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#FF2D78' : '#8890c0'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="5" r="2"/>
-          <path d="M12 7v6M9 10l3 3 3-3M9 17l-2 4M15 17l2 4"/>
+        <svg width="22" height="22" viewBox="0 0 100 100" fill={active ? '#FF2D78' : '#8890c0'}>
+          <ellipse cx="50" cy="12" rx="8" ry="10"/>
+          <path d="M50 22 C42 26 36 32 38 42 L44 58 L36 80 L42 82 L50 62 L58 82 L64 80 L56 58 L62 42 C64 32 58 26 50 22Z"/>
+          <path d="M38 42 C32 44 26 48 24 56 L30 58 C31 52 36 48 40 47Z"/>
+          <path d="M62 42 C68 44 74 48 76 56 L70 58 C69 52 64 48 60 47Z"/>
         </svg>
       )
     },
