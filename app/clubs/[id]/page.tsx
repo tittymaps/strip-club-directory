@@ -15,6 +15,7 @@ export default function ClubDetail() {
   const router = useRouter()
   const [club, setClub] = useState<any>(null)
   const [dancers, setDancers] = useState<any[]>([])
+  const [fullPhoto, setFullPhoto] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) fetchClub()
@@ -41,8 +42,22 @@ export default function ClubDetail() {
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 40 }}>
 
+      {fullPhoto && (
+        <div onClick={() => setFullPhoto(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <img src={fullPhoto} alt="full size" style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain' }} />
+          <button onClick={() => setFullPhoto(null)}
+            style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', width: 36, height: 36, fontSize: 16, cursor: 'pointer' }}>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Header */}
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
+        <button onClick={() => router.back()} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>
+          ← Back
+        </button>
         <div style={{ flex: 1 }}>
           <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
           <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
@@ -50,28 +65,28 @@ export default function ClubDetail() {
         </div>
       </div>
 
+      {/* Club hero */}
       <div style={{ background: '#131629', borderBottom: '1px solid #1e2140', padding: '24px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 16 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 14, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>
-             {club.photo_url
+          <div onClick={() => club.photo_url && setFullPhoto(club.photo_url)}
+            style={{ width: 56, height: 56, borderRadius: 14, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0, cursor: club.photo_url ? 'pointer' : 'default' }}>
+            {club.photo_url
               ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : (club.is_featured ? '🌟' : '💜')
-              }
-           </div>
+            }
+          </div>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: 0 }}>{club.name}</h1>
-              {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🌟 Featured</span>}
-            </div>
-            <div style={{ fontSize: 13, marginBottom: 10 }}>
+            <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>{club.name}</h1>
             {club.address && (
-            <div style={{ color: '#8890c0', marginBottom: 4 }}>{club.address}</div>
+              <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 4 }}>{club.address}</div>
             )}
-            <span onClick={() => window.location.href=`/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.city}</span>
-            <span style={{ color: '#8890c0' }}>, </span>
-            <span onClick={() => window.location.href=`/states/${club.state.toLowerCase()}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.state}</span>
+            <div style={{ fontSize: 13, marginBottom: 10 }}>
+              <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.city}</span>
+              <span style={{ color: '#8890c0' }}>, </span>
+              <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.state}</span>
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>★ Featured</span>}
               <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>
                 {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
               </span>
@@ -85,6 +100,7 @@ export default function ClubDetail() {
 
       <div style={{ padding: '0 16px' }}>
 
+        {/* Cover charge */}
         {club.cover_charge && (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginTop: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Cover Charge</div>
@@ -92,6 +108,7 @@ export default function ClubDetail() {
           </div>
         )}
 
+        {/* Hours */}
         {club.hours && (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginTop: 12 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Hours</div>
@@ -122,13 +139,13 @@ export default function ClubDetail() {
                 return (
                   <div key={dancer.id}
                     onClick={() => window.location.href = `/dancers/${dancer.id}`}
-                    style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: '1px solid #1e2140' }}>
+                    style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '1', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
                     {photo
                       ? <img src={photo} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
                     }
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', padding: '20px 10px 10px' }}>
-                      <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{dancer.stage_name}</div>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
+                      <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{dancer.stage_name}</div>
                       {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
                     </div>
                   </div>
