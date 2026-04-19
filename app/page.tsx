@@ -83,6 +83,13 @@ export default function Home() {
     map.current.on('load', () => {
       setupClusters(clubData)
     })
+    map.current.on('zoom', () => {
+      const zoom = map.current.getZoom()
+      markers.current.forEach(m => {
+        const el = m.getElement()
+        el.style.display = zoom >= 10 ? 'block' : 'none'
+      })
+    })
   }
 
   function setupClusters(clubData: any[]) {
@@ -117,6 +124,7 @@ export default function Home() {
       cluster: true,
       clusterMaxZoom: 10,
       clusterRadius: 50,
+      clusterMinPoints: 5,
     })
 
     map.current.addLayer({
