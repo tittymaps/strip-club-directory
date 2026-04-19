@@ -112,7 +112,7 @@ export default function Home() {
       cluster: true,
       clusterMaxZoom: 11,
       clusterRadius: 50,
-      clusterMinPoints: 5,
+      clusterMinPoints: 8,
     })
 
     // Cluster circles
@@ -123,7 +123,7 @@ export default function Home() {
       filter: ['has', 'point_count'],
       paint: {
         'circle-color': '#FF2D78',
-        'circle-radius': ['step', ['get', 'point_count'], 22, 5, 30, 20, 38],
+        'circle-radius': ['step', ['get', 'point_count'], 22, 8, 30, 25, 38],
         'circle-stroke-width': 3,
         'circle-stroke-color': 'white',
       }
