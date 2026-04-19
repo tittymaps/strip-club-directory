@@ -3,8 +3,16 @@ import './globals.css'
 import BottomNav from './components/BottomNav'
 
 export const metadata: Metadata = {
-  title: 'TittyMaps',
-  description: 'Find strip clubs near you',
+  title: 'TittyMaps — Strip Club Directory',
+  description: 'Find strip clubs near you. Browse by location, check nude levels, bar type, hours and cover charges. The ultimate strip club directory.',
+  keywords: 'strip clubs, gentlemens clubs, adult entertainment, strip club directory, nude clubs, topless bars',
+  openGraph: {
+    title: 'TittyMaps — Strip Club Directory',
+    description: 'Find strip clubs near you. Browse by location, check nude levels, bar type, hours and cover charges.',
+    url: 'https://tittymaps.com',
+    siteName: 'TittyMaps',
+    type: 'website',
+  },
 }
 
 export default function RootLayout({
