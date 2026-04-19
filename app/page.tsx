@@ -17,16 +17,11 @@ export default function Home() {
   const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
-  const markers = useRef<any[]>([])
+  const allClubs = useRef<any[]>([])
 
   useEffect(() => {
     fetchClubs()
   }, [])
-
-  useEffect(() => {
-    if (!map.current || clubs.length === 0) return
-    addMarkers(clubs)
-  }, [clubs, filter])
 
   function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 3958.8
@@ -50,6 +45,7 @@ export default function Home() {
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('*')
     const clubData = data || []
+    allClubs.current = clubData
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -57,6 +53,7 @@ export default function Home() {
           const userLon = pos.coords.longitude
           setUserLocation({ lat: userLat, lon: userLon })
           const sorted = sortByDistance(clubData, userLat, userLon)
+          allClubs.current = sorted
           setClubs(sorted)
           initMap(sorted, userLat, userLon)
         },
@@ -71,29 +68,8 @@ export default function Home() {
     }
   }
 
-  function initMap(clubData: any[], lat: number, lon: number) {
-    if (map.current) return
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [lon, lat],
-      zoom: 5,
-    })
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
-    map.current.on('load', () => {
-      setupClusters(clubData)
-    })
-    map.current.on('zoom', () => {
-      const zoom = map.current.getZoom()
-      markers.current.forEach(m => {
-        const el = m.getElement()
-        el.style.display = zoom >= 10 ? 'block' : 'none'
-      })
-    })
-  }
-
-  function setupClusters(clubData: any[]) {
-    const geojson: any = {
+  function buildGeoJSON(clubData: any[]) {
+    return {
       type: 'FeatureCollection',
       features: clubData
         .filter(c => c.latitude && c.longitude)
@@ -106,27 +82,40 @@ export default function Home() {
             state: c.state,
             nude_level: c.nude_level,
             bar_type: c.bar_type,
-            is_featured: c.is_featured,
-            photo_url: c.photo_url || '',
+            is_featured: c.is_featured ? 1 : 0,
           },
           geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }
         }))
     }
+  }
 
-    if (map.current.getSource('clubs')) {
-      (map.current.getSource('clubs') as any).setData(geojson)
-      return
-    }
+  function initMap(clubData: any[], lat: number, lon: number) {
+    if (map.current) return
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/dark-v11',
+      center: [lon, lat],
+      zoom: 5,
+    })
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
+    map.current.on('load', () => {
+      setupMapLayers(clubData)
+    })
+  }
+
+  function setupMapLayers(clubData: any[]) {
+    const geojson = buildGeoJSON(clubData)
 
     map.current.addSource('clubs', {
       type: 'geojson',
       data: geojson,
       cluster: true,
-      clusterMaxZoom: 10,
+      clusterMaxZoom: 11,
       clusterRadius: 50,
       clusterMinPoints: 5,
     })
 
+    // Cluster circles
     map.current.addLayer({
       id: 'clusters',
       type: 'circle',
@@ -134,12 +123,13 @@ export default function Home() {
       filter: ['has', 'point_count'],
       paint: {
         'circle-color': '#FF2D78',
-        'circle-radius': ['step', ['get', 'point_count'], 20, 5, 28, 10, 36],
+        'circle-radius': ['step', ['get', 'point_count'], 22, 5, 30, 20, 38],
         'circle-stroke-width': 3,
         'circle-stroke-color': 'white',
       }
     })
 
+    // Cluster count labels
     map.current.addLayer({
       id: 'cluster-count',
       type: 'symbol',
@@ -153,87 +143,64 @@ export default function Home() {
       paint: { 'text-color': 'white' }
     })
 
+    // Unclustered featured pins (gold)
+    map.current.addLayer({
+      id: 'unclustered-featured',
+      type: 'circle',
+      source: 'clubs',
+      filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 1]],
+      paint: {
+        'circle-color': '#FFD700',
+        'circle-radius': 16,
+        'circle-stroke-width': 3,
+        'circle-stroke-color': 'white',
+      }
+    })
+
+    // Unclustered standard pins (pink)
+    map.current.addLayer({
+      id: 'unclustered-standard',
+      type: 'circle',
+      source: 'clubs',
+      filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 0]],
+      paint: {
+        'circle-color': '#FF2D78',
+        'circle-radius': 14,
+        'circle-stroke-width': 2.5,
+        'circle-stroke-color': 'white',
+      }
+    })
+
+    // Star symbol on featured pins
+    map.current.addLayer({
+      id: 'unclustered-featured-star',
+      type: 'symbol',
+      source: 'clubs',
+      filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 1]],
+      layout: {
+        'text-field': '★',
+        'text-size': 14,
+        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+      },
+      paint: { 'text-color': '#c49500' }
+    })
+
+    // Click cluster to expand
     map.current.on('click', 'clusters', (e: any) => {
       const features = map.current.queryRenderedFeatures(e.point, { layers: ['clusters'] })
       const clusterId = features[0].properties.cluster_id
       ;(map.current.getSource('clubs') as any).getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
         if (err) return
-        map.current.easeTo({ center: features[0].geometry.coordinates, zoom })
+        map.current.easeTo({ center: (features[0].geometry as any).coordinates, zoom })
       })
     })
 
-    map.current.on('mouseenter', 'clusters', () => {
-      map.current.getCanvas().style.cursor = 'pointer'
-    })
-    map.current.on('mouseleave', 'clusters', () => {
-      map.current.getCanvas().style.cursor = ''
-    })
-
-    addMarkers(clubData)
-  }
-
-  function addMarkers(clubData: any[]) {
-    markers.current.forEach((m) => m.remove())
-    markers.current = []
-
-    const filtered = clubData.filter((c) => {
-      if (filter === 'all') return true
-      if (filter === 'full_nude') return c.nude_level === 'full_nude'
-      if (filter === 'topless') return c.nude_level === 'topless'
-      if (filter === 'full_bar') return c.bar_type === 'full_bar'
-      if (filter === 'byob') return c.bar_type === 'byob'
-      if (filter === 'featured') return c.is_featured
-      return true
-    })
-
-    if (map.current.getSource('clubs')) {
-      const geojson: any = {
-        type: 'FeatureCollection',
-        features: filtered
-          .filter(c => c.latitude && c.longitude)
-          .map(c => ({
-            type: 'Feature',
-            properties: {
-              id: c.id,
-              name: c.name,
-              city: c.city,
-              state: c.state,
-              nude_level: c.nude_level,
-              bar_type: c.bar_type,
-              is_featured: c.is_featured,
-              photo_url: c.photo_url || '',
-            },
-            geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }
-          }))
-      }
-      ;(map.current.getSource('clubs') as any).setData(geojson)
-    }
-
-    filtered.forEach((club) => {
-      if (!club.latitude || !club.longitude) return
-      const el = document.createElement('div')
-      el.style.cssText = `width:40px;height:52px;cursor:pointer;position:relative;`
-
-      if (club.is_featured) {
-        el.innerHTML = `
-          <svg width="40" height="52" viewBox="0 0 54 75" xmlns="http://www.w3.org/2000/svg">
-            <path d="M27 0 C12 0 0 12 0 27 C0 42 27 75 27 75 C27 75 54 42 54 27 C54 12 42 0 27 0Z" fill="#FFD700" stroke="white" stroke-width="3"/>
-            <ellipse cx="19" cy="20" rx="8" ry="6" fill="#ffe980" opacity="0.5"/>
-            <circle cx="27" cy="27" r="13" fill="#c49500"/>
-            <path d="M27 16 L29.5 23.5 L37.5 23.5 L31 28.5 L33.5 36 L27 31 L20.5 36 L23 28.5 L16.5 23.5 L24.5 23.5 Z" fill="#FFD700"/>
-          </svg>
-        `
-      } else {
-        el.innerHTML = `
-          <svg width="40" height="52" viewBox="0 0 54 75" xmlns="http://www.w3.org/2000/svg">
-            <path d="M27 0 C12 0 0 12 0 27 C0 42 27 75 27 75 C27 75 54 42 54 27 C54 12 42 0 27 0Z" fill="#FF2D78" stroke="white" stroke-width="3"/>
-            <ellipse cx="19" cy="20" rx="8" ry="6" fill="#ff85a8" opacity="0.5"/>
-            <circle cx="27" cy="27" r="11" fill="#c4005e"/>
-            <circle cx="27" cy="27" r="6" fill="#FF2D78"/>
-          </svg>
-        `
-      }
-
+    // Click individual pin to show popup
+    const showPopup = (e: any) => {
+      const props = e.features[0].properties
+      const coords = (e.features[0].geometry as any).coordinates.slice()
+      const club = allClubs.current.find(c => c.id === props.id)
+      if (!club) return
       const popupHTML =
         '<div style="background:#131629;color:white;padding:10px;border-radius:12px;min-width:180px;cursor:pointer;border:1px solid ' + (club.is_featured ? '#FFD700' : '#1e2140') + ';" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
         '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
@@ -243,13 +210,35 @@ export default function Home() {
         '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless') + '</span>' +
         '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB') + '</span>' +
         '</div></div>'
-
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([club.longitude, club.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(popupHTML))
+      new mapboxgl.Popup({ offset: 20 })
+        .setLngLat(coords)
+        .setHTML(popupHTML)
         .addTo(map.current)
-      markers.current.push(marker)
+    }
+
+    map.current.on('click', 'unclustered-featured', showPopup)
+    map.current.on('click', 'unclustered-standard', showPopup)
+
+    // Cursor pointer
+    ;['clusters', 'unclustered-featured', 'unclustered-standard'].forEach(layer => {
+      map.current.on('mouseenter', layer, () => { map.current.getCanvas().style.cursor = 'pointer' })
+      map.current.on('mouseleave', layer, () => { map.current.getCanvas().style.cursor = '' })
     })
+  }
+
+  function updateFilter(newFilter: string) {
+    setFilter(newFilter)
+    if (!map.current || !map.current.getSource('clubs')) return
+    const filtered = allClubs.current.filter(c => {
+      if (newFilter === 'all') return true
+      if (newFilter === 'full_nude') return c.nude_level === 'full_nude'
+      if (newFilter === 'topless') return c.nude_level === 'topless'
+      if (newFilter === 'full_bar') return c.bar_type === 'full_bar'
+      if (newFilter === 'byob') return c.bar_type === 'byob'
+      if (newFilter === 'featured') return c.is_featured
+      return true
+    })
+    ;(map.current.getSource('clubs') as any).setData(buildGeoJSON(filtered))
   }
 
   const filtered = clubs.filter((c) => {
@@ -291,7 +280,7 @@ export default function Home() {
       <div ref={mapContainer} style={{ height: '45vh', width: '100%' }} />
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
         {chips.map((c) => (
-          <button key={c.key} onClick={() => { setFilter(c.key); addMarkers(clubs) }}
+          <button key={c.key} onClick={() => updateFilter(c.key)}
             style={{
               borderRadius: 20, padding: '5px 14px', fontSize: 12, whiteSpace: 'nowrap',
               border: '1px solid', cursor: 'pointer', flexShrink: 0,
