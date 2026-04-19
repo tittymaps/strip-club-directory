@@ -265,9 +265,11 @@ export default function Home() {
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
       <style>{`
+        .mapboxgl-popup { z-index: 99 !important; }
         .mapboxgl-popup-content { background: transparent !important; padding: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
         .mapboxgl-popup-tip { display: none !important; }
         .mapboxgl-popup-close-button { display: none !important; }
+        .mapboxgl-canvas-container { z-index: 1; }
       `}</style>
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -279,7 +281,7 @@ export default function Home() {
           <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
         </div>
       </div>
-      <div ref={mapContainer} style={{ height: '45vh', width: '100%' }} />
+      <div ref={mapContainer} style={{ height: '52vh', width: '100%' }} />
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
         {chips.map((c) => (
           <button key={c.key} onClick={() => updateFilter(c.key)}
