@@ -16,7 +16,7 @@ export default function Home() {
   const map = useRef<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
-  const [userLocation, setUserLocation] = useState<{lat: number, lon: number} | null>(null)
+  const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
   const markers = useRef<any[]>([])
 
   useEffect(() => {
@@ -80,12 +80,94 @@ export default function Home() {
       zoom: 5,
     })
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
-    map.current.on('load', () => addMarkers(clubData))
+    map.current.on('load', () => {
+      setupClusters(clubData)
+    })
+  }
+
+  function setupClusters(clubData: any[]) {
+    const geojson: any = {
+      type: 'FeatureCollection',
+      features: clubData
+        .filter(c => c.latitude && c.longitude)
+        .map(c => ({
+          type: 'Feature',
+          properties: {
+            id: c.id,
+            name: c.name,
+            city: c.city,
+            state: c.state,
+            nude_level: c.nude_level,
+            bar_type: c.bar_type,
+            is_featured: c.is_featured,
+            photo_url: c.photo_url || '',
+          },
+          geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }
+        }))
+    }
+
+    if (map.current.getSource('clubs')) {
+      (map.current.getSource('clubs') as any).setData(geojson)
+      return
+    }
+
+    map.current.addSource('clubs', {
+      type: 'geojson',
+      data: geojson,
+      cluster: true,
+      clusterMaxZoom: 10,
+      clusterRadius: 50,
+    })
+
+    map.current.addLayer({
+      id: 'clusters',
+      type: 'circle',
+      source: 'clubs',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': '#FF2D78',
+        'circle-radius': ['step', ['get', 'point_count'], 20, 5, 28, 10, 36],
+        'circle-stroke-width': 3,
+        'circle-stroke-color': 'white',
+      }
+    })
+
+    map.current.addLayer({
+      id: 'cluster-count',
+      type: 'symbol',
+      source: 'clubs',
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': '{point_count_abbreviated}',
+        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+        'text-size': 14,
+      },
+      paint: { 'text-color': 'white' }
+    })
+
+    map.current.on('click', 'clusters', (e: any) => {
+      const features = map.current.queryRenderedFeatures(e.point, { layers: ['clusters'] })
+      const clusterId = features[0].properties.cluster_id
+      ;(map.current.getSource('clubs') as any).getClusterExpansionZoom(clusterId, (err: any, zoom: any) => {
+        if (err) return
+        map.current.easeTo({ center: features[0].geometry.coordinates, zoom })
+      })
+    })
+
+    map.current.on('mouseenter', 'clusters', () => {
+      map.current.getCanvas().style.cursor = 'pointer'
+    })
+    map.current.on('mouseleave', 'clusters', () => {
+      map.current.getCanvas().style.cursor = ''
+    })
+
+    addMarkers(clubData)
   }
 
   function addMarkers(clubData: any[]) {
     markers.current.forEach((m) => m.remove())
     markers.current = []
+
     const filtered = clubData.filter((c) => {
       if (filter === 'all') return true
       if (filter === 'full_nude') return c.nude_level === 'full_nude'
@@ -95,20 +177,55 @@ export default function Home() {
       if (filter === 'featured') return c.is_featured
       return true
     })
-    filtered.forEach((club) => {
-      const el = document.createElement('div')
-      el.style.cssText = `
-        width:28px;height:28px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
-        background:${club.is_featured ? '#FFD700' : club.nude_level === 'topless' ? '#7B2FBE' : '#FF2D78'};
-        border:2px solid white;cursor:pointer;display:flex;align-items:center;
-        justify-content:center;font-size:11px;color:white;font-weight:bold;
-        overflow:hidden;
-      `
-      if (club.photo_url) {
-        el.innerHTML = `<img src="${club.photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />`
-      } else {
-        el.innerHTML = club.nude_level === 'full_nude' ? '🐱' : '👙'
+
+    if (map.current.getSource('clubs')) {
+      const geojson: any = {
+        type: 'FeatureCollection',
+        features: filtered
+          .filter(c => c.latitude && c.longitude)
+          .map(c => ({
+            type: 'Feature',
+            properties: {
+              id: c.id,
+              name: c.name,
+              city: c.city,
+              state: c.state,
+              nude_level: c.nude_level,
+              bar_type: c.bar_type,
+              is_featured: c.is_featured,
+              photo_url: c.photo_url || '',
+            },
+            geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }
+          }))
       }
+      ;(map.current.getSource('clubs') as any).setData(geojson)
+    }
+
+    filtered.forEach((club) => {
+      if (!club.latitude || !club.longitude) return
+      const el = document.createElement('div')
+      el.style.cssText = `width:40px;height:52px;cursor:pointer;position:relative;`
+
+      if (club.is_featured) {
+        el.innerHTML = `
+          <svg width="40" height="52" viewBox="0 0 54 75" xmlns="http://www.w3.org/2000/svg">
+            <path d="M27 0 C12 0 0 12 0 27 C0 42 27 75 27 75 C27 75 54 42 54 27 C54 12 42 0 27 0Z" fill="#FFD700" stroke="white" stroke-width="3"/>
+            <ellipse cx="19" cy="20" rx="8" ry="6" fill="#ffe980" opacity="0.5"/>
+            <circle cx="27" cy="27" r="13" fill="#c49500"/>
+            <path d="M27 16 L29.5 23.5 L37.5 23.5 L31 28.5 L33.5 36 L27 31 L20.5 36 L23 28.5 L16.5 23.5 L24.5 23.5 Z" fill="#FFD700"/>
+          </svg>
+        `
+      } else {
+        el.innerHTML = `
+          <svg width="40" height="52" viewBox="0 0 54 75" xmlns="http://www.w3.org/2000/svg">
+            <path d="M27 0 C12 0 0 12 0 27 C0 42 27 75 27 75 C27 75 54 42 54 27 C54 12 42 0 27 0Z" fill="#FF2D78" stroke="white" stroke-width="3"/>
+            <ellipse cx="19" cy="20" rx="8" ry="6" fill="#ff85a8" opacity="0.5"/>
+            <circle cx="27" cy="27" r="11" fill="#c4005e"/>
+            <circle cx="27" cy="27" r="6" fill="#FF2D78"/>
+          </svg>
+        `
+      }
+
       const popupHTML =
         '<div style="background:#131629;color:white;padding:10px;border-radius:12px;min-width:180px;cursor:pointer;border:1px solid ' + (club.is_featured ? '#FFD700' : '#1e2140') + ';" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
         '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
@@ -118,6 +235,7 @@ export default function Home() {
         '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless') + '</span>' +
         '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB') + '</span>' +
         '</div></div>'
+
       const marker = new mapboxgl.Marker(el)
         .setLngLat([club.longitude, club.latitude])
         .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(popupHTML))
