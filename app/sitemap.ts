@@ -23,10 +23,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from('clubs')
     .select('id, updated_at')
 
-  const clubPages: MetadataRoute.Sitemap = (clubs || []).map(club => ({
+ const clubPages: MetadataRoute.Sitemap = (clubs || []).map(club => ({
     url: `${baseUrl}/clubs/${club.id}`,
-    lastModified: club.updated_at || new Date(),
-    changeFrequency: 'weekly',
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
@@ -69,8 +69,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const dancerPages: MetadataRoute.Sitemap = (dancers || []).map(dancer => ({
     url: `${baseUrl}/dancers/${dancer.id}`,
-    lastModified: dancer.created_at || new Date(),
-    changeFrequency: 'weekly',
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
     priority: 0.6,
   }))
 
