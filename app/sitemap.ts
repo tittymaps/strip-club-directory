@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from('clubs')
     .select('state')
 
-  const states = [...new Set((stateData || []).map(c => c.state).filter(Boolean))]
+  const states = Array.from(new Set((stateData || []).map(c => c.state).filter(Boolean)))
   const statePages: MetadataRoute.Sitemap = states.map(state => ({
     url: `${baseUrl}/states/${state.toLowerCase()}`,
     changeFrequency: 'weekly',
