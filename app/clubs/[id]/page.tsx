@@ -64,6 +64,9 @@ export default function ClubDetail() {
               {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🌟 Featured</span>}
             </div>
             <div style={{ fontSize: 13, marginBottom: 10 }}>
+            {club.address && (
+            <div style={{ color: '#8890c0', marginBottom: 4 }}>{club.address}</div>
+            )}
             <span onClick={() => window.location.href=`/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.city}</span>
             <span style={{ color: '#8890c0' }}>, </span>
             <span onClick={() => window.location.href=`/states/${club.state.toLowerCase()}`} style={{ color: '#7ab8ff', cursor: 'pointer' }}>{club.state}</span>
