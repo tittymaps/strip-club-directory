@@ -4,8 +4,8 @@ import BottomNav from './components/BottomNav'
 
 export const metadata: Metadata = {
   title: 'TittyMaps - Strip Club Directory',
-  'Find strip clubs near me. Search strip clubs near you by location, nude level, bar type and hours. The ultimate strip club near me directory.',
-  keywords: 'strip clubs, gentlemens clubs, adult entertainment, strip club directory, nude clubs, topless bars',
+  description: 'Find strip clubs near me. Search strip clubs near you by location, nude level, bar type and hours. The ultimate strip club directory.',
+  keywords: 'strip clubs, strip clubs near me, gentlemens clubs, adult entertainment, strip club directory, nude clubs, topless bars',
   openGraph: {
     title: 'TittyMaps - Strip Club Directory',
     description: 'Find strip clubs near you. Browse by location, check nude levels, bar type, hours and cover charges.',
