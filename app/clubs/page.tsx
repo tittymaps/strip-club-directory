@@ -209,9 +209,11 @@ export default function ClubsPage() {
                     <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
                       {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
                     </span>
-                    <span style={{ background: 'rgba(26,42,61,0.8)', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
-                      {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
-                    </span>
+                    {club.bar_type !== 'none' && (
+                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
+                </span>
+               )}
                   </div>
                 </div>
                 {club.is_featured && (
