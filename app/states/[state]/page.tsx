@@ -126,9 +126,11 @@ export default function StatePage() {
                 <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                   {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
                 </span>
-                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
-                </span>
+                {club.bar_type !== 'none' && (
+              <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+             {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
+             </span>
+             )}
               </div>
             </div>
           </div>
