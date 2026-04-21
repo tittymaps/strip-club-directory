@@ -411,10 +411,11 @@ export default function AdminPage() {
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Bar type</div>
               <select value={clubForm.bar_type} onChange={e => setClubForm(prev => ({ ...prev, bar_type: e.target.value }))}
-                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
-                <option value="full_bar">Full bar</option>
-                <option value="byob">BYOB</option>
-              </select>
+         style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
+         <option value="full_bar">Full bar</option>
+         <option value="byob">BYOB</option>
+         <option value="none">No bar</option>
+          </select>
             </div>
             <div style={{ marginBottom: 16 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Hours</div>
