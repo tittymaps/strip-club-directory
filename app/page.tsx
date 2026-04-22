@@ -263,6 +263,7 @@ export default function Home() {
     { key: 'bikini', label: '👙 Bikini' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
+    { key: 'cafe', '🧋 Cafe' },
   ]
 
   return (
