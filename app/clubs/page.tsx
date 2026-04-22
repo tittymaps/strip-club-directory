@@ -210,14 +210,14 @@ export default function ClubsPage() {
                   <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{club.name}</div>
                   <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {STATE_NAMES[club.state] || club.state}</div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
-                      {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
-                    </span>
+                   <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9, whiteSpace: 'nowrap' }}>
+                   {club.nude_level === 'full_nude' ? '🐱' : club.nude_level === 'bikini' ? '👙' : '🍒'}
+                   </span>
                     {club.bar_type !== 'none' && (
-                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
+                <span style={{ background: 'rgba(26,42,61,0.8)', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '1px 6px', fontSize: 9, whiteSpace: 'nowrap' }}>
+                {club.bar_type === 'full_bar' ? '🍾' : club.bar_type === 'cafe' ? '🧋' : '🍺'}
                 </span>
-               )}
+                )}
                   </div>
                 </div>
                 {club.is_featured && (
