@@ -98,9 +98,11 @@ export default function ClubsPage() {
     { key: 'all', label: 'All' },
     { key: 'featured', label: '⭐ Featured' },
     { key: 'full_nude', label: '🐱 Full nude' },
-    { key: 'topless', label: '👙 Topless' },
+    { key: 'topless', label: '🍒 Topless' },
+    { key: 'bikini', label: '👙 Bikini' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
+    { key: 'cafe', '🧋 Cafe' },
   ]
 
   const filtered = clubs.filter(c => {
@@ -111,9 +113,11 @@ export default function ClubsPage() {
     const matchesFilter =
       filter === 'all' ? true :
       filter === 'full_nude' ? c.nude_level === 'full_nude' :
-      filter === 'topless' ? c.nude_level === 'topless' :
+      filter === 'topless') return c.nude_level === 'topless' :
+      filter === 'bikini') return c.nude_level === 'bikini' :
       filter === 'full_bar' ? c.bar_type === 'full_bar' :
-      filter === 'byob' ? c.bar_type === 'byob' :
+      filter === 'byob') return c.bar_type === 'byob' :
+      filter === 'cafe') return c.bar_type === 'cafe' :
       filter === 'featured' ? c.is_featured : true
     return matchesSearch && matchesFilter
   })
@@ -207,11 +211,11 @@ export default function ClubsPage() {
                   <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {STATE_NAMES[club.state] || club.state}</div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
-                      {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
+                      {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                     </span>
                     {club.bar_type !== 'none' && (
                 <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
+                {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
                 </span>
                )}
                   </div>
