@@ -133,10 +133,10 @@ export default function StripClubsNearMe() {
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                     {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
                     <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                      {club.nude_level === 'full_nude' ? '🐱 Full nude' : '👙 Topless'}
+                      {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                     </span>
                     <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                      {club.bar_type === 'full_bar' ? '🍾 Full bar' : '🍺 BYOB'}
+                      {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
                     </span>
                   </div>
                 </div>
