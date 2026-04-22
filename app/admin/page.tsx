@@ -406,6 +406,7 @@ export default function AdminPage() {
                 style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
                 <option value="full_nude">Full nude</option>
                 <option value="topless">Topless</option>
+                <option value="bikini">Bikini</option>
               </select>
             </div>
             <div style={{ marginBottom: 12 }}>
@@ -414,6 +415,7 @@ export default function AdminPage() {
          style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
          <option value="full_bar">Full bar</option>
          <option value="byob">BYOB</option>
+         <option value="cafe">Cafe</option>
          <option value="none">No bar</option>
           </select>
             </div>
