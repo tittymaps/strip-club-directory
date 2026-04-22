@@ -110,14 +110,14 @@ export default function ClubsPage() {
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.city.toLowerCase().includes(search.toLowerCase()) ||
       c.state.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter =
+   const matchesFilter =
       filter === 'all' ? true :
       filter === 'full_nude' ? c.nude_level === 'full_nude' :
-      filter === 'topless') return c.nude_level === 'topless' :
-      filter === 'bikini') return c.nude_level === 'bikini' :
+      filter === 'topless' ? c.nude_level === 'topless' :
+      filter === 'bikini' ? c.nude_level === 'bikini' :
       filter === 'full_bar' ? c.bar_type === 'full_bar' :
-      filter === 'byob') return c.bar_type === 'byob' :
-      filter === 'cafe') return c.bar_type === 'cafe' :
+      filter === 'byob' ? c.bar_type === 'byob' :
+      filter === 'cafe' ? c.bar_type === 'cafe' :
       filter === 'featured' ? c.is_featured : true
     return matchesSearch && matchesFilter
   })
