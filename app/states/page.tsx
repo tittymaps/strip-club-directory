@@ -46,17 +46,10 @@ export default function StatesPage() {
   }
 
   return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
-      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 18 }}>📍</span>
-        </div>
-        <div style={{ flex: 1 }}>
-          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 18 }}>Titty</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>Maps</span>
-          <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
-        </div>
-      </div>
+   <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
+  <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+   </div>
 
       <div style={{ padding: '16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Browse by State</div>
