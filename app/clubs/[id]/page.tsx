@@ -54,15 +54,10 @@ export default function ClubDetail() {
       )}
 
       {/* Header */}
-      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button onClick={() => router.back()} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>
-          ← Back
-        </button>
-        <div style={{ flex: 1 }}>
-          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 16 }}>Titty</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 16 }}>Maps</span>
-          <span style={{ color: '#FFD700', fontSize: 11 }}>.com</span>
-        </div>
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+  <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
+  <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+  </div>
       </div>
 
       {/* Club hero */}
