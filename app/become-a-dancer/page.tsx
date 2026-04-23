@@ -96,6 +96,7 @@ export default function BecomeADancer() {
         })
       })
     }
+
     setLoading(false)
     if (dbError) {
       setError('Something went wrong. Please try again.')
@@ -127,10 +128,12 @@ export default function BecomeADancer() {
   ]
 
   return (
-    <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <button onClick={() => window.location.href = '/'} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Back</button>
-      <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
-    </div>
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 60 }}>
+
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <button onClick={() => window.location.href = '/'} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Back</button>
+        <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+      </div>
 
       <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
         <div style={{ fontSize: 44, marginBottom: 12 }}>💃</div>
@@ -153,21 +156,20 @@ export default function BecomeADancer() {
 
       <div style={{ padding: '20px' }}>
         <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #FF2D78', padding: '20px', marginBottom: 16, textAlign: 'center' }}>
-  <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Want to be a Featured Dancer?</div>
-  <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Sign up for Fansly through our link to get your Featured badge and priority placement. It does not cost you anything extra.</div>
-  <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-    style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
-    Sign up for Fansly through our link
-  </a>
-</div>
+          <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Want to be a Featured Dancer?</div>
+          <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Sign up for Fansly through our link to get your Featured badge and priority placement. It does not cost you anything extra.</div>
+          <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
+            Sign up for Fansly through our link
+          </a>
+        </div>
 
-<div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', marginBottom: 24 }}>
-  <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link</div>
-</div>
+        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', marginBottom: 24 }}>
+          <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link.</div>
+        </div>
 
-<div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Your info</div>
+        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Your info</div>
 
-        {/* Photo upload */}
         <div style={{ marginBottom: 14 }}>
           <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Photos (up to 3)</div>
           <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>First photo becomes your profile picture. All photos appear on your profile page.</div>
@@ -177,7 +179,7 @@ export default function BecomeADancer() {
                 <img src={preview} alt={`photo ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <button onClick={() => removePhoto(i)}
                   style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', color: 'white', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  ✕
+                  x
                 </button>
                 {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,45,120,0.8)', color: 'white', fontSize: 9, textAlign: 'center', padding: '2px 0' }}>Profile pic</div>}
               </div>
@@ -200,7 +202,7 @@ export default function BecomeADancer() {
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Fansly profile link</div>
-            <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="https://fansly.com/yourname"
+          <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="https://fansly.com/yourname"
             style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
@@ -218,7 +220,7 @@ export default function BecomeADancer() {
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
               {selectedClubs.map(name => (
                 <span key={name} onClick={() => toggleClub(name)} style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '3px 10px', fontSize: 11, cursor: 'pointer' }}>
-                  {name} ✕
+                  {name} x
                 </span>
               ))}
             </div>
