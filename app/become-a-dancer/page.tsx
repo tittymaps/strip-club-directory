@@ -130,7 +130,7 @@ export default function BecomeADancer() {
     <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
       <button onClick={() => window.location.href = '/'} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Back</button>
       <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
-      </div>
+    </div>
 
       <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
         <div style={{ fontSize: 44, marginBottom: 12 }}>💃</div>
