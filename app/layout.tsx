@@ -4,6 +4,15 @@ import BottomNav from './components/BottomNav'
 
 export const metadata: Metadata = {
   title: 'TittyMaps - Strip Club Directory',
+  icons: {
+    icon: [
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   description: 'Find strip clubs near me. Search strip clubs near you by location, nude level, bar type and hours. The ultimate strip club directory.',
   keywords: 'strip clubs, strip clubs near me, gentlemens clubs, adult entertainment, strip club directory, nude clubs, topless bars',
   openGraph: {
