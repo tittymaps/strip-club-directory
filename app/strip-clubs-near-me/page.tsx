@@ -80,16 +80,11 @@ export default function StripClubsNearMe() {
   }
 
   return (
-  <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
-    <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
-      <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
-    </div>
-    <div style={{ padding: '16px' }}>
-      {/* ... rest of content ... */}
-    </div>
-  </div>   {/* ← this now correctly closes the outer wrapper */}
-)
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
+        <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+      </div>
 
       <div style={{ padding: '20px 16px 8px' }}>
         <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>Strip Clubs Near Me</h1>
@@ -98,7 +93,6 @@ export default function StripClubsNearMe() {
         </p>
       </div>
 
-      {/* Nearby clubs */}
       <div style={{ padding: '8px 16px' }}>
         {loading ? (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
@@ -153,7 +147,6 @@ export default function StripClubsNearMe() {
         )}
       </div>
 
-      {/* Browse by state */}
       <div style={{ padding: '8px 16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Browse Strip Clubs by State</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
