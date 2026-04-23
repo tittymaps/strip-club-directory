@@ -276,14 +276,8 @@ export default function Home() {
         .mapboxgl-canvas-container { z-index: 1; }
       `}</style>
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#1a1d35', border: '2px solid #7B2FBE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 18 }}>📍</span>
-        </div>
-        <div style={{ flex: 1 }}>
-          <span style={{ color: '#FF2D78', fontWeight: 700, fontSize: 18 }}>Titty</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: 18 }}>Maps</span>
-          <span style={{ color: '#FFD700', fontSize: 12 }}>.com</span>
-        </div>
+        <img src="/logo-pins.png" alt="TittyMaps" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 36, objectFit: 'contain' }} />
       </div>
       <div ref={mapContainer} style={{ height: '52vh', width: '100%' }} />
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
