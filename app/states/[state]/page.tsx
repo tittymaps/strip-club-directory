@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'  // ← added useRouter
 
 const supabase = createClient(
   'https://ssruvoxuwlksmbmubcfv.supabase.co',
@@ -24,6 +24,7 @@ const STATE_NAMES: Record<string, string> = {
 
 export default function StatePage() {
   const { state } = useParams()
+  const router = useRouter()  // ← added this
   const stateCode = (state as string).toUpperCase()
   const stateName = STATE_NAMES[stateCode] || stateCode
   const [clubs, setClubs] = useState<any[]>([])
