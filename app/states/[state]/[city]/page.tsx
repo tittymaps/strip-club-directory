@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 const supabase = createClient(
   'https://ssruvoxuwlksmbmubcfv.supabase.co',
@@ -24,6 +24,7 @@ const STATE_NAMES: Record<string, string> = {
 
 export default function CityPage() {
   const { state, city } = useParams()
+  const router = useRouter()
   const stateCode = (state as string).toUpperCase()
   const cityName = decodeURIComponent(city as string)
   const stateName = STATE_NAMES[stateCode] || stateCode
@@ -56,10 +57,9 @@ export default function CityPage() {
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
-
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
-      <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+        <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
+        <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
       </div>
 
       <div style={{ padding: '16px 16px 8px' }}>
@@ -67,7 +67,6 @@ export default function CityPage() {
         <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>{stateName} · {clubs.length} clubs · {dancers.length} featured dancers</p>
       </div>
 
-      {/* Clubs list */}
       <div style={{ padding: '8px 16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Clubs</div>
         {clubs.length === 0 ? (
@@ -97,17 +96,16 @@ export default function CityPage() {
                   {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                 </span>
                 {club.bar_type !== 'none' && (
-                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                 {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
-                 </span>
-                 )}
+                  <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                    {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
+                  </span>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Dancers grid */}
       {dancers.length > 0 && (
         <div style={{ padding: '8px 16px' }}>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers</div>
