@@ -273,7 +273,7 @@ export default function AdminPage() {
         placeholder="Enter password"
         style={{ width: 260, background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, marginBottom: 10, boxSizing: 'border-box' }} />
       {pwError && <div style={{ color: '#ff4444', fontSize: 13, marginBottom: 10 }}>{pwError}</div>}
-      <button onClick={() => { if (password === ADMIN_PASSWORD) { setAuthed(true) } else { setPwError('Incorrect password') } }}
+       <button onClick={() => { if (password === ADMIN_PASSWORD) { setAuthed(true) } else { setPwError('Incorrect password') } }}
         style={{ width: 260, background: '#FF2D78', color: 'white', border: 'none', borderRadius: 10, padding: '12px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
         Login
       </button>
