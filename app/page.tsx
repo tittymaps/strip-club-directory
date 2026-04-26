@@ -18,6 +18,7 @@ export default function Home() {
   const [filter, setFilter] = useState('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
   const allClubs = useRef<any[]>([])
+  const allClubsForMap = useRef<any[]>([])
 
   useEffect(() => {
     fetchClubs()
@@ -36,6 +37,7 @@ export default function Home() {
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('*')
     const clubData = data || []
+    allClubsForMap.current = clubData
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -60,7 +62,7 @@ export default function Home() {
           const sorted = [...featured, ...standard]
           allClubs.current = sorted
           setClubs(sorted)
-          initMap(sorted, userLat, userLon)
+          initMap(clubData, userLat, userLon)
         },
         () => {
           const featured = clubData.filter(c => c.is_featured)
@@ -70,7 +72,7 @@ export default function Home() {
           const result = [...featured, ...shuffled.slice(0, remaining)]
           allClubs.current = result
           setClubs(result)
-          initMap(result, 39.5, -98.35)
+          initMap(clubData, 39.5, -98.35)
         }
       )
     } else {
@@ -81,7 +83,7 @@ export default function Home() {
       const result = [...featured, ...shuffled.slice(0, remaining)]
       allClubs.current = result
       setClubs(result)
-      initMap(result, 39.5, -98.35)
+      initMap(clubData, 39.5, -98.35)
     }
   }
 
@@ -190,7 +192,7 @@ export default function Home() {
       source: 'clubs',
       filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 1]],
       layout: {
-        'text-field': '★',
+        'text-field': '\u2605',
         'text-size': 14,
         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
       },
@@ -209,19 +211,25 @@ export default function Home() {
     const showPopup = (e: any) => {
       const props = e.features[0].properties
       const coords = (e.features[0].geometry as any).coordinates.slice()
-      const club = allClubs.current.find(c => c.id === props.id)
+      const club = allClubsForMap.current.find(c => c.id === props.id)
       if (!club) return
+      const barBadge = club.bar_type !== 'none'
+        ? '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' +
+          (club.bar_type === 'full_bar' ? 'Full bar' : club.bar_type === 'cafe' ? 'Cafe' : 'BYOB') + '</span>'
+        : ''
+      const nudeBadge = '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' +
+        (club.nude_level === 'full_nude' ? 'Full nude' : club.nude_level === 'bikini' ? 'Bikini' : 'Topless') + '</span>'
+      const featuredBadge = club.is_featured
+        ? '<span style="background:#3d3000;color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:10px;">Featured</span>'
+        : ''
       const popupHTML =
         '<div style="background:#131629;color:white;border-radius:12px;min-width:200px;cursor:pointer;border:1px solid ' + (club.is_featured ? '#FFD700' : '#1e2140') + ';overflow:hidden;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
         (club.photo_url ? '<img src="' + club.photo_url + '" style="width:100%;height:110px;object-fit:cover;display:block;" />' : '') +
         '<div style="padding:10px;">' +
-        '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' →</div>' +
+        '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' \u2192</div>' +
         '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
-        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-        (club.is_featured ? '<span style="background:#3d3000;color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:10px;">★ Featured</span>' : '') +
-        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless') + '</span>' +
-        (club.bar_type !== 'none' ? '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB') + '</span>' : '') +
-        '</div></div></div>'
+        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' + featuredBadge + nudeBadge + barBadge + '</div>' +
+        '</div></div>'
       new mapboxgl.Popup({ offset: 20 })
         .setLngLat(coords)
         .setHTML(popupHTML)
@@ -240,7 +248,7 @@ export default function Home() {
   function updateFilter(newFilter: string) {
     setFilter(newFilter)
     if (!map.current || !map.current.getSource('clubs')) return
-    const filtered = allClubs.current.filter(c => {
+    const filtered = allClubsForMap.current.filter(c => {
       if (newFilter === 'all') return true
       if (newFilter === 'full_nude') return c.nude_level === 'full_nude'
       if (newFilter === 'topless') return c.nude_level === 'topless'
@@ -268,12 +276,12 @@ export default function Home() {
 
   const chips = [
     { key: 'all', label: 'All' },
-    { key: 'featured', label: '⭐ Featured' },
-    { key: 'full_nude', label: '🐱 Full nude' },
-    { key: 'topless', label: '🍒 Topless' },
-    { key: 'bikini', label: '👙 Bikini' },
-    { key: 'full_bar', label: '🍾 Full bar' },
-    { key: 'byob', label: '🍺 BYOB' },
+    { key: 'featured', label: 'Featured' },
+    { key: 'full_nude', label: 'Full nude' },
+    { key: 'topless', label: 'Topless' },
+    { key: 'bikini', label: 'Bikini' },
+    { key: 'full_bar', label: 'Full bar' },
+    { key: 'byob', label: 'BYOB' },
     { key: 'cafe', label: 'Cafe' },
   ]
 
