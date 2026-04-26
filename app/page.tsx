@@ -221,8 +221,8 @@ export default function Home() {
         '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
         '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
         (club.is_featured ? '<span style="background:#3d3000;color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:10px;">\u2605 Featured</span>' : '') +
-        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? 'Full nude' : club.nude_level === 'bikini' ? 'Bikini' : 'Topless') + '</span>' +
-        (club.bar_type !== 'none' ? '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? 'Full bar' : club.bar_type === 'cafe' ? 'Cafe' : 'BYOB') + '</span>' : '') +
+        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless') + '</span>' +
+        (club.bar_type !== 'none' ? '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB') + '</span>' : '') +
         '</div></div></div>'
       new mapboxgl.Popup({ offset: 20 })
         .setLngLat(coords)
@@ -270,13 +270,13 @@ export default function Home() {
 
   const chips = [
     { key: 'all', label: 'All' },
-    { key: 'featured', label: '\u2B50 Featured' },
-    { key: 'full_nude', label: 'Full nude' },
-    { key: 'topless', label: 'Topless' },
-    { key: 'bikini', label: 'Bikini' },
-    { key: 'full_bar', label: 'Full bar' },
-    { key: 'byob', label: 'BYOB' },
-    { key: 'cafe', label: 'Cafe' },
+    { key: 'featured', label: '⭐ Featured' },
+    { key: 'full_nude', label: '🐱 Full nude' },
+    { key: 'topless', label: '🍒 Topless' },
+    { key: 'bikini', label: '👙 Bikini' },
+    { key: 'full_bar', label: '🍾 Full bar' },
+    { key: 'byob', label: '🍺 BYOB' },
+    { key: 'cafe', label: '🧋 Cafe' },
   ]
 
   return (
