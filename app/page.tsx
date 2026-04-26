@@ -33,38 +33,55 @@ export default function Home() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   }
 
-  function sortByDistance(clubList: any[], lat: number, lon: number) {
-    return [...clubList].sort((a, b) => {
-      if (!a.latitude || !a.longitude) return 1
-      if (!b.latitude || !b.longitude) return -1
-      return getDistance(lat, lon, a.latitude, a.longitude) -
-        getDistance(lat, lon, b.latitude, b.longitude)
-    })
-  }
-
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('*')
     const clubData = data || []
-    allClubs.current = clubData
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const userLat = pos.coords.latitude
           const userLon = pos.coords.longitude
           setUserLocation({ lat: userLat, lon: userLon })
-          const sorted = sortByDistance(clubData, userLat, userLon)
+
+          const withDistance = clubData
+            .filter(c => c.latitude && c.longitude)
+            .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
+            .filter(c => c.distance <= 215)
+
+          const featured = withDistance
+            .filter(c => c.is_featured)
+            .sort((a, b) => a.distance - b.distance)
+
+          const standard = withDistance
+            .filter(c => !c.is_featured)
+            .sort((a, b) => a.distance - b.distance)
+
+          const sorted = [...featured, ...standard]
           allClubs.current = sorted
           setClubs(sorted)
           initMap(sorted, userLat, userLon)
         },
         () => {
-          setClubs(clubData)
-          initMap(clubData, 39.5, -98.35)
+          const featured = clubData.filter(c => c.is_featured)
+          const standard = clubData.filter(c => !c.is_featured)
+          const shuffled = [...standard].sort(() => Math.random() - 0.5)
+          const remaining = Math.max(0, 20 - featured.length)
+          const result = [...featured, ...shuffled.slice(0, remaining)]
+          allClubs.current = result
+          setClubs(result)
+          initMap(result, 39.5, -98.35)
         }
       )
     } else {
-      setClubs(clubData)
-      initMap(clubData, 39.5, -98.35)
+      const featured = clubData.filter(c => c.is_featured)
+      const standard = clubData.filter(c => !c.is_featured)
+      const shuffled = [...standard].sort(() => Math.random() - 0.5)
+      const remaining = Math.max(0, 20 - featured.length)
+      const result = [...featured, ...shuffled.slice(0, remaining)]
+      allClubs.current = result
+      setClubs(result)
+      initMap(result, 39.5, -98.35)
     }
   }
 
@@ -115,7 +132,6 @@ export default function Home() {
       clusterMinPoints: 8,
     })
 
-    // Cluster circles
     map.current.addLayer({
       id: 'clusters',
       type: 'circle',
@@ -129,7 +145,6 @@ export default function Home() {
       }
     })
 
-    // Cluster count labels
     map.current.addLayer({
       id: 'cluster-count',
       type: 'symbol',
@@ -143,7 +158,6 @@ export default function Home() {
       paint: { 'text-color': 'white' }
     })
 
-    // Unclustered featured pins (gold)
     map.current.addLayer({
       id: 'unclustered-featured',
       type: 'circle',
@@ -157,7 +171,6 @@ export default function Home() {
       }
     })
 
-    // Unclustered standard pins (pink)
     map.current.addLayer({
       id: 'unclustered-standard',
       type: 'circle',
@@ -171,7 +184,6 @@ export default function Home() {
       }
     })
 
-    // Star symbol on featured pins
     map.current.addLayer({
       id: 'unclustered-featured-star',
       type: 'symbol',
@@ -185,7 +197,6 @@ export default function Home() {
       paint: { 'text-color': '#c49500' }
     })
 
-    // Click cluster to expand
     map.current.on('click', 'clusters', (e: any) => {
       const features = map.current.queryRenderedFeatures(e.point, { layers: ['clusters'] })
       const clusterId = features[0].properties.cluster_id
@@ -195,7 +206,6 @@ export default function Home() {
       })
     })
 
-    // Click individual pin to show popup
     const showPopup = (e: any) => {
       const props = e.features[0].properties
       const coords = (e.features[0].geometry as any).coordinates.slice()
@@ -221,7 +231,6 @@ export default function Home() {
     map.current.on('click', 'unclustered-featured', showPopup)
     map.current.on('click', 'unclustered-standard', showPopup)
 
-    // Cursor pointer
     ;['clusters', 'unclustered-featured', 'unclustered-standard'].forEach(layer => {
       map.current.on('mouseenter', layer, () => { map.current.getCanvas().style.cursor = 'pointer' })
       map.current.on('mouseleave', layer, () => { map.current.getCanvas().style.cursor = '' })
@@ -235,8 +244,10 @@ export default function Home() {
       if (newFilter === 'all') return true
       if (newFilter === 'full_nude') return c.nude_level === 'full_nude'
       if (newFilter === 'topless') return c.nude_level === 'topless'
+      if (newFilter === 'bikini') return c.nude_level === 'bikini'
       if (newFilter === 'full_bar') return c.bar_type === 'full_bar'
       if (newFilter === 'byob') return c.bar_type === 'byob'
+      if (newFilter === 'cafe') return c.bar_type === 'cafe'
       if (newFilter === 'featured') return c.is_featured
       return true
     })
@@ -263,7 +274,7 @@ export default function Home() {
     { key: 'bikini', label: '👙 Bikini' },
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
-    { key: 'cafe', label: '🧋 Cafe' },
+    { key: 'cafe', label: 'Cafe' },
   ]
 
   return (
@@ -275,11 +286,14 @@ export default function Home() {
         .mapboxgl-popup-close-button { display: none !important; }
         .mapboxgl-canvas-container { z-index: 1; }
       `}</style>
-     <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
-      <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+
+      <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
+        <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
       </div>
+
       <div ref={mapContainer} style={{ height: '52vh', width: '100%' }} />
+
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
         {chips.map((c) => (
           <button key={c.key} onClick={() => updateFilter(c.key)}
@@ -294,8 +308,11 @@ export default function Home() {
           </button>
         ))}
       </div>
+
       <div style={{ padding: '8px 12px' }}>
-        <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>{filtered.length} clubs nearby</div>
+        <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>
+          {userLocation ? `${filtered.length} clubs within 215 miles` : `${filtered.length} clubs`}
+        </div>
         {filtered.map((club) => (
           <div key={club.id}
             onClick={() => window.location.href = `/clubs/${club.id}`}
@@ -326,10 +343,10 @@ export default function Home() {
                   {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                 </span>
                 {club.bar_type !== 'none' && (
-           <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-           {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
-            </span>
-               )}
+                  <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                    {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
+                  </span>
+                )}
               </div>
             </div>
           </div>
