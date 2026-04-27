@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: 'Bikini Baristas Near Me | TittyMaps',
   description: 'Find bikini barista coffee shops near you. Browse bikini barista locations with hours, address and featured baristas.',
   keywords: 'bikini baristas near me, bikini barista, bikini coffee, bikini espresso, bikini barista locations',
+  alternates: {
+  canonical: 'https://tittymaps.com/bikini-baristas-near-me',
+        },
   openGraph: {
     title: 'Bikini Baristas Near Me | TittyMaps',
     description: 'Find bikini barista coffee shops near your location.',
