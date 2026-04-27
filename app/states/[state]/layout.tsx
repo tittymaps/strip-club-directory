@@ -28,6 +28,9 @@ export async function generateMetadata({ params }: { params: { state: string } }
   return {
     title: `Strip Clubs in ${stateName} | TittyMaps`,
     description: `Find ${count || ''} strip clubs in ${stateName}. Browse gentlemens clubs by city, check nude levels, bar type, hours and cover charges.`,
+    alternates: {
+    canonical: `https://tittymaps.com/states/${params.state}`,
+          },
     openGraph: {
       title: `Strip Clubs in ${stateName} | TittyMaps`,
       description: `Find strip clubs in ${stateName}. Browse by city with full details on each club.`,
