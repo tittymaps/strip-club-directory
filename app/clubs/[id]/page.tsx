@@ -342,7 +342,6 @@ export default function ClubDetail() {
           ))}
         </div>
 
-      </div>
       {/* Nearby Clubs */}
 {nearbyClubs.length > 0 && (
   <div style={{ marginTop: 20, marginBottom: 20 }}>
@@ -382,6 +381,7 @@ export default function ClubDetail() {
     ))}
   </div>
 )}
+      </div>
     </div>
   )
 }
