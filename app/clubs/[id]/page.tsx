@@ -26,6 +26,7 @@ export default function ClubDetail() {
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState('')
   const [reviewSuccess, setReviewSuccess] = useState(false)
+  const [nearbyClubs, setNearbyClubs] = useState<any[]>([])
 
   useEffect(() => {
     if (id) {
@@ -43,6 +44,7 @@ export default function ClubDetail() {
         .select('*')
         .contains('club_ids', [data.id])
       setDancers(dancerData || [])
+      fetchNearbyClubs(data)
     }
   }
 
@@ -53,6 +55,30 @@ export default function ClubDetail() {
       .eq('club_id', id)
       .order('created_at', { ascending: false })
     setReviews(data || [])
+  }
+  async function fetchNearbyClubs(club: any) {
+    if (!club.latitude || !club.longitude) return
+    const { data } = await supabase
+      .from('clubs')
+      .select('*')
+      .neq('id', club.id)
+    if (!data) return
+    const withDistance = data
+      .filter(c => c.latitude && c.longitude)
+      .map(c => ({ ...c, distance: getDistance(club.latitude, club.longitude, c.latitude, c.longitude) }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 5)
+    setNearbyClubs(withDistance)
+  }
+
+  function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 3958.8
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2)
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   }
 
   async function submitReview() {
@@ -317,6 +343,45 @@ export default function ClubDetail() {
         </div>
 
       </div>
+      {/* Nearby Clubs */}
+{nearbyClubs.length > 0 && (
+  <div style={{ marginTop: 20, marginBottom: 20 }}>
+    <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>More Clubs in the Area</div>
+    {nearbyClubs.map(nearby => (
+      <div key={nearby.id}
+        onClick={() => window.location.href = `/clubs/${nearby.id}`}
+        style={{
+          background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
+          border: `1px solid ${nearby.is_featured ? '#FFD700' : '#1e2140'}`,
+          display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer'
+        }}>
+        <div style={{ width: 44, height: 44, borderRadius: 10, background: nearby.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+          {nearby.photo_url
+            ? <img src={nearby.photo_url} alt={nearby.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : (nearby.is_featured ? '🌟' : '💜')}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{nearby.name}</div>
+          <div style={{ fontSize: 11, color: '#8890c0', marginBottom: 4 }}>{nearby.city}, {nearby.state}</div>
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+            {nearby.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+            <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+              {nearby.nude_level === 'full_nude' ? '🐱 Full nude' : nearby.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
+            </span>
+            {nearby.bar_type !== 'none' && (
+              <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                {nearby.bar_type === 'full_bar' ? '🍾 Full bar' : nearby.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
+              </span>
+            )}
+            <span style={{ background: '#1a2e1a', color: '#7aff9a', border: '1px solid #3acd60', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+              {nearby.distance.toFixed(1)} mi away
+            </span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
     </div>
   )
 }
