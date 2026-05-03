@@ -144,7 +144,7 @@ export default function DancerProfile() {
         {/* Clubs */}
         {clubs.length > 0 && (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16 }}>
-            <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Performs At</div>
+           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Ask For {dancer.stage_name} At</div>
             {clubs.map(club => (
               <div key={club.id} onClick={() => window.location.href = `/clubs/${club.id}`}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1e2140', cursor: 'pointer' }}>
