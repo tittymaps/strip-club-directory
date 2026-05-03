@@ -213,12 +213,12 @@ export default function ClubDetail() {
 
         {/* Dancers */}
         <div style={{ marginTop: 16 }}>
-          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Dancers</div>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'}</div>
           {dancers.length === 0 ? (
             <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
               <div style={{ fontSize: 28, marginBottom: 8 }}>💃</div>
-              <div style={{ color: '#8890c0', fontSize: 13 }}>No featured dancers yet</div>
-              <div style={{ color: '#555', fontSize: 11, marginTop: 4 }}>Dancers can be featured here through our affiliate program</div>
+              <div style={{ color: '#8890c0', fontSize: 13 }}>No featured {club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'baristas' : 'dancers'} yet</div>
+<div style={{ color: '#555', fontSize: 11, marginTop: 4 }}>{club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'} can be featured here through our affiliate program</div>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
