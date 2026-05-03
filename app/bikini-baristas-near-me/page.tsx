@@ -69,7 +69,7 @@ export default function BikiniBaristasNearMe() {
           const featured = bikiniBaristaClubs.filter(c => c.is_featured)
           const standard = bikiniBaristaClubs.filter(c => !c.is_featured)
           const shuffled = [...standard].sort(() => Math.random() - 0.5)
-          const remaining = Math.max(0, 20 - featured.length)
+          const remaining = Math.max(0, 15 - featured.length)
           const result = [...featured, ...shuffled.slice(0, remaining)]
           setClubs(result)
           await fetchDancers(bikiniBaristaClubs.map(c => c.id))
@@ -80,7 +80,7 @@ export default function BikiniBaristasNearMe() {
       const featured = bikiniBaristaClubs.filter(c => c.is_featured)
       const standard = bikiniBaristaClubs.filter(c => !c.is_featured)
       const shuffled = [...standard].sort(() => Math.random() - 0.5)
-      const remaining = Math.max(0, 20 - featured.length)
+      const remaining = Math.max(0, 15 - featured.length)
       const result = [...featured, ...shuffled.slice(0, remaining)]
       setClubs(result)
       await fetchDancers(bikiniBaristaClubs.map(c => c.id))
