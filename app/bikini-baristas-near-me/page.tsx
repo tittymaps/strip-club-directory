@@ -54,7 +54,7 @@ export default function BikiniBaristasNearMe() {
             .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
             .sort((a, b) => a.distance - b.distance)
 
-          const remaining = Math.max(0, 20 - featured.length)
+          const remaining = Math.max(0, 15 - featured.length)
           const result = [...featured, ...standard.slice(0, remaining)]
 
           if (result.length > 0) {
