@@ -7,20 +7,6 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
-const STATE_NAMES: Record<string, string> = {
-  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
-  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
-  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
-  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
-  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
-  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
-  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
-  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
-  SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
-  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
-  DC: 'Washington D.C.'
-}
-
 export default function BikiniBaristasNearMe() {
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
@@ -58,39 +44,45 @@ export default function BikiniBaristasNearMe() {
           const userLon = pos.coords.longitude
           setUserLocation({ lat: userLat, lon: userLon })
 
-          const withDistance = bikiniBaristaClubs
-            .filter(c => c.latitude && c.longitude)
+          const featured = bikiniBaristaClubs
+            .filter(c => c.is_featured && c.latitude && c.longitude)
             .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
-            .sort((a, b) => {
-              if (a.is_featured && !b.is_featured) return -1
-              if (!a.is_featured && b.is_featured) return 1
-              return a.distance - b.distance
-            })
+            .sort((a, b) => a.distance - b.distance)
 
-          if (withDistance.length > 0) {
-            setLocationName(`near ${withDistance[0].city}, ${withDistance[0].state}`)
+          const standard = bikiniBaristaClubs
+            .filter(c => !c.is_featured && c.latitude && c.longitude)
+            .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
+            .sort((a, b) => a.distance - b.distance)
+
+          const remaining = Math.max(0, 20 - featured.length)
+          const result = [...featured, ...standard.slice(0, remaining)]
+
+          if (result.length > 0) {
+            setLocationName(`near ${result[0].city}, ${result[0].state}`)
           }
 
-          setClubs(withDistance)
+          setClubs(result)
           await fetchDancers(bikiniBaristaClubs.map(c => c.id))
           setLoading(false)
         },
         async () => {
-          const sorted = [
-            ...bikiniBaristaClubs.filter(c => c.is_featured),
-            ...bikiniBaristaClubs.filter(c => !c.is_featured)
-          ]
-          setClubs(sorted)
+          const featured = bikiniBaristaClubs.filter(c => c.is_featured)
+          const standard = bikiniBaristaClubs.filter(c => !c.is_featured)
+          const shuffled = [...standard].sort(() => Math.random() - 0.5)
+          const remaining = Math.max(0, 20 - featured.length)
+          const result = [...featured, ...shuffled.slice(0, remaining)]
+          setClubs(result)
           await fetchDancers(bikiniBaristaClubs.map(c => c.id))
           setLoading(false)
         }
       )
     } else {
-      const sorted = [
-        ...bikiniBaristaClubs.filter(c => c.is_featured),
-        ...bikiniBaristaClubs.filter(c => !c.is_featured)
-      ]
-      setClubs(sorted)
+      const featured = bikiniBaristaClubs.filter(c => c.is_featured)
+      const standard = bikiniBaristaClubs.filter(c => !c.is_featured)
+      const shuffled = [...standard].sort(() => Math.random() - 0.5)
+      const remaining = Math.max(0, 20 - featured.length)
+      const result = [...featured, ...shuffled.slice(0, remaining)]
+      setClubs(result)
       await fetchDancers(bikiniBaristaClubs.map(c => c.id))
       setLoading(false)
     }
