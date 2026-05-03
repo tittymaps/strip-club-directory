@@ -36,7 +36,7 @@ export default function Dancers() {
 
       <div style={{ padding: '16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>
-          Dancers
+          Dancers & Baristas
         </div>
 
         {dancers.length === 0 ? (
