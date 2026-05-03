@@ -33,8 +33,8 @@ export default function AdminPage() {
   })
   const [showAddDancer, setShowAddDancer] = useState(false)
   const [editDancer, setEditDancer] = useState<any>(null)
-  const [dancerPhoto, setDancerPhoto] = useState<File | null>(null)
-  const [dancerPhotoPreview, setDancerPhotoPreview] = useState('')
+  const [dancerPhotos, setDancerPhotos] = useState<File[]>([])
+  const [dancerPhotoPreviews, setDancerPhotoPreviews] = useState<string[]>([])
   const [dancerForm, setDancerForm] = useState({
     stage_name: '', fansly_url: '', is_featured: false, club_ids: [] as string[]
   })
@@ -112,10 +112,17 @@ export default function AdminPage() {
   }
 
   function handleDancerPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setDancerPhoto(file)
-    setDancerPhotoPreview(URL.createObjectURL(file))
+    const files = Array.from(e.target.files || [])
+    const currentTotal = dancerPhotos.length + (editDancer?.photo_urls?.length || 0)
+    const remaining = 3 - currentTotal
+    const newFiles = files.slice(0, remaining)
+    setDancerPhotos(prev => [...prev, ...newFiles])
+    setDancerPhotoPreviews(prev => [...prev, ...newFiles.map(f => URL.createObjectURL(f))])
+  }
+
+  function removeDancerPhoto(index: number) {
+    setDancerPhotos(prev => prev.filter((_, i) => i !== index))
+    setDancerPhotoPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
   function openAddClub() {
@@ -142,16 +149,16 @@ export default function AdminPage() {
 
   function openAddDancer() {
     setEditDancer(null)
-    setDancerPhoto(null)
-    setDancerPhotoPreview('')
+    setDancerPhotos([])
+    setDancerPhotoPreviews([])
     setDancerForm({ stage_name: '', fansly_url: '', is_featured: false, club_ids: [] })
     setShowAddDancer(true)
   }
 
   function openEditDancer(dancer: any) {
     setEditDancer(dancer)
-    setDancerPhoto(null)
-    setDancerPhotoPreview('')
+    setDancerPhotos([])
+    setDancerPhotoPreviews([])
     setDancerForm({
       stage_name: dancer.stage_name || '',
       fansly_url: dancer.fansly_url || '',
@@ -204,16 +211,22 @@ export default function AdminPage() {
   async function saveDancer() {
     setSaving(true)
     let photoUrl = editDancer?.photo_url || ''
-    let photoUrls = editDancer?.photo_urls || []
-    if (dancerPhoto) {
-      const fileExt = dancerPhoto.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
-      const { error: uploadError } = await supabase.storage.from('dancer-photos').upload(fileName, dancerPhoto)
-      if (uploadError) { setMessage('Photo upload failed.'); setSaving(false); return }
-      const { data: urlData } = supabase.storage.from('dancer-photos').getPublicUrl(fileName)
-      photoUrl = urlData.publicUrl
-      photoUrls = [photoUrl, ...photoUrls.slice(0, 2)]
+    let photoUrls: string[] = editDancer?.photo_urls || []
+
+    if (dancerPhotos.length > 0) {
+      const uploadedUrls: string[] = []
+      for (const photo of dancerPhotos) {
+        const fileExt = photo.name.split('.').pop()
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+        const { error: uploadError } = await supabase.storage.from('dancer-photos').upload(fileName, photo)
+        if (uploadError) { setMessage('Photo upload failed.'); setSaving(false); return }
+        const { data: urlData } = supabase.storage.from('dancer-photos').getPublicUrl(fileName)
+        uploadedUrls.push(urlData.publicUrl)
+      }
+      photoUrls = [...uploadedUrls, ...photoUrls].slice(0, 3)
+      photoUrl = photoUrls[0]
     }
+
     const payload = {
       stage_name: dancerForm.stage_name,
       fansly_url: dancerForm.fansly_url || null,
@@ -523,21 +536,37 @@ export default function AdminPage() {
               <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: 0 }}>{editDancer ? 'Edit Dancer' : 'Add New Dancer'}</h2>
               <button onClick={() => setShowAddDancer(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
+
             <div style={{ marginBottom: 14 }}>
-              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Profile photo</div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-                <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#131629', border: `2px dashed ${dancerPhotoPreview || editDancer?.photo_url ? '#FF2D78' : '#3a3d60'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                  {dancerPhotoPreview ? <img src={dancerPhotoPreview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : editDancer?.photo_url ? <img src={editDancer.photo_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ fontSize: 28 }}>📷</span>}
-                </div>
-                <div>
-                  <div style={{ color: 'white', fontSize: 13, marginBottom: 2 }}>{dancerPhotoPreview || editDancer?.photo_url ? 'Change photo' : 'Tap to upload'}</div>
-                  <div style={{ color: '#8890c0', fontSize: 11 }}>Profile picture</div>
-                </div>
-                <input type="file" accept="image/*" onChange={handleDancerPhotoChange} style={{ display: 'none' }} />
-              </label>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Photos (up to 3)</div>
+              <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>First photo becomes profile picture. New photos are added to the front.</div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+                {editDancer?.photo_urls && editDancer.photo_urls.map((url: string, i: number) => (
+                  <div key={`existing-${i}`} style={{ position: 'relative', width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                    <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,45,120,0.8)', color: 'white', fontSize: 9, textAlign: 'center', padding: '2px 0' }}>Current</div>}
+                  </div>
+                ))}
+                {dancerPhotoPreviews.map((preview, i) => (
+                  <div key={`new-${i}`} style={{ position: 'relative', width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                    <img src={preview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button onClick={() => removeDancerPhoto(i)}
+                      style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', color: 'white', width: 18, height: 18, fontSize: 10, cursor: 'pointer' }}>
+                      x
+                    </button>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(58,205,96,0.8)', color: 'white', fontSize: 9, textAlign: 'center', padding: '2px 0' }}>New</div>
+                  </div>
+                ))}
+                {(dancerPhotos.length + (editDancer?.photo_urls?.length || 0)) < 3 && dancerPhotos.length < 3 && (
+                  <label style={{ width: 72, height: 72, borderRadius: 10, background: '#131629', border: '2px dashed #3a3d60', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 22 }}>📷</span>
+                    <span style={{ color: '#8890c0', fontSize: 9 }}>Add photo</span>
+                    <input type="file" accept="image/*" multiple onChange={handleDancerPhotoChange} style={{ display: 'none' }} />
+                  </label>
+                )}
+              </div>
             </div>
+
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Stage name</div>
               <input value={dancerForm.stage_name} onChange={e => setDancerForm(prev => ({ ...prev, stage_name: e.target.value }))}
