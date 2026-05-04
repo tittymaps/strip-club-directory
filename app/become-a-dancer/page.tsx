@@ -167,7 +167,7 @@ export default function BecomeADancer() {
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>3</div>
           <div>
             <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Submit your info below</div>
-            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Fill out the form below and we will get your profile live on TittyMaps. You will get a Featured badge, your own profile page, and a direct link to your Fansly driving real fans to your content.</div>
+            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Fill out the form below and we will get your profile live on TittyMaps. You will get a Featured badge, your profile will show up at the top of all applicable lists, and a direct link to your Fansly driving real fans to your content!</div>
           </div>
         </div>
       </div>
