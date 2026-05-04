@@ -9,6 +9,7 @@ const supabase = createClient(
 
 const FANSLY_REF = 'tittymaps'
 const FANSLY_SIGNUP = `https://fansly.com/application/form?r=${FANSLY_REF}`
+const FANSLY_CREATE = 'https://fansly.com/signup'
 
 export default function BecomeADancer() {
   const [clubs, setClubs] = useState<any[]>([])
@@ -52,8 +53,8 @@ export default function BecomeADancer() {
   }
 
   async function handleSubmit() {
-    if (!stageName || !fanslyUsername || !email || selectedClubs.length === 0) {
-      setError('Please fill out all fields and select at least one club.')
+    if (!stageName || !fanslyUsername || selectedClubs.length === 0) {
+      setError('Please fill out your stage name, Fansly link and select at least one club.')
       return
     }
     setLoading(true)
@@ -79,7 +80,7 @@ export default function BecomeADancer() {
       stage_name: stageName,
       fansly_url: fanslyUsername,
       club_names: selectedClubs,
-      email: email,
+      email: email || null,
       photo_url: uploadedUrls[0] || null,
       photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
     })
@@ -91,7 +92,7 @@ export default function BecomeADancer() {
         body: JSON.stringify({
           stage_name: stageName,
           fansly_url: fanslyUsername,
-          email: email,
+          email: email || 'No email provided',
           club_names: selectedClubs,
         })
       })
@@ -121,12 +122,6 @@ export default function BecomeADancer() {
     </div>
   )
 
-  const howItWorks = [
-    { icon: '💋', title: 'Sign up for Fansly through our link', body: 'Signing up through our link costs you nothing extra. You make the same money, but it gives us a small referral bonus that helps us keep promoting your profile for free.' },
-    { icon: '📍', title: 'Your profile gets pinned to the map', body: 'Once approved, your dancer profile appears on TittyMaps linked to the clubs you perform at. Club-goers planning their night out will see your profile before they even walk in the door.' },
-    { icon: '🌟', title: 'Featured badge on your profile', body: 'You get a Featured badge, your own profile page, and a direct link to your Fansly driving real fans to your content.' },
-  ]
-
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 60 }}>
 
@@ -142,27 +137,42 @@ export default function BecomeADancer() {
       </div>
 
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
-        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How it works</div>
-        {howItWorks.map((item, i) => (
-          <div key={i} style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: '#131629', border: '1px solid #1e2140', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{item.icon}</div>
-            <div>
-              <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{item.title}</div>
-              <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>{item.body}</div>
-            </div>
+        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How to get featured</div>
+
+        <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>1</div>
+          <div>
+            <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Create a Fansly account</div>
+            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>You do not need a special link or code for this step. Simply go to Fansly and create a free account.</div>
+            <a href={FANSLY_CREATE} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-block', background: '#131629', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '6px 16px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+              Create Fansly account →
+            </a>
           </div>
-        ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
+          <div>
+            <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
+            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Once you have a Fansly account, use our link to apply to be a creator. This costs you nothing extra — we just receive a small referral bonus that helps us keep promoting your profile for free.</div>
+            <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-block', background: '#FF2D78', color: 'white', borderRadius: 20, padding: '6px 16px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+              Apply as creator through our link →
+            </a>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 14, marginBottom: 4 }}>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>3</div>
+          <div>
+            <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Submit your info below</div>
+            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Fill out the form below and we will get your profile live on TittyMaps. You will get a Featured badge, your own profile page, and a direct link to your Fansly driving real fans to your content.</div>
+          </div>
+        </div>
       </div>
 
       <div style={{ padding: '20px' }}>
-        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #FF2D78', padding: '20px', marginBottom: 16, textAlign: 'center' }}>
-          <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Want to be a Featured Dancer?</div>
-          <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 16 }}>Sign up for Fansly through our link to get your Featured badge and priority placement. It does not cost you anything extra.</div>
-          <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'block', background: '#FF2D78', color: 'white', padding: '13px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>
-            Sign up for Fansly through our link
-          </a>
-        </div>
 
         <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', marginBottom: 24 }}>
           <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link.</div>
@@ -207,8 +217,8 @@ export default function BecomeADancer() {
         </div>
 
         <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Your email</div>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="We will contact you when you are approved" type="email"
+          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Your email <span style={{ color: '#555', fontSize: 11 }}>(optional — we will notify you when approved)</span></div>
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="email"
             style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
