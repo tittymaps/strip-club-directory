@@ -155,7 +155,7 @@ export default function BecomeADancer() {
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
           <div>
             <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
-            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Once you have a Fansly account, use our link to apply to be a creator. This costs you nothing extra — we just receive a small referral bonus that helps us keep promoting your profile for free.</div>
+           <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Once you have a Fansly account, use our link to apply to be a creator. Fansly takes a standard cut from every creator's payout no matter what — our referral bonus comes out of that cut, not out of your earnings. You make the exact same amount either way.</div>
             <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-block', background: '#FF2D78', color: 'white', borderRadius: 20, padding: '6px 16px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
               Apply as creator through our link →
