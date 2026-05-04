@@ -218,7 +218,7 @@ export default function BecomeADancer() {
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Your email <span style={{ color: '#555', fontSize: 11 }}>(optional — we will notify you when approved)</span></div>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="email"
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="text"
             style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
