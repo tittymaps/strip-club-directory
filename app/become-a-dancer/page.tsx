@@ -9,7 +9,7 @@ const supabase = createClient(
 
 const FANSLY_REF = 'tittymaps'
 const FANSLY_SIGNUP = `https://fansly.com/application/form?r=${FANSLY_REF}`
-const FANSLY_CREATE = 'https://fansly.com/signup'
+const FANSLY_CREATE = 'https://fansly.com/tittymaps?r=tittymaps'
 
 export default function BecomeADancer() {
   const [clubs, setClubs] = useState<any[]>([])
