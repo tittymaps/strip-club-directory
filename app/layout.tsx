@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import BottomNav from './components/BottomNav'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'TittyMaps - Strip Club Directory',
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body style={{ margin: 0, paddingBottom: 64, background: '#0D0F1E' }}>
         {children}
         <BottomNav />
+        <Analytics />
       </body>
     </html>
   )
