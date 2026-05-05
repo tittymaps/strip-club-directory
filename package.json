@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.0.0",
     "mapbox-gl": "^3.0.0",
 "@supabase/supabase-js": "^2.0.0",
     "@types/node": "20.6.2",
