@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://tittymaps.com',
   },
+  other: {
+    'apple-mobile-web-app-title': 'TittyMaps',
+  },
   openGraph: {
     title: 'TittyMaps - Strip Club Directory',
     description: 'Find strip clubs near you. Browse by location, check nude levels, bar type, hours and cover charges.',
@@ -19,8 +22,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', rel: 'shortcut icon' },
     ],
     apple: [
       { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
