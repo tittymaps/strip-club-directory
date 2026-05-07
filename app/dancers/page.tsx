@@ -7,6 +7,20 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
+const STATE_NAMES: Record<string, string> = {
+  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+  SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+  DC: 'Washington D.C.'
+}
+
 export default function Dancers() {
   const [dancers, setDancers] = useState<any[]>([])
   const [clubs, setClubs] = useState<any[]>([])
@@ -79,9 +93,10 @@ export default function Dancers() {
         const key = `city:${c.city}`
         if (!seen.has(key)) { seen.add(key); results.push({ label: c.city, type: 'city' }) }
       }
-      if (c.state.toLowerCase().includes(q)) {
+      const stateName = STATE_NAMES[c.state] || c.state
+      if (c.state.toLowerCase().includes(q) || stateName.toLowerCase().includes(q)) {
         const key = `state:${c.state}`
-        if (!seen.has(key)) { seen.add(key); results.push({ label: c.state, type: 'state' }) }
+        if (!seen.has(key)) { seen.add(key); results.push({ label: stateName, type: 'state' }) }
       }
     })
 
@@ -91,11 +106,13 @@ export default function Dancers() {
   function filterDancers(query: string) {
     const q = query.toLowerCase()
     const clubMatches = clubs
-      .filter(c =>
-        c.name.toLowerCase().includes(q) ||
-        c.city.toLowerCase().includes(q) ||
-        c.state.toLowerCase().includes(q)
-      )
+      .filter(c => {
+        const stateName = (STATE_NAMES[c.state] || c.state).toLowerCase()
+        return c.name.toLowerCase().includes(q) ||
+          c.city.toLowerCase().includes(q) ||
+          c.state.toLowerCase().includes(q) ||
+          stateName.includes(q)
+      })
       .map(c => c.id)
 
     const result = dancers.filter(d =>
