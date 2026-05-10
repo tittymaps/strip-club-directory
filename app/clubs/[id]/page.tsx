@@ -17,16 +17,14 @@ export default function ClubDetail() {
   const [dancers, setDancers] = useState<any[]>([])
   const [fullPhoto, setFullPhoto] = useState<string | null>(null)
   const [reviews, setReviews] = useState<any[]>([])
+  const [nearbyClubs, setNearbyClubs] = useState<any[]>([])
   const [showReviewForm, setShowReviewForm] = useState(false)
-  const [reviewUsername, setReviewUsername] = useState('')
-  const [reviewEmail, setReviewEmail] = useState('')
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewText, setReviewText] = useState('')
   const [reviewHover, setReviewHover] = useState(0)
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState('')
   const [reviewSuccess, setReviewSuccess] = useState(false)
-  const [nearbyClubs, setNearbyClubs] = useState<any[]>([])
 
   useEffect(() => {
     if (id) {
@@ -56,12 +54,10 @@ export default function ClubDetail() {
       .order('created_at', { ascending: false })
     setReviews(data || [])
   }
+
   async function fetchNearbyClubs(club: any) {
     if (!club.latitude || !club.longitude) return
-    const { data } = await supabase
-      .from('clubs')
-      .select('*')
-      .neq('id', club.id)
+    const { data } = await supabase.from('clubs').select('*').neq('id', club.id)
     if (!data) return
     const withDistance = data
       .filter(c => c.latitude && c.longitude)
@@ -82,19 +78,31 @@ export default function ClubDetail() {
   }
 
   async function submitReview() {
-    if (!reviewUsername || !reviewEmail || !reviewRating || !reviewText) {
-      setReviewError('Please fill out all fields and select a star rating.')
+    if (!reviewRating || !reviewText) {
+      setReviewError('Please select a star rating and write a review.')
       return
     }
     setReviewLoading(true)
     setReviewError('')
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      window.location.href = '/auth'
+      return
+    }
+
+    const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single()
+
     const { error } = await supabase.from('reviews').insert({
       club_id: id,
-      username: reviewUsername,
-      email: reviewEmail,
+      username: profile?.username || user.email,
+      email: user.email,
       rating: reviewRating,
       review: reviewText,
+      user_id: user.id,
+      profile_username: profile?.username,
     })
+
     setReviewLoading(false)
     if (error) {
       if (error.code === '23505') {
@@ -105,8 +113,6 @@ export default function ClubDetail() {
     } else {
       setReviewSuccess(true)
       setShowReviewForm(false)
-      setReviewUsername('')
-      setReviewEmail('')
       setReviewRating(0)
       setReviewText('')
       fetchReviews()
@@ -213,12 +219,14 @@ export default function ClubDetail() {
 
         {/* Dancers */}
         <div style={{ marginTop: 16 }}>
-          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>{club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'}</div>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
+            {club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'}
+          </div>
           {dancers.length === 0 ? (
             <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
               <div style={{ fontSize: 28, marginBottom: 8 }}>💃</div>
               <div style={{ color: '#8890c0', fontSize: 13 }}>No featured {club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'baristas' : 'dancers'} yet</div>
-<div style={{ color: '#555', fontSize: 11, marginTop: 4 }}>{club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'} can be featured here through our affiliate program</div>
+              <div style={{ color: '#555', fontSize: 11, marginTop: 4 }}>{club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'} can be featured here through our affiliate program</div>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
@@ -247,7 +255,11 @@ export default function ClubDetail() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div style={{ color: '#8890c0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Reviews ({reviews.length})</div>
             {!showReviewForm && !reviewSuccess && (
-              <button onClick={() => setShowReviewForm(true)}
+              <button onClick={async () => {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) { window.location.href = '/auth'; return }
+                setShowReviewForm(true)
+              }}
                 style={{ background: '#FF2D78', border: 'none', borderRadius: 20, color: 'white', padding: '5px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
                 Write a review
               </button>
@@ -277,18 +289,6 @@ export default function ClubDetail() {
                     </span>
                   ))}
                 </div>
-              </div>
-
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Username</div>
-                <input value={reviewUsername} onChange={e => setReviewUsername(e.target.value)} placeholder="Choose a username"
-                  style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
-              </div>
-
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Email (not shown publicly)</div>
-                <input value={reviewEmail} onChange={e => setReviewEmail(e.target.value)} placeholder="your@email.com" type="email"
-                  style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
               </div>
 
               <div style={{ marginBottom: 12 }}>
@@ -322,10 +322,14 @@ export default function ClubDetail() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a1a40', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF2D78', fontSize: 14, fontWeight: 700 }}>
-                    {review.username[0].toUpperCase()}
+                    {(review.profile_username || review.username)[0].toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{review.username}</div>
+                    <div
+                      onClick={() => { if (review.profile_username) window.location.href = `/users/${review.profile_username}` }}
+                      style={{ color: review.profile_username ? '#FF2D78' : 'white', fontSize: 13, fontWeight: 600, cursor: review.profile_username ? 'pointer' : 'default' }}>
+                      {review.profile_username ? `@${review.profile_username}` : review.username}
+                    </div>
                     <div style={{ color: '#8890c0', fontSize: 11 }}>{new Date(review.created_at).toLocaleDateString()}</div>
                   </div>
                 </div>
@@ -342,46 +346,12 @@ export default function ClubDetail() {
           ))}
         </div>
 
-      {/* Nearby Clubs */}
-{nearbyClubs.length > 0 && (
-  <div style={{ marginTop: 20, marginBottom: 20 }}>
-    <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>More Clubs in the Area</div>
-    {nearbyClubs.map(nearby => (
-      <div key={nearby.id}
-        onClick={() => window.location.href = `/clubs/${nearby.id}`}
-        style={{
-          background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
-          border: `1px solid ${nearby.is_featured ? '#FFD700' : '#1e2140'}`,
-          display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer'
-        }}>
-        <div style={{ width: 44, height: 44, borderRadius: 10, background: nearby.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
-          {nearby.photo_url
-            ? <img src={nearby.photo_url} alt={nearby.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : (nearby.is_featured ? '🌟' : '💜')}
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{nearby.name}</div>
-          <div style={{ fontSize: 11, color: '#8890c0', marginBottom: 4 }}>{nearby.city}, {nearby.state}</div>
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-            {nearby.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
-            <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-              {nearby.nude_level === 'full_nude' ? '🐱 Full nude' : nearby.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
-            </span>
-            {nearby.bar_type !== 'none' && (
-              <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                {nearby.bar_type === 'full_bar' ? '🍾 Full bar' : nearby.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
-              </span>
-            )}
-            <span style={{ background: '#1a2e1a', color: '#7aff9a', border: '1px solid #3acd60', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-              {nearby.distance.toFixed(1)} mi away
-            </span>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-      </div>
-    </div>
-  )
-}
+        {/* Nearby Clubs */}
+        {nearbyClubs.length > 0 && (
+          <div style={{ marginTop: 20, marginBottom: 20 }}>
+            <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>More Clubs in the Area</div>
+            {nearbyClubs.map(nearby => (
+              <div key={nearby.id}
+                onClick={() => window.location.href = `/clubs/${nearby.id}`}
+                style={{ background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12, border: `1px solid ${nearby.is_featured ? '#FFD700' : '#1e2140'}`, display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: nearby.is_featured ? '#2a1f00' : '
