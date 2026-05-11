@@ -20,6 +20,11 @@ export default function UserProfile() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState('')
   const [saving, setSaving] = useState(false)
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
+  const [editingReviewText, setEditingReviewText] = useState('')
+  const [editingReviewRating, setEditingReviewRating] = useState(0)
+  const [editingReviewHover, setEditingReviewHover] = useState(0)
+  const [reviewSaving, setReviewSaving] = useState(false)
 
   useEffect(() => {
     fetchProfile()
@@ -72,6 +77,8 @@ export default function UserProfile() {
 
     await supabase.from('profiles').update({ bio, avatar_url: avatarUrl }).eq('id', currentUser.id)
     setProfile((prev: any) => ({ ...prev, bio, avatar_url: avatarUrl }))
+    setAvatarFile(null)
+    setAvatarPreview('')
     setEditingBio(false)
     setSaving(false)
   }
@@ -79,6 +86,31 @@ export default function UserProfile() {
   async function handleSignOut() {
     await supabase.auth.signOut()
     window.location.href = '/'
+  }
+
+  function startEditingReview(review: any) {
+    setEditingReviewId(review.id)
+    setEditingReviewText(review.review)
+    setEditingReviewRating(review.rating)
+  }
+
+  async function saveReview(reviewId: string) {
+    if (!editingReviewText || !editingReviewRating) return
+    setReviewSaving(true)
+    await supabase.from('reviews').update({
+      review: editingReviewText,
+      rating: editingReviewRating,
+      edited: true,
+    }).eq('id', reviewId)
+    setReviewSaving(false)
+    setEditingReviewId(null)
+    fetchProfile()
+  }
+
+  async function deleteReview(reviewId: string) {
+    if (!confirm('Delete this review?')) return
+    await supabase.from('reviews').delete().eq('id', reviewId)
+    setReviews(prev => prev.filter(r => r.id !== reviewId))
   }
 
   if (!profile) return (
@@ -119,7 +151,7 @@ export default function UserProfile() {
             <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Write a bio..."
               rows={3} style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical', marginBottom: 8 }} />
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setEditingBio(false)} style={{ flex: 1, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '8px', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => { setEditingBio(false); setBio(profile.bio || '') }} style={{ flex: 1, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '8px', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               <button onClick={saveProfile} disabled={saving} style={{ flex: 2, background: '#FF2D78', border: 'none', borderRadius: 8, color: 'white', padding: '8px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                 {saving ? 'Saving...' : 'Save'}
               </button>
@@ -131,15 +163,17 @@ export default function UserProfile() {
               {profile.bio || (isOwner ? 'Add a bio...' : 'No bio yet')}
             </p>
             {isOwner && (
-              <button onClick={() => setEditingBio(true)} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 14px', fontSize: 12, cursor: 'pointer' }}>
-              {profile.bio ? 'Edit bio' : 'Add bio'}
-              </button>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => setEditingBio(true)} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 14px', fontSize: 12, cursor: 'pointer' }}>
+                  {profile.bio ? 'Edit bio' : 'Add bio'}
+                </button>
+                {avatarFile && (
+                  <button onClick={saveProfile} disabled={saving} style={{ background: '#FF2D78', border: 'none', borderRadius: 20, color: 'white', padding: '5px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                    {saving ? 'Saving...' : 'Save profile photo'}
+                  </button>
+                )}
+              </div>
             )}
-           {isOwner && avatarFile && !editingBio && (
-             <button onClick={saveProfile} disabled={saving} style={{ display: 'block', margin: '10px auto 0', background: '#FF2D78', border: 'none', borderRadius: 20, color: 'white', padding: '8px 20px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
-             {saving ? 'Saving...' : 'Save profile photo'}
-             </button>
-             )}
           </div>
         )}
 
@@ -156,10 +190,11 @@ export default function UserProfile() {
             {isOwner && <a href="/clubs" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none', display: 'block', marginTop: 8 }}>Browse clubs to review →</a>}
           </div>
         ) : reviews.map(review => (
-          <div key={review.id}
-            onClick={() => window.location.href = `/clubs/${review.clubs?.id}`}
-            style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 14, marginBottom: 10, cursor: 'pointer' }}>
-            <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
+          <div key={review.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 14, marginBottom: 10 }}>
+
+            {/* Club info */}
+            <div onClick={() => window.location.href = `/clubs/${review.clubs?.id}`}
+              style={{ display: 'flex', gap: 12, marginBottom: 10, cursor: 'pointer' }}>
               <div style={{ width: 48, height: 48, borderRadius: 10, background: '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {review.clubs?.photo_url
                   ? <img src={review.clubs.photo_url} alt={review.clubs.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -174,13 +209,63 @@ export default function UserProfile() {
                   ))}
                 </div>
               </div>
-              <div style={{ color: '#8890c0', fontSize: 11 }}>{new Date(review.created_at).toLocaleDateString()}</div>
+              <div style={{ color: '#8890c0', fontSize: 11, flexShrink: 0 }}>{new Date(review.created_at).toLocaleDateString()}</div>
             </div>
-            <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5 }}>{review.review}</div>
-            {review.admin_reply && (
-              <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #FF2D78', padding: '10px 12px', marginTop: 10 }}>
-                <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>TittyMaps Team</div>
-                <div style={{ color: '#ccc', fontSize: 13 }}>{review.admin_reply}</div>
+
+            {/* Review content or edit form */}
+            {editingReviewId === review.id ? (
+              <div>
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Rating</div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {[1,2,3,4,5].map(s => (
+                      <span key={s}
+                        onClick={() => setEditingReviewRating(s)}
+                        onMouseEnter={() => setEditingReviewHover(s)}
+                        onMouseLeave={() => setEditingReviewHover(0)}
+                        style={{ fontSize: 24, cursor: 'pointer', color: s <= (editingReviewHover || editingReviewRating) ? '#FFD700' : '#3a3d60' }}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <textarea value={editingReviewText} onChange={e => setEditingReviewText(e.target.value)}
+                  rows={3} style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical', marginBottom: 8 }} />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setEditingReviewId(null)}
+                    style={{ flex: 1, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '8px', fontSize: 12, cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={() => saveReview(review.id)} disabled={reviewSaving}
+                    style={{ flex: 2, background: reviewSaving ? '#333' : '#FF2D78', border: 'none', borderRadius: 8, color: 'white', padding: '8px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                    {reviewSaving ? 'Saving...' : 'Save changes'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: 6 }}>{review.review}</div>
+                {review.edited && (
+                  <div style={{ color: '#555', fontSize: 11, marginBottom: 6, fontStyle: 'italic' }}>edited</div>
+                )}
+                {review.admin_reply && (
+                  <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #FF2D78', padding: '10px 12px', marginBottom: 8 }}>
+                    <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>TittyMaps Team</div>
+                    <div style={{ color: '#ccc', fontSize: 13 }}>{review.admin_reply}</div>
+                  </div>
+                )}
+                {isOwner && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button onClick={() => startEditingReview(review)}
+                      style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '5px 12px', fontSize: 11, cursor: 'pointer' }}>
+                      Edit
+                    </button>
+                    <button onClick={() => deleteReview(review.id)}
+                      style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '5px 12px', fontSize: 11, cursor: 'pointer' }}>
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
