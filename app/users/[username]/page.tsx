@@ -132,14 +132,14 @@ export default function UserProfile() {
             </p>
             {isOwner && (
               <button onClick={() => setEditingBio(true)} style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 14px', fontSize: 12, cursor: 'pointer' }}>
-                {avatarFile && 'Save photo & '}{profile.bio ? 'Edit bio' : 'Add bio'}
+              {profile.bio ? 'Edit bio' : 'Add bio'}
               </button>
             )}
-            {isOwner && avatarFile && !editingBio && (
-              <button onClick={saveProfile} disabled={saving} style={{ marginLeft: 8, background: '#FF2D78', border: 'none', borderRadius: 20, color: 'white', padding: '5px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-                {saving ? 'Saving...' : 'Save photo'}
-              </button>
-            )}
+           {isOwner && avatarFile && !editingBio && (
+             <button onClick={saveProfile} disabled={saving} style={{ display: 'block', margin: '10px auto 0', background: '#FF2D78', border: 'none', borderRadius: 20, color: 'white', padding: '8px 20px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
+             {saving ? 'Saving...' : 'Save profile photo'}
+             </button>
+             )}
           </div>
         )}
 
