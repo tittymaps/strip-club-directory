@@ -46,10 +46,10 @@ export default function ClubDetail() {
     }
   }
 
-  async function fetchReviews() {
+ async function fetchReviews() {
     const { data } = await supabase
       .from('reviews')
-      .select('*')
+      .select('*, profiles(avatar_url)')
       .eq('club_id', id)
       .order('created_at', { ascending: false })
     setReviews(data || [])
@@ -321,8 +321,10 @@ export default function ClubDetail() {
             <div key={review.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 14, marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a1a40', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF2D78', fontSize: 14, fontWeight: 700 }}>
-                    {(review.profile_username || review.username)[0].toUpperCase()}
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF2D78', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                    {review.profiles?.avatar_url
+                      ? <img src={review.profiles.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : (review.profile_username || review.username)[0].toUpperCase()}
                   </div>
                   <div>
                     <div
