@@ -177,8 +177,17 @@ export default function UserProfile() {
           </div>
         )}
 
-        <div style={{ color: '#8890c0', fontSize: 12, marginTop: 10 }}>{reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}</div>
-      </div>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 10 }}>
+        <div style={{ textAlign: 'center' }}>
+        <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{reviews.length}</div>
+        <div style={{ color: '#8890c0', fontSize: 11 }}>{reviews.length === 1 ? 'review' : 'reviews'}</div>
+        </div>
+        <div style={{ width: 1, background: '#1e2140' }} />
+        <div style={{ textAlign: 'center' }}>
+        <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{reviews.length}</div>
+        <div style={{ color: '#8890c0', fontSize: 11 }}>{reviews.length === 1 ? 'club visited' : 'clubs visited'}</div>
+        </div>
+     </div>
 
       <div style={{ padding: '16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Reviews</div>
