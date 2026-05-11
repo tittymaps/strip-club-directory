@@ -177,17 +177,18 @@ export default function UserProfile() {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 10 }}>
-        <div style={{ textAlign: 'center' }}>
-        <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{reviews.length}</div>
-        <div style={{ color: '#8890c0', fontSize: 11 }}>{reviews.length === 1 ? 'review' : 'reviews'}</div>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 16 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{reviews.length}</div>
+            <div style={{ color: '#8890c0', fontSize: 11 }}>{reviews.length === 1 ? 'review' : 'reviews'}</div>
+          </div>
+          <div style={{ width: 1, background: '#1e2140' }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{reviews.length}</div>
+            <div style={{ color: '#8890c0', fontSize: 11 }}>{reviews.length === 1 ? 'club visited' : 'clubs visited'}</div>
+          </div>
         </div>
-        <div style={{ width: 1, background: '#1e2140' }} />
-        <div style={{ textAlign: 'center' }}>
-        <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>{reviews.length}</div>
-        <div style={{ color: '#8890c0', fontSize: 11 }}>{reviews.length === 1 ? 'club visited' : 'clubs visited'}</div>
-        </div>
-     </div>
+      </div>
 
       <div style={{ padding: '16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Reviews</div>
@@ -200,8 +201,6 @@ export default function UserProfile() {
           </div>
         ) : reviews.map(review => (
           <div key={review.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 14, marginBottom: 10 }}>
-
-            {/* Club info */}
             <div onClick={() => window.location.href = `/clubs/${review.clubs?.id}`}
               style={{ display: 'flex', gap: 12, marginBottom: 10, cursor: 'pointer' }}>
               <div style={{ width: 48, height: 48, borderRadius: 10, background: '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
@@ -221,7 +220,6 @@ export default function UserProfile() {
               <div style={{ color: '#8890c0', fontSize: 11, flexShrink: 0 }}>{new Date(review.created_at).toLocaleDateString()}</div>
             </div>
 
-            {/* Review content or edit form */}
             {editingReviewId === review.id ? (
               <div>
                 <div style={{ marginBottom: 10 }}>
