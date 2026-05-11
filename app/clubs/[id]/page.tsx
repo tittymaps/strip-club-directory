@@ -18,6 +18,7 @@ export default function ClubDetail() {
   const [fullPhoto, setFullPhoto] = useState<string | null>(null)
   const [reviews, setReviews] = useState<any[]>([])
   const [nearbyClubs, setNearbyClubs] = useState<any[]>([])
+  const [profileAvatars, setProfileAvatars] = useState<Record<string, string>>({})
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewText, setReviewText] = useState('')
@@ -46,13 +47,29 @@ export default function ClubDetail() {
     }
   }
 
- async function fetchReviews() {
+  async function fetchReviews() {
     const { data } = await supabase
       .from('reviews')
-      .select('*, profiles(avatar_url)')
+      .select('*')
       .eq('club_id', id)
       .order('created_at', { ascending: false })
     setReviews(data || [])
+    if (data) fetchProfileAvatars(data)
+  }
+
+  async function fetchProfileAvatars(reviewData: any[]) {
+    const usernames = reviewData
+      .filter(r => r.profile_username)
+      .map(r => r.profile_username)
+    if (usernames.length === 0) return
+    const { data } = await supabase
+      .from('profiles')
+      .select('username, avatar_url')
+      .in('username', usernames)
+    if (!data) return
+    const map: Record<string, string> = {}
+    data.forEach(p => { if (p.avatar_url) map[p.username] = p.avatar_url })
+    setProfileAvatars(map)
   }
 
   async function fetchNearbyClubs(club: any) {
@@ -217,7 +234,6 @@ export default function ClubDetail() {
           </div>
         )}
 
-        {/* Dancers */}
         <div style={{ marginTop: 16 }}>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
             {club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'}
@@ -250,7 +266,6 @@ export default function ClubDetail() {
           )}
         </div>
 
-        {/* Reviews */}
         <div style={{ marginTop: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div style={{ color: '#8890c0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Reviews ({reviews.length})</div>
@@ -275,7 +290,6 @@ export default function ClubDetail() {
           {showReviewForm && (
             <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginBottom: 16 }}>
               <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 14 }}>Write a Review</div>
-
               <div style={{ marginBottom: 12 }}>
                 <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Your rating</div>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -290,16 +304,13 @@ export default function ClubDetail() {
                   ))}
                 </div>
               </div>
-
               <div style={{ marginBottom: 12 }}>
                 <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Your review</div>
                 <textarea value={reviewText} onChange={e => setReviewText(e.target.value)} placeholder="Share your experience..."
                   rows={3}
                   style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical' }} />
               </div>
-
               {reviewError && <div style={{ color: '#ff4444', fontSize: 12, marginBottom: 10 }}>{reviewError}</div>}
-
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => { setShowReviewForm(false); setReviewError('') }}
                   style={{ flex: 1, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 10, color: '#8890c0', padding: '10px', fontSize: 13, cursor: 'pointer' }}>
@@ -322,8 +333,8 @@ export default function ClubDetail() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF2D78', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
-                    {review.profiles?.avatar_url
-                      ? <img src={review.profiles.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {review.profile_username && profileAvatars[review.profile_username]
+                      ? <img src={profileAvatars[review.profile_username]} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : (review.profile_username || review.username)[0].toUpperCase()}
                   </div>
                   <div>
@@ -348,7 +359,6 @@ export default function ClubDetail() {
           ))}
         </div>
 
-        {/* Nearby Clubs */}
         {nearbyClubs.length > 0 && (
           <div style={{ marginTop: 20, marginBottom: 20 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>More Clubs in the Area</div>
