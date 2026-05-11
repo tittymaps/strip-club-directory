@@ -32,14 +32,19 @@ export default function BottomNav() {
   ]
 
   return (
-    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0D0F1E', borderTop: '1px solid #1e2140', display: 'flex', zIndex: 100 }}>
+    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#131629', borderTop: '1px solid #1e2140', display: 'flex', padding: '10px 12px', gap: 6, zIndex: 100 }}>
       {tabs.map(tab => {
         const active = pathname === tab.href || (tab.href !== '/' && pathname.startsWith(tab.href))
         return (
           <a key={tab.href} href={tab.href}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0', textDecoration: 'none', borderTop: `2px solid ${active ? '#FF2D78' : 'transparent'}` }}>
-            <span style={{ fontSize: 20 }}>{tab.emoji}</span>
-            <span style={{ color: active ? '#FF2D78' : '#8890c0', fontSize: 10, marginTop: 2 }}>{tab.label}</span>
+            style={{
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              padding: '8px 4px', borderRadius: 10, textDecoration: 'none',
+              background: active ? '#FF2D78' : 'transparent',
+              transition: 'background 0.15s',
+            }}>
+            <span style={{ fontSize: 18 }}>{tab.emoji}</span>
+            <span style={{ fontSize: 10, color: active ? 'white' : '#8890c0', fontFamily: 'sans-serif' }}>{tab.label}</span>
           </a>
         )
       })}
