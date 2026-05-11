@@ -41,7 +41,7 @@ export default function AuthPage() {
     }
 
     setLoading(false)
-    setSuccess('Account created! Check your email to confirm your account, then log in.')
+    setSuccess('Account created! A confirmation email has been sent from Supabase Auth — check your inbox and click the link to verify your account, then come back to log in.')
   }
 
   async function handleLogin() {
