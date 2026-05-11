@@ -14,7 +14,6 @@ export default function AuthPage() {
   const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   async function handleSignup() {
     if (!username || !email || !password) { setError('All fields are required.'); return }
@@ -34,14 +33,15 @@ export default function AuthPage() {
     if (signupError) { setError(signupError.message); setLoading(false); return }
 
     if (data.user) {
-      await supabase.from('profiles').insert({
+      const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         username,
       })
+      if (profileError) { setError('Error creating profile. Username may be taken.'); setLoading(false); return }
     }
 
     setLoading(false)
-    setSuccess('Account created! A confirmation email has been sent from Supabase Auth — check your inbox and click the link to verify your account, then come back to log in.')
+    window.location.href = '/'
   }
 
   async function handleLogin() {
@@ -64,12 +64,23 @@ export default function AuthPage() {
 
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
+
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ fontSize: 40, marginBottom: 10 }}>👤</div>
+            <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: '0 0 6px' }}>
+              {mode === 'login' ? 'Welcome back' : 'Create an account'}
+            </h1>
+            <p style={{ color: '#8890c0', fontSize: 14, margin: 0 }}>
+              {mode === 'login' ? 'Sign in to leave reviews and manage your profile' : 'Join TittyMaps to leave reviews and build your profile'}
+            </p>
+          </div>
+
           <div style={{ display: 'flex', background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 4, marginBottom: 24 }}>
-            <button onClick={() => { setMode('login'); setError(''); setSuccess('') }}
+            <button onClick={() => { setMode('login'); setError('') }}
               style={{ flex: 1, padding: '10px', background: mode === 'login' ? '#FF2D78' : 'transparent', border: 'none', borderRadius: 10, color: mode === 'login' ? 'white' : '#8890c0', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
               Log In
             </button>
-            <button onClick={() => { setMode('signup'); setError(''); setSuccess('') }}
+            <button onClick={() => { setMode('signup'); setError('') }}
               style={{ flex: 1, padding: '10px', background: mode === 'signup' ? '#FF2D78' : 'transparent', border: 'none', borderRadius: 10, color: mode === 'signup' ? 'white' : '#8890c0', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
               Sign Up
             </button>
@@ -91,24 +102,37 @@ export default function AuthPage() {
 
           <div style={{ marginBottom: 20 }}>
             <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Password</div>
-            <input value={password} onChange={e => setPassword(e.target.value)} placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'} type="password"
+            <input value={password} onChange={e => setPassword(e.target.value)}
+              placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
+              type="password"
               style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
           </div>
 
-          {error && <div style={{ color: '#ff4444', fontSize: 13, marginBottom: 14 }}>{error}</div>}
-          {success && <div style={{ background: '#1a2e1a', border: '1px solid #3acd60', borderRadius: 10, padding: '12px 14px', color: '#7aff9a', fontSize: 13, marginBottom: 14 }}>{success}</div>}
+          {error && (
+            <div style={{ background: '#2e1a1a', border: '1px solid #ff4444', borderRadius: 10, padding: '12px 14px', color: '#ff4444', fontSize: 13, marginBottom: 14 }}>
+              {error}
+            </div>
+          )}
 
           <button onClick={mode === 'login' ? handleLogin : handleSignup} disabled={loading}
-            style={{ width: '100%', background: loading ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            style={{ width: '100%', background: loading ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', marginBottom: 16 }}>
             {loading ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Create Account'}
           </button>
 
-          {mode === 'login' && (
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <span style={{ color: '#8890c0', fontSize: 13 }}>Don&apos;t have an account? </span>
-              <span onClick={() => setMode('signup')} style={{ color: '#FF2D78', fontSize: 13, cursor: 'pointer' }}>Sign up</span>
-            </div>
-          )}
+          <div style={{ textAlign: 'center' }}>
+            {mode === 'login' ? (
+              <span style={{ color: '#8890c0', fontSize: 13 }}>
+                Don&apos;t have an account?{' '}
+                <span onClick={() => { setMode('signup'); setError('') }} style={{ color: '#FF2D78', cursor: 'pointer' }}>Sign up</span>
+              </span>
+            ) : (
+              <span style={{ color: '#8890c0', fontSize: 13 }}>
+                Already have an account?{' '}
+                <span onClick={() => { setMode('login'); setError('') }} style={{ color: '#FF2D78', cursor: 'pointer' }}>Log in</span>
+              </span>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
