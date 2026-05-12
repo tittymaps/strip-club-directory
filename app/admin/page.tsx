@@ -14,11 +14,12 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [password, setPassword] = useState('')
   const [pwError, setPwError] = useState('')
-  const [tab, setTab] = useState<'applications' | 'clubs' | 'dancers' | 'reviews'>('applications')
+  const [tab, setTab] = useState<'applications' | 'clubs' | 'dancers' | 'reviews' | 'users'>('applications')
   const [applications, setApplications] = useState<any[]>([])
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
   const [reviews, setReviews] = useState<any[]>([])
+  const [users, setUsers] = useState<any[]>([])
   const [replyText, setReplyText] = useState<Record<string, string>>({})
   const [showAddClub, setShowAddClub] = useState(false)
   const [editClub, setEditClub] = useState<any>(null)
@@ -47,6 +48,7 @@ export default function AdminPage() {
       fetchClubs()
       fetchDancers()
       fetchReviews()
+      fetchUsers()
     }
   }, [authed])
 
@@ -71,6 +73,29 @@ export default function AdminPage() {
       .select('*, clubs(name, city, state)')
       .order('created_at', { ascending: false })
     setReviews(data || [])
+  }
+
+  async function fetchUsers() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setUsers(data || [])
+  }
+
+  async function deleteUserAvatar(userId: string) {
+    if (!confirm('Remove this user\'s profile picture?')) return
+    await supabase.from('profiles').update({ avatar_url: null }).eq('id', userId)
+    setMessage('Profile picture removed.')
+    fetchUsers()
+  }
+
+  async function deleteUser(userId: string, username: string) {
+    if (!confirm(`Permanently delete user @${username} and all their reviews? This cannot be undone.`)) return
+    await supabase.from('reviews').delete().eq('user_id', userId)
+    await supabase.from('profiles').delete().eq('id', userId)
+    setMessage(`@${username} deleted.`)
+    fetchUsers()
   }
 
   async function approveApplication(app: any) {
@@ -312,10 +337,14 @@ export default function AdminPage() {
       )}
 
       <div style={{ display: 'flex', borderBottom: '1px solid #1e2140', margin: '0 16px', overflowX: 'auto' }}>
-        {(['applications', 'clubs', 'dancers', 'reviews'] as const).map(t => (
+        {(['applications', 'clubs', 'dancers', 'reviews', 'users'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ flexShrink: 0, padding: '12px 10px', background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? '#FF2D78' : 'transparent'}`, color: tab === t ? '#FF2D78' : '#8890c0', fontSize: 12, cursor: 'pointer', textTransform: 'capitalize' }}>
-            {t === 'applications' ? `Apps (${applications.filter(a => a.status === 'pending').length})` : t === 'clubs' ? `Clubs (${clubs.length})` : t === 'dancers' ? `Dancers (${dancers.length})` : `Reviews (${reviews.length})`}
+            {t === 'applications' ? `Apps (${applications.filter(a => a.status === 'pending').length})`
+              : t === 'clubs' ? `Clubs (${clubs.length})`
+              : t === 'dancers' ? `Dancers (${dancers.length})`
+              : t === 'reviews' ? `Reviews (${reviews.length})`
+              : `Users (${users.length})`}
           </button>
         ))}
       </div>
@@ -408,7 +437,7 @@ export default function AdminPage() {
             <div key={review.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <div>
-                  <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{review.username}</div>
+                  <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>{review.profile_username ? `@${review.profile_username}` : review.username}</div>
                   <div style={{ color: '#8890c0', fontSize: 12 }}>{review.email}</div>
                   <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 4 }}>{review.clubs?.name} — {review.clubs?.city}, {review.clubs?.state}</div>
                   <div style={{ display: 'flex', gap: 2 }}>
@@ -443,6 +472,41 @@ export default function AdminPage() {
                   </button>
                 </div>
               )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === 'users' && (
+        <div style={{ padding: '16px' }}>
+          {users.length === 0 ? (
+            <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
+              <div style={{ color: '#8890c0', fontSize: 14 }}>No users yet</div>
+            </div>
+          ) : users.map(user => (
+            <div key={user.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                {user.avatar_url
+                  ? <img src={user.avatar_url} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : '👤'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>@{user.username}</div>
+                {user.bio && <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 2 }}>{user.bio}</div>}
+                <div style={{ color: '#555', fontSize: 11 }}>Joined {new Date(user.created_at).toLocaleDateString()}</div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {user.avatar_url && (
+                  <button onClick={() => deleteUserAvatar(user.id)}
+                    style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '5px 10px', fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    Remove photo
+                  </button>
+                )}
+                <button onClick={() => deleteUser(user.id, user.username)}
+                  style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '5px 10px', fontSize: 11, cursor: 'pointer' }}>
+                  Delete user
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -536,7 +600,6 @@ export default function AdminPage() {
               <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: 0 }}>{editDancer ? 'Edit Dancer' : 'Add New Dancer'}</h2>
               <button onClick={() => setShowAddDancer(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
             </div>
-
             <div style={{ marginBottom: 14 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Photos (up to 3)</div>
               <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>First photo becomes profile picture. New photos are added to the front.</div>
@@ -566,7 +629,6 @@ export default function AdminPage() {
                 )}
               </div>
             </div>
-
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Stage name</div>
               <input value={dancerForm.stage_name} onChange={e => setDancerForm(prev => ({ ...prev, stage_name: e.target.value }))}
