@@ -27,13 +27,14 @@ export async function generateMetadata({ params }: { params: { state: string, ci
   const { count } = await supabase.from('clubs').select('*', { count: 'exact', head: true }).eq('state', stateCode).ilike('city', cityName)
 
   return {
-    title: `Strip Clubs in ${cityName}, ${stateName} | TittyMaps`,
-    description: `Find ${count || ''} strip clubs in ${cityName}, ${stateName}. Browse gentlemens clubs with full details on nude levels, bar type, hours and cover charges.`,
+    title: `${cityName} Strip Clubs | Strip Clubs in ${cityName} ${stateName} | TittyMaps`,
+    description: `Find ${count || ''} strip clubs in ${cityName}, ${stateName}. Browse ${cityName} strip clubs with full details on nude levels, bar type, hours and cover charges.`,
+    keywords: `${cityName} strip clubs, strip clubs in ${cityName}, strip clubs ${cityName} ${stateCode}, gentlemens clubs ${cityName}, adult entertainment ${cityName}`,
     alternates: {
-    canonical: `https://tittymaps.com/states/${params.state}/${params.city}`,
-       },
+      canonical: `https://tittymaps.com/states/${params.state}/${params.city}`,
+    },
     openGraph: {
-      title: `Strip Clubs in ${cityName}, ${stateName} | TittyMaps`,
+      title: `${cityName} Strip Clubs | TittyMaps`,
       description: `Find strip clubs in ${cityName}, ${stateName}. Full details on each club.`,
       url: `https://tittymaps.com/states/${params.state}/${params.city}`,
     }
