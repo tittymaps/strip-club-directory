@@ -139,6 +139,7 @@ export default function BecomeADancer() {
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How to get featured</div>
 
+        {/* Step 1 */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>1</div>
           <div>
@@ -151,11 +152,13 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
+        {/* Step 2 — highlighted as most important */}
+        <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', marginBottom: 20, display: 'flex', gap: 14 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
           <div>
-            <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
-          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible. 🫡</div>
+            <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Most important step ⭐</div>
+            <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
+            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible. 🫡</div>
             <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-block', background: '#FF2D78', color: 'white', borderRadius: 20, padding: '6px 16px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
               Apply as creator through our link →
@@ -163,6 +166,7 @@ export default function BecomeADancer() {
           </div>
         </div>
 
+        {/* Step 3 */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 4 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>3</div>
           <div>
