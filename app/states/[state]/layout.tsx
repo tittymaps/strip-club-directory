@@ -23,19 +23,24 @@ const STATE_NAMES: Record<string, string> = {
 export async function generateMetadata({ params }: { params: { state: string } }): Promise<Metadata> {
   const stateCode = params.state.toUpperCase()
   const stateName = STATE_NAMES[stateCode] || stateCode
-  const { count } = await supabase.from('clubs').select('*', { count: 'exact', head: true }).eq('state', stateCode)
+  const canonicalUrl = `https://tittymaps.com/states/${params.state.toLowerCase()}`
 
- return {
+  const { count } = await supabase
+    .from('clubs')
+    .select('*', { count: 'exact', head: true })
+    .eq('state', stateCode)
+
+  return {
     title: `${stateName} Strip Clubs | ${stateCode} Strip Clubs | TittyMaps`,
     description: `Find ${count || ''} strip clubs in ${stateName}. Browse ${stateCode} strip clubs by city, check nude levels, bar type, hours and cover charges.`,
     keywords: `${stateName} strip clubs, ${stateCode} strip clubs, strip clubs in ${stateName}, gentlemens clubs ${stateName}, adult entertainment ${stateName}`,
     alternates: {
-      canonical: `https://tittymaps.com/states/${params.state}`,
+      canonical: canonicalUrl,
     },
     openGraph: {
       title: `${stateName} Strip Clubs | TittyMaps`,
       description: `Find strip clubs in ${stateName}. Browse by city with full details on each club.`,
-      url: `https://tittymaps.com/states/${params.state}`,
+      url: canonicalUrl,
     }
   }
 }
