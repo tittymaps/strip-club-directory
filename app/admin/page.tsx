@@ -95,7 +95,7 @@ export default function AdminPage() {
     await supabase.from('reviews').delete().eq('user_id', userId)
     await supabase.from('profiles').delete().eq('id', userId)
     setMessage(`@${username} deleted.`)
-    fetchUsers()
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, deleted: true } : u))
   }
 
   async function approveApplication(app: any) {
@@ -491,7 +491,10 @@ export default function AdminPage() {
                   : '👤'}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>@{user.username}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <div style={{ color: user.deleted ? '#555' : 'white', fontSize: 14, fontWeight: 600, textDecoration: user.deleted ? 'line-through' : 'none' }}>@{user.username}</div>
+                {user.deleted && <span style={{ color: '#ff4444', fontSize: 11, background: '#2e1a1a', border: '1px solid #ff4444', borderRadius: 20, padding: '1px 8px' }}>deleted</span>}
+              </div>
                 {user.bio && <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 2 }}>{user.bio}</div>}
                 <div style={{ color: '#555', fontSize: 11 }}>Joined {new Date(user.created_at).toLocaleDateString()}</div>
               </div>
