@@ -24,19 +24,25 @@ export async function generateMetadata({ params }: { params: { state: string, ci
   const stateCode = params.state.toUpperCase()
   const cityName = decodeURIComponent(params.city)
   const stateName = STATE_NAMES[stateCode] || stateCode
-  const { count } = await supabase.from('clubs').select('*', { count: 'exact', head: true }).eq('state', stateCode).ilike('city', cityName)
+  const canonicalUrl = `https://tittymaps.com/states/${params.state.toLowerCase()}/${encodeURIComponent(cityName)}`
+
+  const { count } = await supabase
+    .from('clubs')
+    .select('*', { count: 'exact', head: true })
+    .eq('state', stateCode)
+    .ilike('city', cityName)
 
   return {
     title: `${cityName} Strip Clubs | Strip Clubs in ${cityName} ${stateName} | TittyMaps`,
     description: `Find ${count || ''} strip clubs in ${cityName}, ${stateName}. Browse ${cityName} strip clubs with full details on nude levels, bar type, hours and cover charges.`,
     keywords: `${cityName} strip clubs, strip clubs in ${cityName}, strip clubs ${cityName} ${stateCode}, gentlemens clubs ${cityName}, adult entertainment ${cityName}`,
     alternates: {
-      canonical: `https://tittymaps.com/states/${params.state}/${params.city}`,
+      canonical: canonicalUrl,
     },
     openGraph: {
       title: `${cityName} Strip Clubs | TittyMaps`,
       description: `Find strip clubs in ${cityName}, ${stateName}. Full details on each club.`,
-      url: `https://tittymaps.com/states/${params.state}/${params.city}`,
+      url: canonicalUrl,
     }
   }
 }
