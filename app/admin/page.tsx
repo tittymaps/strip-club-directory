@@ -91,11 +91,11 @@ export default function AdminPage() {
   }
 
   async function deleteUser(userId: string, username: string) {
-    if (!confirm(`Permanently delete user @${username} and all their reviews? This cannot be undone.`)) return
+    if (!confirm(`Ban user @${username} and delete all their reviews? This cannot be undone.`)) return
     await supabase.from('reviews').delete().eq('user_id', userId)
-    await supabase.from('profiles').delete().eq('id', userId)
-    setMessage(`@${username} deleted.`)
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, deleted: true } : u))
+    await supabase.from('profiles').update({ banned: true }).eq('id', userId)
+    setMessage(`@${username} banned.`)
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, banned: true } : u))
   }
 
   async function approveApplication(app: any) {
@@ -484,30 +484,30 @@ export default function AdminPage() {
               <div style={{ color: '#8890c0', fontSize: 14 }}>No users yet</div>
             </div>
           ) : users.map(user => (
-            <div key={user.id} style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div key={user.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${user.banned ? '#ff4444' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {user.avatar_url
-                  ? <img src={user.avatar_url} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={user.avatar_url} alt={user.username} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: user.banned ? 'grayscale(1)' : 'none' }} />
                   : '👤'}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                <div style={{ color: user.deleted ? '#555' : 'white', fontSize: 14, fontWeight: 600, textDecoration: user.deleted ? 'line-through' : 'none' }}>@{user.username}</div>
-                {user.deleted && <span style={{ color: '#ff4444', fontSize: 11, background: '#2e1a1a', border: '1px solid #ff4444', borderRadius: 20, padding: '1px 8px' }}>deleted</span>}
-              </div>
+                  <div style={{ color: user.banned ? '#555' : 'white', fontSize: 14, fontWeight: 600, textDecoration: user.banned ? 'line-through' : 'none' }}>@{user.username}</div>
+                  {user.banned && <span style={{ color: '#ff4444', fontSize: 11, background: '#2e1a1a', border: '1px solid #ff4444', borderRadius: 20, padding: '1px 8px' }}>banned</span>}
+                </div>
                 {user.bio && <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 2 }}>{user.bio}</div>}
                 <div style={{ color: '#555', fontSize: 11 }}>Joined {new Date(user.created_at).toLocaleDateString()}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {user.avatar_url && (
+                {user.avatar_url && !user.banned && (
                   <button onClick={() => deleteUserAvatar(user.id)}
                     style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '5px 10px', fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                     Remove photo
                   </button>
                 )}
-                <button onClick={() => deleteUser(user.id, user.username)}
-                  style={{ background: 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '5px 10px', fontSize: 11, cursor: 'pointer' }}>
-                  Delete user
+                <button onClick={() => !user.banned && deleteUser(user.id, user.username)}
+                  style={{ background: user.banned ? '#2e1a1a' : 'transparent', border: '1px solid #ff4444', borderRadius: 8, color: '#ff4444', padding: '5px 10px', fontSize: 11, cursor: user.banned ? 'default' : 'pointer', opacity: user.banned ? 0.5 : 1 }}>
+                  {user.banned ? 'Banned' : 'Ban user'}
                 </button>
               </div>
             </div>
