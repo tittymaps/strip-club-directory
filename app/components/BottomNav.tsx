@@ -1,34 +1,13 @@
 'use client'
-import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  'https://ssruvoxuwlksmbmubcfv.supabase.co',
-  'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
-)
 
 export default function BottomNav() {
   const pathname = usePathname()
-  const [profileUsername, setProfileUsername] = useState<string | null>(null)
-
-  useEffect(() => {
-    checkUser()
-  }, [])
-
-  async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single()
-      if (profile) setProfileUsername(profile.username)
-    }
-  }
 
   const tabs = [
     { href: '/', label: 'Map', emoji: '🗺️' },
     { href: '/clubs', label: 'Clubs', emoji: '🏛️' },
     { href: '/dancers', label: 'Dancers', emoji: '💃' },
-    { href: profileUsername ? `/users/${profileUsername}` : '/auth', label: profileUsername ? 'Profile' : 'Sign In', emoji: profileUsername ? '👤' : '🔑' },
   ]
 
   return (
