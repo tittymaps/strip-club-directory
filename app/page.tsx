@@ -19,12 +19,17 @@ export default function Home() {
   const [filter, setFilter] = useState('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
   const [selectedClub, setSelectedClub] = useState<any>(null)
+  const selectedClubRef = useRef<any>(null)
   const allClubs = useRef<any[]>([])
   const allClubsForMap = useRef<any[]>([])
 
   useEffect(() => {
     fetchClubs()
   }, [])
+
+  useEffect(() => {
+    selectedClubRef.current = selectedClub
+  }, [selectedClub])
 
   function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 3958.8
@@ -157,7 +162,6 @@ export default function Home() {
       paint: { 'text-color': 'white' }
     })
 
-    // Featured pins — gold, darker when selected
     map.current.addLayer({
       id: 'unclustered-featured',
       type: 'circle',
@@ -171,7 +175,6 @@ export default function Home() {
       }
     })
 
-    // Standard pins — pink, darker when selected
     map.current.addLayer({
       id: 'unclustered-standard',
       type: 'circle',
@@ -211,21 +214,29 @@ export default function Home() {
       const props = e.features[0].properties
       const club = allClubsForMap.current.find(c => c.id === props.id)
       if (!club) return
+
+      const currentSelected = selectedClubRef.current
+      if (currentSelected && currentSelected.id === club.id) {
+        // Second tap on same pin — navigate to club page
+        window.location.href = `/clubs/${club.id}`
+        return
+      }
+
       setSelectedClub(club)
-      updateSelectedPin(club.id)
+      updateSelectedPinById(club.id)
     }
 
     map.current.on('click', 'unclustered-featured', handlePinClick)
     map.current.on('click', 'unclustered-standard', handlePinClick)
 
-    // Click on map background to deselect
     map.current.on('click', (e: any) => {
       const features = map.current.queryRenderedFeatures(e.point, {
         layers: ['unclustered-featured', 'unclustered-standard', 'clusters']
       })
       if (features.length === 0) {
         setSelectedClub(null)
-        updateSelectedPin(null)
+        selectedClubRef.current = null
+        updateSelectedPinById(null)
       }
     })
 
@@ -235,7 +246,7 @@ export default function Home() {
     })
   }
 
-  function updateSelectedPin(selectedId: string | null) {
+  function updateSelectedPinById(selectedId: string | null) {
     if (!map.current || !map.current.getSource('clubs')) return
     const currentFilter = filter
     const filtered = allClubsForMap.current.filter(c => {
@@ -255,6 +266,7 @@ export default function Home() {
   function updateFilter(newFilter: string) {
     setFilter(newFilter)
     setSelectedClub(null)
+    selectedClubRef.current = null
     if (!map.current || !map.current.getSource('clubs')) return
     const filtered = allClubsForMap.current.filter(c => {
       if (newFilter === 'all') return true
@@ -305,7 +317,6 @@ export default function Home() {
       <div style={{ position: 'relative' }}>
         <div ref={mapContainer} style={{ height: '52vh', width: '100%' }} />
 
-        {/* Selected club card overlay at top of map */}
         {selectedClub && (
           <div style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 10 }}>
             <div
@@ -342,7 +353,7 @@ export default function Home() {
                 </div>
               </div>
               <button
-                onClick={e => { e.stopPropagation(); setSelectedClub(null); updateSelectedPin(null) }}
+                onClick={e => { e.stopPropagation(); setSelectedClub(null); selectedClubRef.current = null; updateSelectedPinById(null) }}
                 style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', width: 24, height: 24, fontSize: 12, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 ✕
               </button>
