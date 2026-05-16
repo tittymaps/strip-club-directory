@@ -17,6 +17,7 @@ export default function Home() {
   const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
+  const [selectedClub, setSelectedClub] = useState<any>(null)
   const allClubs = useRef<any[]>([])
   const allClubsForMap = useRef<any[]>([])
 
@@ -51,14 +52,8 @@ export default function Home() {
             .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
             .filter(c => c.distance <= 215)
 
-          const featured = withDistance
-            .filter(c => c.is_featured)
-            .sort((a, b) => a.distance - b.distance)
-
-          const standard = withDistance
-            .filter(c => !c.is_featured)
-            .sort((a, b) => a.distance - b.distance)
-
+          const featured = withDistance.filter(c => c.is_featured).sort((a, b) => a.distance - b.distance)
+          const standard = withDistance.filter(c => !c.is_featured).sort((a, b) => a.distance - b.distance)
           const sorted = [...featured, ...standard]
           allClubs.current = sorted
           setClubs(sorted)
@@ -87,7 +82,7 @@ export default function Home() {
     }
   }
 
-  function buildGeoJSON(clubData: any[]) {
+  function buildGeoJSON(clubData: any[], selectedId?: string) {
     return {
       type: 'FeatureCollection',
       features: clubData
@@ -102,6 +97,7 @@ export default function Home() {
             nude_level: c.nude_level,
             bar_type: c.bar_type,
             is_featured: c.is_featured ? 1 : 0,
+            selected: c.id === selectedId ? 1 : 0,
           },
           geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }
         }))
@@ -160,26 +156,28 @@ export default function Home() {
       paint: { 'text-color': 'white' }
     })
 
+    // Featured pins — gold, darker when selected
     map.current.addLayer({
       id: 'unclustered-featured',
       type: 'circle',
       source: 'clubs',
       filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 1]],
       paint: {
-        'circle-color': '#FFD700',
+        'circle-color': ['case', ['==', ['get', 'selected'], 1], '#b8960a', '#FFD700'],
         'circle-radius': 16,
         'circle-stroke-width': 3,
         'circle-stroke-color': 'white',
       }
     })
 
+    // Standard pins — pink, darker when selected
     map.current.addLayer({
       id: 'unclustered-standard',
       type: 'circle',
       source: 'clubs',
       filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 0]],
       paint: {
-        'circle-color': '#FF2D78',
+        'circle-color': ['case', ['==', ['get', 'selected'], 1], '#a01040', '#FF2D78'],
         'circle-radius': 14,
         'circle-stroke-width': 2.5,
         'circle-stroke-color': 'white',
@@ -208,30 +206,27 @@ export default function Home() {
       })
     })
 
-    const showPopup = (e: any) => {
+    const handlePinClick = (e: any) => {
       const props = e.features[0].properties
-      const coords = (e.features[0].geometry as any).coordinates.slice()
       const club = allClubsForMap.current.find(c => c.id === props.id)
       if (!club) return
-      const popupHTML =
-        '<div style="background:#131629;color:white;border-radius:12px;min-width:200px;cursor:pointer;border:1px solid ' + (club.is_featured ? '#FFD700' : '#1e2140') + ';overflow:hidden;" onclick="window.location.href=\'/clubs/' + club.id + '\'">' +
-        (club.photo_url ? '<img src="' + club.photo_url + '" style="width:100%;height:110px;object-fit:cover;display:block;" />' : '') +
-        '<div style="padding:10px;">' +
-        '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + club.name + ' \u2192</div>' +
-        '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">' + club.city + ', ' + club.state + '</div>' +
-        '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
-        (club.is_featured ? '<span style="background:#3d3000;color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:10px;">\u2605 Featured</span>' : '') +
-        '<span style="background:#3d1a2e;color:#FF2D78;border:1px solid #FF2D78;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless') + '</span>' +
-        (club.bar_type !== 'none' ? '<span style="background:#1a2a3d;color:#7ab8ff;border:1px solid #3a7acd;border-radius:20px;padding:2px 8px;font-size:10px;">' + (club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB') + '</span>' : '') +
-        '</div></div></div>'
-      new mapboxgl.Popup({ offset: 20 })
-        .setLngLat(coords)
-        .setHTML(popupHTML)
-        .addTo(map.current)
+      setSelectedClub(club)
+      updateSelectedPin(club.id)
     }
 
-    map.current.on('click', 'unclustered-featured', showPopup)
-    map.current.on('click', 'unclustered-standard', showPopup)
+    map.current.on('click', 'unclustered-featured', handlePinClick)
+    map.current.on('click', 'unclustered-standard', handlePinClick)
+
+    // Click on map background to deselect
+    map.current.on('click', (e: any) => {
+      const features = map.current.queryRenderedFeatures(e.point, {
+        layers: ['unclustered-featured', 'unclustered-standard', 'clusters']
+      })
+      if (features.length === 0) {
+        setSelectedClub(null)
+        updateSelectedPin(null)
+      }
+    })
 
     ;['clusters', 'unclustered-featured', 'unclustered-standard'].forEach(layer => {
       map.current.on('mouseenter', layer, () => { map.current.getCanvas().style.cursor = 'pointer' })
@@ -239,8 +234,26 @@ export default function Home() {
     })
   }
 
+  function updateSelectedPin(selectedId: string | null) {
+    if (!map.current || !map.current.getSource('clubs')) return
+    const currentFilter = filter
+    const filtered = allClubsForMap.current.filter(c => {
+      if (currentFilter === 'all') return true
+      if (currentFilter === 'full_nude') return c.nude_level === 'full_nude'
+      if (currentFilter === 'topless') return c.nude_level === 'topless'
+      if (currentFilter === 'bikini') return c.nude_level === 'bikini'
+      if (currentFilter === 'full_bar') return c.bar_type === 'full_bar'
+      if (currentFilter === 'byob') return c.bar_type === 'byob'
+      if (currentFilter === 'cafe') return c.bar_type === 'cafe'
+      if (currentFilter === 'featured') return c.is_featured
+      return true
+    })
+    ;(map.current.getSource('clubs') as any).setData(buildGeoJSON(filtered, selectedId || undefined))
+  }
+
   function updateFilter(newFilter: string) {
     setFilter(newFilter)
+    setSelectedClub(null)
     if (!map.current || !map.current.getSource('clubs')) return
     const filtered = allClubsForMap.current.filter(c => {
       if (newFilter === 'all') return true
@@ -281,20 +294,60 @@ export default function Home() {
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
-      <style>{`
-        .mapboxgl-popup { z-index: 99 !important; }
-        .mapboxgl-popup-content { background: transparent !important; padding: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
-        .mapboxgl-popup-tip { display: none !important; }
-        .mapboxgl-popup-close-button { display: none !important; }
-        .mapboxgl-canvas-container { z-index: 1; }
-      `}</style>
 
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
       </div>
 
-      <div ref={mapContainer} style={{ height: '52vh', width: '100%' }} />
+      <div style={{ position: 'relative' }}>
+        <div ref={mapContainer} style={{ height: '52vh', width: '100%' }} />
+
+        {/* Selected club card overlay at top of map */}
+        {selectedClub && (
+          <div style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 10 }}>
+            <div
+              onClick={() => window.location.href = `/clubs/${selectedClub.id}`}
+              style={{
+                background: '#131629',
+                borderRadius: 12,
+                padding: 12,
+                border: `1px solid ${selectedClub.is_featured ? '#FFD700' : '#FF2D78'}`,
+                display: 'flex',
+                gap: 10,
+                alignItems: 'flex-start',
+                cursor: 'pointer',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+              }}>
+              <div style={{ width: 52, height: 52, borderRadius: 10, background: selectedClub.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+                {selectedClub.photo_url
+                  ? <img src={selectedClub.photo_url} alt={selectedClub.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : (selectedClub.is_featured ? '🌟' : '💜')}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2, color: 'white' }}>{selectedClub.name}</div>
+                <div style={{ fontSize: 11, color: '#8890c0', marginBottom: 6 }}>{selectedClub.city}, {selectedClub.state}{selectedClub.address ? ` — ${selectedClub.address}` : ''}</div>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  {selectedClub.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                  <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                    {selectedClub.nude_level === 'full_nude' ? '🐱 Full nude' : selectedClub.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
+                  </span>
+                  {selectedClub.bar_type !== 'none' && (
+                    <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                      {selectedClub.bar_type === 'full_bar' ? '🍾 Full bar' : selectedClub.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={e => { e.stopPropagation(); setSelectedClub(null); updateSelectedPin(null) }}
+                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', width: 24, height: 24, fontSize: 12, cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '8px 12px', display: 'flex', gap: 8, overflowX: 'auto' }}>
         {chips.map((c) => (
@@ -319,8 +372,9 @@ export default function Home() {
           <div key={club.id}
             onClick={() => window.location.href = `/clubs/${club.id}`}
             style={{
-              background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
-              border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
+              background: selectedClub?.id === club.id ? '#1a0d20' : '#131629',
+              borderRadius: 12, marginBottom: 8, padding: 12,
+              border: `1px solid ${selectedClub?.id === club.id ? '#FF2D78' : club.is_featured ? '#FFD700' : '#1e2140'}`,
               display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
             }}>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
@@ -340,7 +394,7 @@ export default function Home() {
                 )}
               </div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>&#9733; Featured</span>}
+                {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
                 <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                   {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                 </span>
