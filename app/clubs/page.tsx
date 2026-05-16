@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import ProfileButton from './components/ProfileButton'
 
 const supabase = createClient(
   'https://ssruvoxuwlksmbmubcfv.supabase.co',
