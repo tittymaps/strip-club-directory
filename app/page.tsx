@@ -315,7 +315,7 @@ export default function Home() {
       </div>
 
       <div style={{ position: 'relative' }}>
-        <div ref={mapContainer} style={{ height: '45vh', width: '100%' }} />
+        <div ref={mapContainer} style={{ height: '44vh', width: '100%' }} />
 
         {selectedClub && (
           <div style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 10 }}>
