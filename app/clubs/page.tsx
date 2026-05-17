@@ -192,7 +192,7 @@ export default function ClubsPage() {
                 onClick={() => window.location.href = `/clubs/${club.id}`}
                 style={{
                   borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
-                  position: 'relative', aspectRatio: '1',
+                  position: 'relative', aspectRatio: '4/3',
                   background: '#131629',
                   border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`
                 }}>
