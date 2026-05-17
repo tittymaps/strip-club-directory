@@ -206,6 +206,7 @@ export default function ClubsPage() {
                   <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{club.name}</div>
                   <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {STATE_NAMES[club.state] || club.state}</div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>★ Featured</span>}
                    <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9, whiteSpace: 'nowrap' }}>
                    {club.nude_level === 'full_nude' ? '🐱' : club.nude_level === 'bikini' ? '👙' : '🍒'}
                    </span>
@@ -216,11 +217,7 @@ export default function ClubsPage() {
                 )}
                   </div>
                 </div>
-                {club.is_featured && (
-                  <div style={{ position: 'absolute', top: 8, right: 8, background: '#FFD700', color: '#0D0F1E', borderRadius: 20, padding: '2px 8px', fontSize: 9, fontWeight: 700 }}>
-                    ★ Featured
-                  </div>
-                )}
+                
               </div>
             ))}
           </div>
