@@ -168,10 +168,10 @@ export default function Home() {
       source: 'clubs',
       filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 1]],
       paint: {
-        'circle-color': ['case', ['==', ['get', 'selected'], 1], '#b8960a', '#FFD700'],
+        'circle-color': ['case', ['==', ['get', 'selected'], 1], 'white', '#FFD700'],
         'circle-radius': 16,
-        'circle-stroke-width': 3,
-        'circle-stroke-color': 'white',
+        'circle-stroke-width': 4,
+        'circle-stroke-color': ['case', ['==', ['get', 'selected'], 1], '#FFD700', 'white'],
       }
     })
 
@@ -198,7 +198,9 @@ export default function Home() {
         'text-size': 14,
         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
       },
-      paint: { 'text-color': '#c49500' }
+      paint: {
+        'text-color': ['case', ['==', ['get', 'selected'], 1], '#FFD700', '#c49500']
+      }
     })
 
     map.current.on('click', 'clusters', (e: any) => {
@@ -217,7 +219,6 @@ export default function Home() {
 
       const currentSelected = selectedClubRef.current
       if (currentSelected && currentSelected.id === club.id) {
-        // Second tap on same pin — navigate to club page
         window.location.href = `/clubs/${club.id}`
         return
       }
