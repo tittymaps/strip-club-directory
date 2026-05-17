@@ -202,9 +202,9 @@ export default function ClubDetail() {
             <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>{club.name}</h1>
             {club.address && <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 4 }}>{club.address}</div>}
            <div style={{ fontSize: 15, marginBottom: 8 }}>
-              <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#FF2D78', textDecoration: 'underline', cursor: 'pointer' }}>{club.city}</span>
+              <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>{club.city}</span>
               <span style={{ color: '#8890c0' }}>, </span>
-              <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}`} style={{ color: '#FF2D78', textDecoration: 'underline', cursor: 'pointer' }}>{STATE_NAMES[club.state] || club.state}</span>
+              <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>{STATE_NAMES[club.state] || club.state}</span>
             </div>
             {reviews.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
