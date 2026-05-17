@@ -33,10 +33,10 @@ export default function ProfileButton() {
   return (
     <a href={profileUsername ? `/users/${profileUsername}` : '/auth'}
       style={{ position: 'absolute', right: 16, display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
-      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a1a40', border: `2px solid ${profileUsername ? '#FF2D78' : '#3a3d60'}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+     <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1a1d35', border: profileUsername ? '2px solid #FF2D78' : '2px dashed #3a3d60', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#8890c0' }}>
         {avatarUrl
           ? <img src={avatarUrl} alt="profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <span>{profileUsername ? '👤' : '🔑'}</span>}
+          : <span>👤</span>}
       </div>
     </a>
   )
