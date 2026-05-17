@@ -8,12 +8,15 @@ const supabase = createClient(
 )
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot'>('login')
+  const [emailOrUsername, setEmailOrUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   async function handleSignup() {
     if (!username || !email || !password) { setError('All fields are required.'); return }
@@ -36,6 +39,7 @@ export default function AuthPage() {
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         username,
+        email,
       })
       if (profileError) { setError('Error creating profile. Username may be taken.'); setLoading(false); return }
     }
@@ -45,14 +49,62 @@ export default function AuthPage() {
   }
 
   async function handleLogin() {
-    if (!email || !password) { setError('All fields are required.'); return }
+    if (!emailOrUsername || !password) { setError('All fields are required.'); return }
     setLoading(true)
     setError('')
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
-    if (loginError) { setError(loginError.message); setLoading(false); return }
+    let loginEmail = emailOrUsername
 
+    // If not an email address look up the email by username
+    if (!emailOrUsername.includes('@')) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('username', emailOrUsername)
+        .single()
+
+      if (!profile || !profile.email) {
+        setError('Username not found. Try signing in with your email instead.')
+        setLoading(false)
+        return
+      }
+
+      loginEmail = profile.email
+    }
+
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password,
+    })
+
+    if (loginError) { setError(loginError.message); setLoading(false); return }
     window.location.href = '/'
+  }
+
+  async function handleForgotPassword() {
+    if (!email) { setError('Please enter your email address.'); return }
+    setLoading(true)
+    setError('')
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://tittymaps.com/auth',
+    })
+
+    setLoading(false)
+    if (resetError) {
+      setError(resetError.message)
+    } else {
+      setSuccess('Password reset email sent! Check your inbox.')
+    }
+  }
+
+  const resetForm = () => {
+    setError('')
+    setSuccess('')
+    setEmailOrUsername('')
+    setEmail('')
+    setPassword('')
+    setUsername('')
   }
 
   return (
@@ -68,23 +120,27 @@ export default function AuthPage() {
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <div style={{ fontSize: 40, marginBottom: 10 }}>👤</div>
             <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: '0 0 6px' }}>
-              {mode === 'login' ? 'Welcome back' : 'Create an account'}
+              {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create an account' : 'Reset your password'}
             </h1>
             <p style={{ color: '#8890c0', fontSize: 14, margin: 0 }}>
-              {mode === 'login' ? 'Sign in to leave reviews and manage your profile' : 'Join TittyMaps to leave reviews and build your profile'}
+              {mode === 'login' ? 'Sign in to leave reviews and manage your profile'
+                : mode === 'signup' ? 'Join TittyMaps to leave reviews and build your profile'
+                : 'Enter your email and we will send you a reset link'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 4, marginBottom: 24 }}>
-            <button onClick={() => { setMode('login'); setError('') }}
-              style={{ flex: 1, padding: '10px', background: mode === 'login' ? '#FF2D78' : 'transparent', border: 'none', borderRadius: 10, color: mode === 'login' ? 'white' : '#8890c0', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-              Log In
-            </button>
-            <button onClick={() => { setMode('signup'); setError('') }}
-              style={{ flex: 1, padding: '10px', background: mode === 'signup' ? '#FF2D78' : 'transparent', border: 'none', borderRadius: 10, color: mode === 'signup' ? 'white' : '#8890c0', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
-              Sign Up
-            </button>
-          </div>
+          {mode !== 'forgot' && (
+            <div style={{ display: 'flex', background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 4, marginBottom: 24 }}>
+              <button onClick={() => { setMode('login'); resetForm() }}
+                style={{ flex: 1, padding: '10px', background: mode === 'login' ? '#FF2D78' : 'transparent', border: 'none', borderRadius: 10, color: mode === 'login' ? 'white' : '#8890c0', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                Log In
+              </button>
+              <button onClick={() => { setMode('signup'); resetForm() }}
+                style={{ flex: 1, padding: '10px', background: mode === 'signup' ? '#FF2D78' : 'transparent', border: 'none', borderRadius: 10, color: mode === 'signup' ? 'white' : '#8890c0', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                Sign Up
+              </button>
+            </div>
+          )}
 
           {mode === 'signup' && (
             <div style={{ marginBottom: 14 }}>
@@ -94,19 +150,49 @@ export default function AuthPage() {
             </div>
           )}
 
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Email</div>
-            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="email"
-              style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
-          </div>
+          {mode === 'forgot' ? (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Email</div>
+              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="email"
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            </div>
+          ) : mode === 'signup' ? (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Email</div>
+              <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="email"
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            </div>
+          ) : (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Email or username</div>
+              <input value={emailOrUsername} onChange={e => setEmailOrUsername(e.target.value)} placeholder="your@email.com or username"
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            </div>
+          )}
 
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Password</div>
-            <input value={password} onChange={e => setPassword(e.target.value)}
-              placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
-              type="password"
-              style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
-          </div>
+          {mode !== 'forgot' && (
+            <div style={{ marginBottom: mode === 'login' ? 8 : 20 }}>
+              <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Password</div>
+              <div style={{ position: 'relative' }}>
+                <input value={password} onChange={e => setPassword(e.target.value)}
+                  placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
+                  type={showPassword ? 'text' : 'password'}
+                  style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 44px 12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+                <button onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: '#8890c0', fontSize: 18, cursor: 'pointer', padding: 0, lineHeight: 1 }}>
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {mode === 'login' && (
+            <div style={{ textAlign: 'right', marginBottom: 20 }}>
+              <span onClick={() => { setMode('forgot'); resetForm() }} style={{ color: '#8890c0', fontSize: 12, cursor: 'pointer' }}>
+                Forgot password?
+              </span>
+            </div>
+          )}
 
           {error && (
             <div style={{ background: '#2e1a1a', border: '1px solid #ff4444', borderRadius: 10, padding: '12px 14px', color: '#ff4444', fontSize: 13, marginBottom: 14 }}>
@@ -114,21 +200,33 @@ export default function AuthPage() {
             </div>
           )}
 
-          <button onClick={mode === 'login' ? handleLogin : handleSignup} disabled={loading}
+          {success && (
+            <div style={{ background: '#1a2e1a', border: '1px solid #3acd60', borderRadius: 10, padding: '12px 14px', color: '#7aff9a', fontSize: 13, marginBottom: 14 }}>
+              {success}
+            </div>
+          )}
+
+          <button
+            onClick={mode === 'login' ? handleLogin : mode === 'signup' ? handleSignup : handleForgotPassword}
+            disabled={loading}
             style={{ width: '100%', background: loading ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', marginBottom: 16 }}>
-            {loading ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Create Account'}
+            {loading ? 'Please wait...' : mode === 'login' ? 'Log In' : mode === 'signup' ? 'Create Account' : 'Send Reset Email'}
           </button>
 
           <div style={{ textAlign: 'center' }}>
             {mode === 'login' ? (
               <span style={{ color: '#8890c0', fontSize: 13 }}>
                 Don&apos;t have an account?{' '}
-                <span onClick={() => { setMode('signup'); setError('') }} style={{ color: '#FF2D78', cursor: 'pointer' }}>Sign up</span>
+                <span onClick={() => { setMode('signup'); resetForm() }} style={{ color: '#FF2D78', cursor: 'pointer' }}>Sign up</span>
               </span>
-            ) : (
+            ) : mode === 'signup' ? (
               <span style={{ color: '#8890c0', fontSize: 13 }}>
                 Already have an account?{' '}
-                <span onClick={() => { setMode('login'); setError('') }} style={{ color: '#FF2D78', cursor: 'pointer' }}>Log in</span>
+                <span onClick={() => { setMode('login'); resetForm() }} style={{ color: '#FF2D78', cursor: 'pointer' }}>Log in</span>
+              </span>
+            ) : (
+              <span onClick={() => { setMode('login'); resetForm() }} style={{ color: '#FF2D78', fontSize: 13, cursor: 'pointer' }}>
+                ← Back to log in
               </span>
             )}
           </div>
