@@ -17,6 +17,7 @@ export default function Home() {
   const map = useRef<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
+  const filterRef = useRef<string>('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
   const [selectedClub, setSelectedClub] = useState<any>(null)
   const selectedClubRef = useRef<any>(null)
@@ -249,7 +250,7 @@ export default function Home() {
 
   function updateSelectedPinById(selectedId: string | null) {
     if (!map.current || !map.current.getSource('clubs')) return
-    const currentFilter = filter
+    const currentFilter = filterRef.current
     const filtered = allClubsForMap.current.filter(c => {
       if (currentFilter === 'all') return true
       if (currentFilter === 'full_nude') return c.nude_level === 'full_nude'
@@ -258,7 +259,7 @@ export default function Home() {
       if (currentFilter === 'full_bar') return c.bar_type === 'full_bar'
       if (currentFilter === 'byob') return c.bar_type === 'byob'
       if (currentFilter === 'cafe') return c.bar_type === 'cafe'
-      if (filter === 'none') return c.bar_type === 'none'
+      if (currentFilter === 'none') return c.bar_type === 'none'
       if (currentFilter === 'featured') return c.is_featured
       return true
     })
@@ -267,6 +268,7 @@ export default function Home() {
 
   function updateFilter(newFilter: string) {
     setFilter(newFilter)
+    filterRef.current = newFilter
     setSelectedClub(null)
     selectedClubRef.current = null
     if (!map.current || !map.current.getSource('clubs')) return
@@ -327,14 +329,9 @@ export default function Home() {
             <div
               onClick={() => window.location.href = `/clubs/${selectedClub.id}`}
               style={{
-                background: '#131629',
-                borderRadius: 12,
-                padding: 12,
+                background: '#131629', borderRadius: 12, padding: 12,
                 border: `1px solid ${selectedClub.is_featured ? '#FFD700' : '#FF2D78'}`,
-                display: 'flex',
-                gap: 10,
-                alignItems: 'flex-start',
-                cursor: 'pointer',
+                display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
               }}>
               <div style={{ width: 52, height: 52, borderRadius: 10, background: selectedClub.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
@@ -351,8 +348,8 @@ export default function Home() {
                     {selectedClub.nude_level === 'full_nude' ? '🐱 Full nude' : selectedClub.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                   </span>
                   <span style={{ background: selectedClub.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: selectedClub.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${selectedClub.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {selectedClub.bar_type === 'full_bar' ? '🍾 Full bar' : selectedClub.bar_type === 'cafe' ? '🧋 Cafe' : selectedClub.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-                </span>
+                    {selectedClub.bar_type === 'full_bar' ? '🍾 Full bar' : selectedClub.bar_type === 'cafe' ? '🧋 Cafe' : selectedClub.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+                  </span>
                 </div>
               </div>
               <button
@@ -371,8 +368,8 @@ export default function Home() {
             style={{
               borderRadius: 20, padding: '5px 14px', fontSize: 12, whiteSpace: 'nowrap',
               border: '1px solid', cursor: 'pointer', flexShrink: 0,
-              background: filter === c.key ? (c.key === 'featured' ? '#FFD700' : '#FF2D78') : 'transparent',
-              borderColor: filter === c.key ? (c.key === 'featured' ? '#FFD700' : '#FF2D78') : '#3a3d60',
+              background: filter === c.key ? (c.key === 'featured' ? '#FFD700' : c.key === 'none' ? '#ff4444' : '#FF2D78') : 'transparent',
+              borderColor: filter === c.key ? (c.key === 'featured' ? '#FFD700' : c.key === 'none' ? '#ff4444' : '#FF2D78') : '#3a3d60',
               color: filter === c.key ? (c.key === 'featured' ? '#0D0F1E' : 'white') : '#8890c0',
             }}>
             {c.label}
@@ -415,8 +412,8 @@ export default function Home() {
                   {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                 </span>
                 <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-              </span>
+                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+                </span>
               </div>
             </div>
           </div>
