@@ -291,6 +291,7 @@ export default function Home() {
     if (filter === 'full_bar') return c.bar_type === 'full_bar'
     if (filter === 'byob') return c.bar_type === 'byob'
     if (filter === 'cafe') return c.bar_type === 'cafe'
+    if (filter === 'none') return c.bar_type === 'none'
     if (filter === 'featured') return c.is_featured
     return true
   })
@@ -304,6 +305,7 @@ export default function Home() {
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
     { key: 'cafe', label: '🧋 Cafe' },
+    { key: 'none', label: '❌ No bar' },
   ]
 
   return (
