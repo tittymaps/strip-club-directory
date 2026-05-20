@@ -258,6 +258,7 @@ export default function Home() {
       if (currentFilter === 'full_bar') return c.bar_type === 'full_bar'
       if (currentFilter === 'byob') return c.bar_type === 'byob'
       if (currentFilter === 'cafe') return c.bar_type === 'cafe'
+      if (filter === 'none') return c.bar_type === 'none'
       if (currentFilter === 'featured') return c.is_featured
       return true
     })
