@@ -104,6 +104,7 @@ export default function ClubsPage() {
     { key: 'full_bar', label: '🍾 Full bar' },
     { key: 'byob', label: '🍺 BYOB' },
     { key: 'cafe', label: '🧋 Cafe' },
+    { key: 'none', label: '❌ No bar' },
   ]
 
   const filtered = clubs.filter(c => {
@@ -119,6 +120,7 @@ export default function ClubsPage() {
       filter === 'full_bar' ? c.bar_type === 'full_bar' :
       filter === 'byob' ? c.bar_type === 'byob' :
       filter === 'cafe' ? c.bar_type === 'cafe' :
+      filter === 'none' ? c.bar_type === 'none' :
       filter === 'featured' ? c.is_featured : true
     return matchesSearch && matchesFilter
   })
