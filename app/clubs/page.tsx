@@ -209,12 +209,12 @@ export default function ClubsPage() {
                   <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {STATE_NAMES[club.state] || club.state}</div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>★ Featured</span>}
-                   <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9, whiteSpace: 'nowrap' }}>
-                   {club.nude_level === 'full_nude' ? '🐱' : club.nude_level === 'bikini' ? '👙' : '🍒'}
-                   </span>
-                    <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-                </span>
+                    <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
+                      {club.nude_level === 'full_nude' ? '🐱' : club.nude_level === 'bikini' ? '👙' : '🍒'}
+                    </span>
+                    <span style={{ background: club.bar_type === 'none' ? 'rgba(255,68,68,0.2)' : 'rgba(26,42,61,0.8)', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
+                      {club.bar_type === 'full_bar' ? '🍾' : club.bar_type === 'cafe' ? '🧋' : club.bar_type === 'byob' ? '🍺' : '❌'}
+                    </span>
                   </div>
                 </div>
                 
