@@ -38,7 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, paddingBottom: 64, background: '#0D0F1E' }}>
+     <body style={{ margin: 0, paddingBottom: 80, background: '#0D0F1E' }}>
         {children}
         <BottomNav />
         <Analytics />
