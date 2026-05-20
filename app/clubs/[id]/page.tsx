@@ -217,11 +217,9 @@ export default function ClubDetail() {
               <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>
                 {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
               </span>
-              {club.bar_type !== 'none' && (
-                <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>
-                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
-                </span>
-              )}
+              <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>
+              {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+            </span>
             </div>
           </div>
         </div>
@@ -395,11 +393,9 @@ export default function ClubDetail() {
                     <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                       {nearby.nude_level === 'full_nude' ? '🐱 Full nude' : nearby.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                     </span>
-                    {nearby.bar_type !== 'none' && (
-                      <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                        {nearby.bar_type === 'full_bar' ? '🍾 Full bar' : nearby.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
-                      </span>
-                    )}
+                    <span style={{ background: nearby.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: nearby.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${nearby.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                    {nearby.bar_type === 'full_bar' ? '🍾 Full bar' : nearby.bar_type === 'cafe' ? '🧋 Cafe' : nearby.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+                  </span>
                     <span style={{ background: '#1a2e1a', color: '#7aff9a', border: '1px solid #3acd60', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                       {nearby.distance.toFixed(1)} mi away
                     </span>
