@@ -25,6 +25,11 @@ const STATE_NAMES: Record<string, string> = {
   DC: 'Washington D.C.'
 }
 
+function getTodayKey() {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  return days[new Date().getDay()]
+}
+
 export default function ClubDetail() {
   const { id } = useParams()
   const router = useRouter()
@@ -34,6 +39,7 @@ export default function ClubDetail() {
   const [reviews, setReviews] = useState<any[]>([])
   const [nearbyClubs, setNearbyClubs] = useState<any[]>([])
   const [profileAvatars, setProfileAvatars] = useState<Record<string, string>>({})
+  const [showAllHours, setShowAllHours] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewText, setReviewText] = useState('')
@@ -172,8 +178,11 @@ export default function ClubDetail() {
     </div>
   )
 
+  const todayKey = getTodayKey()
+  const todayHours = club.hours?.[todayKey]
+
   return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 100 }}>
 
       {fullPhoto && (
         <div onClick={() => setFullPhoto(null)}
@@ -201,7 +210,7 @@ export default function ClubDetail() {
           <div style={{ flex: 1 }}>
             <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>{club.name}</h1>
             {club.address && <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 4 }}>{club.address}</div>}
-           <div style={{ fontSize: 15, marginBottom: 8 }}>
+            <div style={{ fontSize: 15, marginBottom: 8 }}>
               <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>{club.city}</span>
               <span style={{ color: '#8890c0' }}>, </span>
               <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>{STATE_NAMES[club.state] || club.state}</span>
@@ -218,8 +227,8 @@ export default function ClubDetail() {
                 {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
               </span>
               <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '3px 10px', fontSize: 11 }}>
-              {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-            </span>
+                {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+              </span>
             </div>
           </div>
         </div>
@@ -235,16 +244,36 @@ export default function ClubDetail() {
         )}
 
         {club.hours && (
-          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginTop: 12 }}>
-            <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Hours</div>
-            {DAYS.map(day => (
-              <div key={day} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #1e2140' }}>
-                <span style={{ color: '#8890c0', fontSize: 13 }}>{day}</span>
-                <span style={{ color: club.hours[day] === 'Closed' ? '#ff4444' : '#7aff9a', fontSize: 13 }}>
-                  {club.hours[day] || 'Closed'}
-                </span>
+          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', marginTop: 12, overflow: 'hidden' }}>
+            <div style={{ color: '#8890c0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, padding: '14px 16px 6px' }}>Hours</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ background: '#FF2D78', color: 'white', fontSize: 10, fontWeight: 700, borderRadius: 20, padding: '2px 8px' }}>Today</span>
+                <span style={{ color: '#8890c0', fontSize: 13 }}>{todayKey}</span>
               </div>
-            ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ color: todayHours === 'Closed' ? '#ff4444' : '#7aff9a', fontSize: 13 }}>
+                  {todayHours || 'Closed'}
+                </span>
+                <button
+                  onClick={() => setShowAllHours(!showAllHours)}
+                  style={{ width: 24, height: 24, borderRadius: 20, border: '1px solid #3a3d60', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <span style={{ color: '#8890c0', fontSize: 11, lineHeight: 1, display: 'block', transform: showAllHours ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▾</span>
+                </button>
+              </div>
+            </div>
+            {showAllHours && (
+              <div style={{ borderTop: '1px solid #1e2140', padding: '8px 16px' }}>
+                {DAYS.map(day => (
+                  <div key={day} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid #1e2140' }}>
+                    <span style={{ color: day === todayKey ? 'white' : '#8890c0', fontSize: 13, fontWeight: day === todayKey ? 600 : 400 }}>{day}</span>
+                    <span style={{ color: club.hours[day] === 'Closed' ? '#ff4444' : '#7aff9a', fontSize: 13, fontWeight: day === todayKey ? 600 : 400 }}>
+                      {club.hours[day] || 'Closed'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -363,6 +392,7 @@ export default function ClubDetail() {
                 <StarDisplay rating={review.rating} size={14} />
               </div>
               <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: review.admin_reply ? 10 : 0 }}>{review.review}</div>
+              {review.edited && <div style={{ color: '#555', fontSize: 11, marginTop: 4, fontStyle: 'italic' }}>edited</div>}
               {review.admin_reply && (
                 <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #FF2D78', padding: '10px 12px', marginTop: 10 }}>
                   <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>TittyMaps Team</div>
@@ -394,8 +424,8 @@ export default function ClubDetail() {
                       {nearby.nude_level === 'full_nude' ? '🐱 Full nude' : nearby.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                     </span>
                     <span style={{ background: nearby.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: nearby.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${nearby.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                    {nearby.bar_type === 'full_bar' ? '🍾 Full bar' : nearby.bar_type === 'cafe' ? '🧋 Cafe' : nearby.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-                  </span>
+                      {nearby.bar_type === 'full_bar' ? '🍾 Full bar' : nearby.bar_type === 'cafe' ? '🧋 Cafe' : nearby.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+                    </span>
                     <span style={{ background: '#1a2e1a', color: '#7aff9a', border: '1px solid #3acd60', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                       {nearby.distance.toFixed(1)} mi away
                     </span>
