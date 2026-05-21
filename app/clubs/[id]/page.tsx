@@ -30,6 +30,11 @@ function getTodayKey() {
   return days[new Date().getDay()]
 }
 
+function getTodayFullName() {
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  return days[new Date().getDay()]
+}
+
 export default function ClubDetail() {
   const { id } = useParams()
   const router = useRouter()
@@ -246,10 +251,10 @@ export default function ClubDetail() {
         {club.hours && (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', marginTop: 12, overflow: 'hidden' }}>
             <div style={{ color: '#8890c0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, padding: '14px 16px 6px' }}>Hours</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px 14px' }}>
+            <div onClick={() => setShowAllHours(!showAllHours)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px 14px', cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ background: '#FF2D78', color: 'white', fontSize: 10, fontWeight: 700, borderRadius: 20, padding: '2px 8px' }}>Today</span>
-                <span style={{ color: '#8890c0', fontSize: 13 }}>{todayKey}</span>
+                <span style={{ color: '#8890c0', fontSize: 13 }}>{getTodayFullName()}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ color: todayHours === 'Closed' ? '#ff4444' : '#7aff9a', fontSize: 13 }}>
