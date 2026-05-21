@@ -213,7 +213,7 @@ export default function ClubDetail() {
               : (club.is_featured ? '🌟' : '💜')}
           </div>
           <div style={{ flex: 1 }}>
-            <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>{club.name}</h1>
+            <div style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>{club.name}</div>
             {club.address && <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 4 }}>{club.address}</div>}
             <div style={{ fontSize: 15, marginBottom: 8 }}>
               <span onClick={() => window.location.href = `/states/${club.state.toLowerCase()}/${encodeURIComponent(club.city)}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>{club.city}</span>
@@ -239,7 +239,7 @@ export default function ClubDetail() {
         </div>
       </div>
 
-      <div style={{ padding: '0 16px' }}>
+      <div style={{ padding: '4px 16px' }}>
 
         {club.cover_charge && (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginTop: 16 }}>
