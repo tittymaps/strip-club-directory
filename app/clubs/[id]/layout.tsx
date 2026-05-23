@@ -7,27 +7,30 @@ const supabase = createClient(
 )
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const { data } = await supabase
+  const { data: club } = await supabase
     .from('clubs')
     .select('name, city, state, nude_level, bar_type')
     .eq('id', params.id)
     .single()
 
-  if (!data) return { title: 'Strip Club | TittyMaps' }
+  if (!club) return { title: 'Strip Club | TittyMaps' }
 
-  const nudeLevel = data.nude_level === 'full_nude' ? 'Full nude' : data.nude_level === 'bikini' ? 'Bikini' : 'Topless'
-  const barType = data.bar_type === 'full_bar' ? 'full bar' : data.bar_type === 'cafe' ? 'cafe' : 'BYOB'
+  const isBikiniCafe = club.nude_level === 'bikini' && club.bar_type === 'cafe'
+  const categoryLabel = isBikiniCafe ? 'Bikini Coffee Shop' : 'Strip Club'
+  const nudeLabel = club.nude_level === 'full_nude' ? 'full nude' : club.nude_level === 'bikini' ? 'bikini' : 'topless'
+  const barLabel = club.bar_type === 'full_bar' ? 'with a full bar' : club.bar_type === 'byob' ? 'BYOB' : club.bar_type === 'cafe' ? 'coffee shop' : ''
+  const canonicalUrl = `https://tittymaps.com/clubs/${params.id}`
 
   return {
-    title: `${data.name} - Strip Club in ${data.city}, ${data.state} | TittyMaps`,
-    description: `${data.name} is a ${nudeLevel.toLowerCase()} strip club in ${data.city}, ${data.state} with a ${barType}. View hours, cover charge, reviews and featured dancers.`,
+    title: `${club.name} - ${categoryLabel} in ${club.city}, ${club.state} | TittyMaps`,
+    description: `${club.name} is a ${nudeLabel} ${categoryLabel.toLowerCase()} in ${club.city}, ${club.state}${barLabel ? ' ' + barLabel : ''}. View hours, cover charge, reviews and featured ${isBikiniCafe ? 'baristas' : 'dancers'}.`,
     alternates: {
-      canonical: `https://tittymaps.com/clubs/${params.id}`,
+      canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${data.name} | TittyMaps`,
-      description: `${nudeLevel} strip club in ${data.city}, ${data.state}. View hours, cover charge and featured dancers.`,
-      url: `https://tittymaps.com/clubs/${params.id}`,
+      title: `${club.name} - ${categoryLabel} in ${club.city}, ${club.state} | TittyMaps`,
+      description: `${club.name} is a ${nudeLabel} ${categoryLabel.toLowerCase()} in ${club.city}, ${club.state}. View hours, cover charge and reviews on TittyMaps.`,
+      url: canonicalUrl,
     }
   }
 }
