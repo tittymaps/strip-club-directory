@@ -21,6 +21,7 @@ export default function UserProfile() {
   const [avatarPreview, setAvatarPreview] = useState('')
   const [saving, setSaving] = useState(false)
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
+  const [editingReviewTitle, setEditingReviewTitle] = useState('')
   const [editingReviewText, setEditingReviewText] = useState('')
   const [editingReviewRating, setEditingReviewRating] = useState(0)
   const [editingReviewHover, setEditingReviewHover] = useState(0)
@@ -42,7 +43,7 @@ export default function UserProfile() {
 
   async function fetchProfile() {
     const { data } = await supabase.from('profiles').select('*').eq('username', username).single()
-    if (!data) { window.location.href = '/'; return }
+    if (!data || data.banned) { window.location.href = '/'; return }
     setProfile(data)
     setBio(data.bio || '')
 
@@ -90,6 +91,7 @@ export default function UserProfile() {
 
   function startEditingReview(review: any) {
     setEditingReviewId(review.id)
+    setEditingReviewTitle(review.title || '')
     setEditingReviewText(review.review)
     setEditingReviewRating(review.rating)
   }
@@ -99,6 +101,7 @@ export default function UserProfile() {
     setReviewSaving(true)
     await supabase.from('reviews').update({
       review: editingReviewText,
+      title: editingReviewTitle || null,
       rating: editingReviewRating,
       edited: true,
     }).eq('id', reviewId)
@@ -138,7 +141,7 @@ export default function UserProfile() {
             {avatarPreview
               ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : profile.avatar_url
-              ? <img src={profile.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img src={`${profile.avatar_url}?width=200&quality=80`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : '👤'}
           </div>
           {isOwner && <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />}
@@ -205,7 +208,7 @@ export default function UserProfile() {
               style={{ display: 'flex', gap: 12, marginBottom: 10, cursor: 'pointer' }}>
               <div style={{ width: 48, height: 48, borderRadius: 10, background: '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {review.clubs?.photo_url
-                  ? <img src={review.clubs.photo_url ? `${review.clubs.photo_url}?width=400&quality=75` : ''} alt={review.clubs.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={`${review.clubs.photo_url}?width=100&quality=80`} alt={review.clubs.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : '🏛️'}
               </div>
               <div style={{ flex: 1 }}>
@@ -236,6 +239,9 @@ export default function UserProfile() {
                     ))}
                   </div>
                 </div>
+                <input value={editingReviewTitle} onChange={e => setEditingReviewTitle(e.target.value)}
+                  placeholder="Review title (optional)"
+                  style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 8 }} />
                 <textarea value={editingReviewText} onChange={e => setEditingReviewText(e.target.value)}
                   rows={3} style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical', marginBottom: 8 }} />
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -252,7 +258,7 @@ export default function UserProfile() {
             ) : (
               <div>
                 {review.title && <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{review.title}</div>}
-                  <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: 6 }}>{review.review}</div>
+                <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: 6 }}>{review.review}</div>
                 {review.edited && (
                   <div style={{ color: '#555', fontSize: 11, marginBottom: 6, fontStyle: 'italic' }}>edited</div>
                 )}
