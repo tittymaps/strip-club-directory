@@ -199,7 +199,7 @@ export default function ClubsPage() {
                   border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`
                 }}>
                 {club.photo_url
-                  ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={club.photo_url ? `${club.photo_url}?width=400&quality=75` : ''} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, background: club.is_featured ? '#1a1200' : '#131629' }}>
                       {club.is_featured ? '🌟' : '💜'}
                     </div>
