@@ -205,7 +205,7 @@ export default function UserProfile() {
               style={{ display: 'flex', gap: 12, marginBottom: 10, cursor: 'pointer' }}>
               <div style={{ width: 48, height: 48, borderRadius: 10, background: '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {review.clubs?.photo_url
-                  ? <img src={review.clubs.photo_url ? `${review.club.photo_url}?width=400&quality=75` : ''} alt={review.clubs.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={review.clubs.photo_url ? `${review.clubs.photo_url}?width=400&quality=75` : ''} alt={review.clubs.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : '🏛️'}
               </div>
               <div style={{ flex: 1 }}>
