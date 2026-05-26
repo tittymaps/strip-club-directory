@@ -46,6 +46,7 @@ export default function ClubDetail() {
   const [profileAvatars, setProfileAvatars] = useState<Record<string, string>>({})
   const [showAllHours, setShowAllHours] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewTitle, setReviewTitle] = useState('')
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewText, setReviewText] = useState('')
   const [reviewHover, setReviewHover] = useState(0)
@@ -141,6 +142,7 @@ export default function ClubDetail() {
       username: profile?.username || user.email,
       email: user.email,
       rating: reviewRating,
+      title: reviewTitle || null,
       review: reviewText,
       user_id: user.id,
       profile_username: profile?.username,
@@ -157,6 +159,7 @@ export default function ClubDetail() {
       setReviewSuccess(true)
       setShowReviewForm(false)
       setReviewRating(0)
+      setReviewTitle('')
       setReviewText('')
       fetchReviews()
     }
@@ -209,7 +212,7 @@ export default function ClubDetail() {
           <div onClick={() => club.photo_url && setFullPhoto(club.photo_url)}
             style={{ width: 56, height: 56, borderRadius: 14, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0, cursor: club.photo_url ? 'pointer' : 'default' }}>
             {club.photo_url
-              ? <img src={club.photo_url ? `${club.photo_url}?width=400&quality=75` : ''} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img src={`${club.photo_url}?width=400&quality=75`} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : (club.is_featured ? '🌟' : '💜')}
           </div>
           <div style={{ flex: 1 }}>
@@ -261,7 +264,7 @@ export default function ClubDetail() {
                   {todayHours || 'Closed'}
                 </span>
                 <button
-                  onClick={() => setShowAllHours(!showAllHours)}
+                  onClick={(e) => { e.stopPropagation(); setShowAllHours(!showAllHours) }}
                   style={{ width: 24, height: 24, borderRadius: 20, border: '1px solid #3a3d60', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <span style={{ color: '#8890c0', fontSize: 11, lineHeight: 1, display: 'block', transform: showAllHours ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▾</span>
                 </button>
@@ -301,7 +304,7 @@ export default function ClubDetail() {
                     onClick={() => window.location.href = `/dancers/${dancer.id}`}
                     style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '1', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
                     {photo
-                      ? <img src={photo} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={`${photo}?width=400&quality=75`} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>}
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
                       <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{dancer.stage_name}</div>
@@ -353,6 +356,11 @@ export default function ClubDetail() {
                 </div>
               </div>
               <div style={{ marginBottom: 12 }}>
+                <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Review title</div>
+                <input value={reviewTitle} onChange={e => setReviewTitle(e.target.value)} placeholder="Summarize your experience in one line..."
+                  style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ marginBottom: 12 }}>
                 <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Your review</div>
                 <textarea value={reviewText} onChange={e => setReviewText(e.target.value)} placeholder="Share your experience..."
                   rows={3}
@@ -382,7 +390,7 @@ export default function ClubDetail() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF2D78', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
                     {review.profile_username && profileAvatars[review.profile_username]
-                      ? <img src={profileAvatars[review.profile_username]} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={`${profileAvatars[review.profile_username]}?width=100&quality=80`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : (review.profile_username || review.username)[0].toUpperCase()}
                   </div>
                   <div>
@@ -396,6 +404,7 @@ export default function ClubDetail() {
                 </div>
                 <StarDisplay rating={review.rating} size={14} />
               </div>
+              {review.title && <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{review.title}</div>}
               <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: review.admin_reply ? 10 : 0 }}>{review.review}</div>
               {review.edited && <div style={{ color: '#555', fontSize: 11, marginTop: 4, fontStyle: 'italic' }}>edited</div>}
               {review.admin_reply && (
@@ -417,7 +426,7 @@ export default function ClubDetail() {
                 style={{ background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12, border: `1px solid ${nearby.is_featured ? '#FFD700' : '#1e2140'}`, display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
                 <div style={{ width: 44, height: 44, borderRadius: 10, background: nearby.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                   {nearby.photo_url
-                    ? <img src={nearby.photo_url} alt={nearby.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={`${nearby.photo_url}?width=400&quality=75`} alt={nearby.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : (nearby.is_featured ? '🌟' : '💜')}
                 </div>
                 <div style={{ flex: 1 }}>
