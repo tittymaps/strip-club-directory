@@ -251,7 +251,8 @@ export default function UserProfile() {
               </div>
             ) : (
               <div>
-                <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: 6 }}>{review.review}</div>
+                {review.title && <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{review.title}</div>}
+                  <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5, marginBottom: 6 }}>{review.review}</div>
                 {review.edited && (
                   <div style={{ color: '#555', fontSize: 11, marginBottom: 6, fontStyle: 'italic' }}>edited</div>
                 )}
