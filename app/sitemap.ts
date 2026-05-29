@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/bikini-baristas-near-me`, changeFrequency: 'daily' as const, priority: 0.9 },
     { url: `${baseUrl}/dancers`, changeFrequency: 'daily', priority: 0.8 },
     { url: `${baseUrl}/states`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/lingerie-modeling-near-me`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
     { url: `${baseUrl}/become-a-dancer`, changeFrequency: 'monthly', priority: 0.6 },
   ]
 
