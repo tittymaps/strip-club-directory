@@ -27,7 +27,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 
     if (clubs && clubs.length > 0) {
       clubNames = clubs.map(c => c.name)
-      cities = [...new Set(clubs.map(c => `${c.city}, ${c.state}`))]
+      const citySet: Record<string, boolean> = {}
+      clubs.forEach(c => { citySet[`${c.city}, ${c.state}`] = true })
+      cities = Object.keys(citySet)
       isBikiniOnly = clubs.every(c => c.nude_level === 'bikini' && c.bar_type === 'cafe')
     }
   }
