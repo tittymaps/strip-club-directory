@@ -3,6 +3,7 @@ import './globals.css'
 import BottomNav from './components/BottomNav'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import DesktopQR from './components/DesktopQR'
 
 export const metadata: Metadata = {
   title: 'TittyMaps - Strip Club Directory',
@@ -43,6 +44,7 @@ export default function RootLayout({
         <BottomNav />
         <Analytics />
         <SpeedInsights />
+        <DesktopQR />
       </body>
     </html>
   )
