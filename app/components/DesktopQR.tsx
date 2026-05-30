@@ -26,7 +26,7 @@ export default function DesktopQR() {
   return (
     <div style={{
       position: 'fixed',
-      bottom: 90,
+      bottom: 110,
       right: 20,
       background: '#131629',
       border: '1px solid #FF2D78',
@@ -41,9 +41,9 @@ export default function DesktopQR() {
     }}>
       <button onClick={dismiss} style={{ position: 'absolute', top: 6, right: 8, background: 'transparent', border: 'none', color: '#3a3d60', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: 0 }}>✕</button>
       <img
-        src="https://chart.googleapis.com/chart?cht=qr&chs=120x120&chl=https://tittymaps.com&choe=UTF-8"
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://tittymaps.com&bgcolor=ffffff&color=000000&margin=4`}
         alt="QR code for tittymaps.com"
-        style={{ width: 90, height: 90, borderRadius: 8, background: 'white', padding: 4 }}
+        style={{ width: 90, height: 90, borderRadius: 8 }}
       />
       <div style={{ textAlign: 'center' }}>
         <div style={{ color: 'white', fontSize: 11, fontWeight: 600, fontFamily: 'sans-serif', marginBottom: 2 }}>TittyMaps works best on mobile</div>
