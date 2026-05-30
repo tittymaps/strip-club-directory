@@ -31,23 +31,26 @@ export default function DesktopQR() {
       background: '#131629',
       border: '1px solid #FF2D78',
       borderRadius: 14,
-      padding: '12px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 8,
+      width: 140,
+      overflow: 'hidden',
       zIndex: 99,
       boxShadow: '0 2px 16px rgba(255,45,120,0.15)',
     }}>
-      <button onClick={dismiss} style={{ position: 'absolute', top: 6, right: 8, background: 'transparent', border: 'none', color: '#3a3d60', fontSize: 14, cursor: 'pointer', lineHeight: 1, padding: 0 }}>✕</button>
-      <img
-        src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://tittymaps.com&bgcolor=ffffff&color=000000&margin=4`}
-        alt="QR code for tittymaps.com"
-        style={{ width: 90, height: 90, borderRadius: 8 }}
-      />
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ color: 'white', fontSize: 11, fontWeight: 600, fontFamily: 'sans-serif', marginBottom: 2 }}>TittyMaps works best on mobile</div>
-        <div style={{ color: '#8890c0', fontSize: 10, fontFamily: 'sans-serif' }}>Scan to use on your phone</div>
+      <button onClick={dismiss} style={{ position: 'absolute', top: 7, right: 9, background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', lineHeight: 1, padding: 0, zIndex: 1 }}>✕</button>
+
+      <div style={{ background: '#FF2D78', padding: '10px 14px', textAlign: 'center' }}>
+        <div style={{ color: 'white', fontSize: 11, fontWeight: 700, fontFamily: 'sans-serif', lineHeight: 1.4 }}>TittyMaps works best on mobile</div>
+      </div>
+
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: 'white', borderRadius: 8, padding: 5, width: 90, height: 90, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://tittymaps.com&bgcolor=ffffff&color=000000&margin=2"
+            alt="QR code for tittymaps.com"
+            style={{ width: 80, height: 80 }}
+          />
+        </div>
+        <div style={{ color: '#8890c0', fontSize: 10, fontFamily: 'sans-serif', textAlign: 'center', lineHeight: 1.4 }}>Scan to use on your phone</div>
       </div>
     </div>
   )
