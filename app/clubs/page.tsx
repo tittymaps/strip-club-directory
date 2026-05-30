@@ -59,16 +59,15 @@ export default function ClubsPage() {
     const q = value.toLowerCase()
     const results: any[] = []
 
-    // Match clubs
     clubs.forEach(club => {
       if (club.name.toLowerCase().includes(q)) {
         results.push({ type: 'club', label: club.name, sublabel: `${club.city}, ${STATE_NAMES[club.state] || club.state}`, href: `/clubs/${club.id}`, icon: '🏛️' })
       }
     })
 
-    // Match cities
-    const cities = Array.from(new Set(clubs.map(c => c.city))) as string[]
-    cities.forEach(city => {
+    const cityMap: Record<string, boolean> = {}
+    clubs.forEach(c => { cityMap[c.city] = true })
+    Object.keys(cityMap).forEach(city => {
       if (city.toLowerCase().includes(q)) {
         const club = clubs.find(c => c.city === city)
         if (club) {
@@ -77,7 +76,6 @@ export default function ClubsPage() {
       }
     })
 
-    // Match states
     Object.entries(STATE_NAMES).forEach(([code, name]) => {
       if (name.toLowerCase().includes(q) || code.toLowerCase().includes(q)) {
         if (clubs.some(c => c.state === code)) {
@@ -112,7 +110,7 @@ export default function ClubsPage() {
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.city.toLowerCase().includes(search.toLowerCase()) ||
       c.state.toLowerCase().includes(search.toLowerCase())
-   const matchesFilter =
+    const matchesFilter =
       filter === 'all' ? true :
       filter === 'full_nude' ? c.nude_level === 'full_nude' :
       filter === 'topless' ? c.nude_level === 'topless' :
@@ -134,7 +132,6 @@ export default function ClubsPage() {
         <ProfileButton />
       </div>
 
-      {/* Search with autocomplete */}
       <div style={{ padding: '12px 16px 0', position: 'relative' }} ref={searchRef}>
         <input
           value={search}
@@ -189,7 +186,7 @@ export default function ClubsPage() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-            {filtered.map(club => (
+            {filtered.map((club, index) => (
               <div key={club.id}
                 onClick={() => window.location.href = `/clubs/${club.id}`}
                 style={{
@@ -199,7 +196,12 @@ export default function ClubsPage() {
                   border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`
                 }}>
                 {club.photo_url
-                  ? <img src={club.photo_url ? `${club.photo_url}?width=400&quality=75` : ''} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img
+                      src={`${club.photo_url}?width=400&quality=75`}
+                      alt={club.name}
+                      loading={index < 6 ? 'eager' : 'lazy'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, background: club.is_featured ? '#1a1200' : '#131629' }}>
                       {club.is_featured ? '🌟' : '💜'}
                     </div>
@@ -217,7 +219,6 @@ export default function ClubsPage() {
                     </span>
                   </div>
                 </div>
-                
               </div>
             ))}
           </div>
