@@ -45,7 +45,9 @@ export default function AuthPage() {
     }
 
     setLoading(false)
-    window.location.href = '/'
+    const params = new URLSearchParams(window.location.search)
+    const redirect = params.get('redirect')
+    window.location.href = redirect || '/'
   }
 
   async function handleLogin() {
@@ -55,7 +57,6 @@ export default function AuthPage() {
 
     let loginEmail = emailOrUsername
 
-    // If not an email address look up the email by username
     if (!emailOrUsername.includes('@')) {
       const { data: profile } = await supabase
         .from('profiles')
@@ -78,7 +79,10 @@ export default function AuthPage() {
     })
 
     if (loginError) { setError(loginError.message); setLoading(false); return }
-    window.location.href = '/'
+
+    const params = new URLSearchParams(window.location.search)
+    const redirect = params.get('redirect')
+    window.location.href = redirect || '/'
   }
 
   async function handleForgotPassword() {
