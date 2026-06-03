@@ -548,14 +548,52 @@ export default function AdminPage() {
                   )}
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
-                {req.name && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Name: </span><span style={{ color: 'white', fontSize: 12 }}>{req.name}</span></div>}
-                {req.address && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Address: </span><span style={{ color: 'white', fontSize: 12 }}>{req.address}</span></div>}
-                {req.city && <div><span style={{ color: '#8890c0', fontSize: 11 }}>City: </span><span style={{ color: 'white', fontSize: 12 }}>{req.city}</span></div>}
-                {req.state && <div><span style={{ color: '#8890c0', fontSize: 11 }}>State: </span><span style={{ color: 'white', fontSize: 12 }}>{req.state}</span></div>}
-                {req.nude_level && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Nude level: </span><span style={{ color: 'white', fontSize: 12 }}>{req.nude_level}</span></div>}
-                {req.bar_type && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Bar type: </span><span style={{ color: 'white', fontSize: 12 }}>{req.bar_type}</span></div>}
-                {req.cover_charge && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Cover: </span><span style={{ color: 'white', fontSize: 12 }}>{req.cover_charge}</span></div>}
+              <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #2a2d50', padding: '10px 12px', marginBottom: 10 }}>
+                <div style={{ color: '#FF2D78', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>📝 Suggested changes</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {req.name && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Club name</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.name}</div>
+                    </div>
+                  )}
+                  {req.address && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Address</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.address}</div>
+                    </div>
+                  )}
+                  {req.city && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>City</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.city}</div>
+                    </div>
+                  )}
+                  {req.state && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>State</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.state}</div>
+                    </div>
+                  )}
+                  {req.nude_level && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Nude level</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.nude_level}</div>
+                    </div>
+                  )}
+                  {req.bar_type && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Bar type</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.bar_type}</div>
+                    </div>
+                  )}
+                  {req.cover_charge && (
+                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Cover charge</div>
+                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.cover_charge}</div>
+                    </div>
+                  )}
+                </div>
               </div>
               {req.hours && Object.values(req.hours).some((h: any) => h) && (
                 <div style={{ marginBottom: 10 }}>
