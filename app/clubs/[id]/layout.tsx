@@ -13,7 +13,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     .eq('id', params.id)
     .single()
 
-  if (!club) return { title: 'Strip Club | TittyMaps' }
+  if (!club) return {
+    title: 'Strip Club | TittyMaps',
+    alternates: { canonical: `https://tittymaps.com/clubs/${params.id}` }
+  }
 
   const isBikiniCafe = club.nude_level === 'bikini' && club.bar_type === 'cafe'
   const categoryLabel = isBikiniCafe ? 'Bikini Coffee Shop' : 'Strip Club'
@@ -31,7 +34,15 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       title: `${club.name} - ${categoryLabel} in ${club.city}, ${club.state} | TittyMaps`,
       description: `${club.name} is a ${nudeLabel} ${categoryLabel.toLowerCase()} in ${club.city}, ${club.state}. View hours, cover charge and reviews on TittyMaps.`,
       url: canonicalUrl,
-    }
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+      },
+    },
   }
 }
 
