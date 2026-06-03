@@ -53,6 +53,15 @@ export default function ClubDetail() {
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState('')
   const [reviewSuccess, setReviewSuccess] = useState(false)
+  const [showUpdateForm, setShowUpdateForm] = useState(false)
+  const [updateSubmitted, setUpdateSubmitted] = useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
+  const [updateForm, setUpdateForm] = useState({
+    name: '', address: '', city: '', state: '',
+    nude_level: '', bar_type: '', cover_charge: '',
+    hours: { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' },
+    additional_comments: ''
+  })
 
   useEffect(() => {
     if (id) {
@@ -65,6 +74,17 @@ export default function ClubDetail() {
     const { data } = await supabase.from('clubs').select('*').eq('id', id).single()
     setClub(data)
     if (data) {
+      setUpdateForm({
+        name: data.name || '',
+        address: data.address || '',
+        city: data.city || '',
+        state: data.state || '',
+        nude_level: data.nude_level || '',
+        bar_type: data.bar_type || '',
+        cover_charge: data.cover_charge || '',
+        hours: data.hours || { Mon: '', Tue: '', Wed: '', Thu: '', Fri: '', Sat: '', Sun: '' },
+        additional_comments: ''
+      })
       const { data: dancerData } = await supabase
         .from('dancers')
         .select('*')
@@ -85,14 +105,9 @@ export default function ClubDetail() {
   }
 
   async function fetchProfileAvatars(reviewData: any[]) {
-    const usernames = reviewData
-      .filter(r => r.profile_username)
-      .map(r => r.profile_username)
+    const usernames = reviewData.filter(r => r.profile_username).map(r => r.profile_username)
     if (usernames.length === 0) return
-    const { data } = await supabase
-      .from('profiles')
-      .select('username, avatar_url')
-      .in('username', usernames)
+    const { data } = await supabase.from('profiles').select('username, avatar_url').in('username', usernames)
     if (!data) return
     const map: Record<string, string> = {}
     data.forEach(p => { if (p.avatar_url) map[p.username] = p.avatar_url })
@@ -121,6 +136,36 @@ export default function ClubDetail() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   }
 
+  async function handleUpdateClick() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { window.location.href = '/auth'; return }
+    setShowUpdateForm(true)
+  }
+
+  async function submitUpdate() {
+    setUpdateLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: profile } = user ? await supabase.from('profiles').select('username').eq('id', user.id).single() : { data: null }
+    await supabase.from('club_update_requests').insert({
+      club_id: id,
+      club_name: club.name,
+      user_id: user?.id || null,
+      profile_username: profile?.username || null,
+      name: updateForm.name,
+      address: updateForm.address,
+      city: updateForm.city,
+      state: updateForm.state,
+      nude_level: updateForm.nude_level,
+      bar_type: updateForm.bar_type,
+      cover_charge: updateForm.cover_charge,
+      hours: updateForm.hours,
+      additional_comments: updateForm.additional_comments,
+      status: 'pending',
+    })
+    setUpdateLoading(false)
+    setUpdateSubmitted(true)
+  }
+
   async function submitReview() {
     if (!reviewRating || !reviewText) {
       setReviewError('Please select a star rating and write a review.')
@@ -128,15 +173,9 @@ export default function ClubDetail() {
     }
     setReviewLoading(true)
     setReviewError('')
-
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      window.location.href = '/auth'
-      return
-    }
-
+    if (!user) { window.location.href = '/auth'; return }
     const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single()
-
     const { error } = await supabase.from('reviews').insert({
       club_id: id,
       username: profile?.username || user.email,
@@ -147,7 +186,6 @@ export default function ClubDetail() {
       user_id: user.id,
       profile_username: profile?.username,
     })
-
     setReviewLoading(false)
     if (error) {
       if (error.code === '23505') {
@@ -201,6 +239,101 @@ export default function ClubDetail() {
         </div>
       )}
 
+      {/* Update form modal */}
+      {showUpdateForm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 200, overflowY: 'auto', padding: 16 }}>
+          <div style={{ background: '#0D0F1E', borderRadius: 16, border: '1px solid #1e2140', padding: 20, maxWidth: 500, margin: '0 auto' }}>
+            {updateSubmitted ? (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+                <div style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Thank you!</div>
+                <div style={{ color: '#8890c0', fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>Your update request has been submitted. We will review it and make any necessary changes shortly.</div>
+                <button onClick={() => { setShowUpdateForm(false); setUpdateSubmitted(false) }}
+                  style={{ background: '#FF2D78', border: 'none', borderRadius: 12, color: 'white', padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  Close
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <div>
+                    <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 4px' }}>Update Club Info</h2>
+                    <div style={{ color: '#8890c0', fontSize: 12 }}>Changes will be reviewed before going live</div>
+                  </div>
+                  <button onClick={() => setShowUpdateForm(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
+                </div>
+
+                {[
+                  { label: 'Club name', key: 'name', placeholder: 'Club name' },
+                  { label: 'Address', key: 'address', placeholder: 'Street address' },
+                  { label: 'City', key: 'city', placeholder: 'City' },
+                  { label: 'State', key: 'state', placeholder: 'e.g. ME' },
+                  { label: 'Cover charge', key: 'cover_charge', placeholder: 'e.g. $10 weekdays' },
+                ].map(field => (
+                  <div key={field.key} style={{ marginBottom: 12 }}>
+                    <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>{field.label}</div>
+                    <input value={(updateForm as any)[field.key]}
+                      onChange={e => setUpdateForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                      placeholder={field.placeholder}
+                      style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
+                  </div>
+                ))}
+
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Nude level</div>
+                  <select value={updateForm.nude_level} onChange={e => setUpdateForm(prev => ({ ...prev, nude_level: e.target.value }))}
+                    style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
+                    <option value="">Select...</option>
+                    <option value="full_nude">Full nude</option>
+                    <option value="topless">Topless</option>
+                    <option value="bikini">Bikini</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Bar type</div>
+                  <select value={updateForm.bar_type} onChange={e => setUpdateForm(prev => ({ ...prev, bar_type: e.target.value }))}
+                    style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13 }}>
+                    <option value="">Select...</option>
+                    <option value="full_bar">Full bar</option>
+                    <option value="byob">BYOB</option>
+                    <option value="cafe">Cafe</option>
+                    <option value="none">No bar</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Hours</div>
+                  {DAYS.map(day => (
+                    <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span style={{ color: '#8890c0', fontSize: 12, width: 30 }}>{day}</span>
+                      <input value={updateForm.hours[day as keyof typeof updateForm.hours]}
+                        onChange={e => setUpdateForm(prev => ({ ...prev, hours: { ...prev.hours, [day]: e.target.value } }))}
+                        placeholder="e.g. 8pm-2am or Closed"
+                        style={{ flex: 1, background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '7px 10px', color: 'white', fontSize: 12 }} />
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Additional comments</div>
+                  <textarea value={updateForm.additional_comments}
+                    onChange={e => setUpdateForm(prev => ({ ...prev, additional_comments: e.target.value }))}
+                    placeholder="Describe any specific changes or corrections..."
+                    rows={3}
+                    style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical' }} />
+                </div>
+
+                <button onClick={submitUpdate} disabled={updateLoading}
+                  style={{ width: '100%', background: updateLoading ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: updateLoading ? 'not-allowed' : 'pointer' }}>
+                  {updateLoading ? 'Submitting...' : 'Submit Update Request'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
@@ -238,6 +371,11 @@ export default function ClubDetail() {
                 {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
               </span>
             </div>
+            <div style={{ textAlign: 'right', marginTop: 8 }}>
+              <span onClick={handleUpdateClick} style={{ color: '#3a3d60', fontSize: 11, cursor: 'pointer', textDecoration: 'underline' }}>
+                Update Club Info
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -263,8 +401,7 @@ export default function ClubDetail() {
                 <span style={{ color: todayHours === 'Closed' ? '#ff4444' : '#7aff9a', fontSize: 13 }}>
                   {todayHours || 'Closed'}
                 </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setShowAllHours(!showAllHours) }}
+                <button onClick={(e) => { e.stopPropagation(); setShowAllHours(!showAllHours) }}
                   style={{ width: 24, height: 24, borderRadius: 20, border: '1px solid #3a3d60', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <span style={{ color: '#8890c0', fontSize: 11, lineHeight: 1, display: 'block', transform: showAllHours ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▾</span>
                 </button>
@@ -349,9 +486,7 @@ export default function ClubDetail() {
                       onClick={() => setReviewRating(s)}
                       onMouseEnter={() => setReviewHover(s)}
                       onMouseLeave={() => setReviewHover(0)}
-                      style={{ fontSize: 28, cursor: 'pointer', color: s <= (reviewHover || reviewRating) ? '#FFD700' : '#3a3d60' }}>
-                      ★
-                    </span>
+                      style={{ fontSize: 28, cursor: 'pointer', color: s <= (reviewHover || reviewRating) ? '#FFD700' : '#3a3d60' }}>★</span>
                   ))}
                 </div>
               </div>
@@ -394,8 +529,7 @@ export default function ClubDetail() {
                       : (review.profile_username || review.username)[0].toUpperCase()}
                   </div>
                   <div>
-                    <div
-                      onClick={() => { if (review.profile_username) window.location.href = `/users/${review.profile_username}` }}
+                    <div onClick={() => { if (review.profile_username) window.location.href = `/users/${review.profile_username}` }}
                       style={{ color: review.profile_username ? '#FF2D78' : 'white', fontSize: 13, fontWeight: 600, cursor: review.profile_username ? 'pointer' : 'default' }}>
                       {review.profile_username ? `@${review.profile_username}` : review.username}
                     </div>
@@ -449,7 +583,6 @@ export default function ClubDetail() {
             ))}
           </div>
         )}
-
       </div>
     </div>
   )
