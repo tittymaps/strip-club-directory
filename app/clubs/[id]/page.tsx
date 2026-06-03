@@ -70,6 +70,17 @@ export default function ClubDetail() {
     }
   }, [id])
 
+  // Auto-open update form if redirected back from auth
+  useEffect(() => {
+    if (club) {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('update') === 'true') {
+        setShowUpdateForm(true)
+        window.history.replaceState({}, '', `/clubs/${id}`)
+      }
+    }
+  }, [club])
+
   async function fetchClub() {
     const { data } = await supabase.from('clubs').select('*').eq('id', id).single()
     setClub(data)
@@ -138,14 +149,19 @@ export default function ClubDetail() {
 
   async function handleUpdateClick() {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = '/auth'; return }
+    if (!user) {
+      window.location.href = `/auth?redirect=/clubs/${id}?update=true`
+      return
+    }
     setShowUpdateForm(true)
   }
 
   async function submitUpdate() {
     setUpdateLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const { data: profile } = user ? await supabase.from('profiles').select('username').eq('id', user.id).single() : { data: null }
+    const { data: profile } = user
+      ? await supabase.from('profiles').select('username').eq('id', user.id).single()
+      : { data: null }
     await supabase.from('club_update_requests').insert({
       club_id: id,
       club_name: club.name,
@@ -174,7 +190,7 @@ export default function ClubDetail() {
     setReviewLoading(true)
     setReviewError('')
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { window.location.href = '/auth'; return }
+    if (!user) { window.location.href = `/auth?redirect=/clubs/${id}`; return }
     const { data: profile } = await supabase.from('profiles').select('username').eq('id', user.id).single()
     const { error } = await supabase.from('reviews').insert({
       club_id: id,
@@ -239,7 +255,6 @@ export default function ClubDetail() {
         </div>
       )}
 
-      {/* Update form modal */}
       {showUpdateForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', zIndex: 200, overflowY: 'auto', padding: 16 }}>
           <div style={{ background: '#0D0F1E', borderRadius: 16, border: '1px solid #1e2140', padding: 20, maxWidth: 500, margin: '0 auto' }}>
@@ -257,7 +272,7 @@ export default function ClubDetail() {
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                   <div>
-                    <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 4px' }}>Update Club Info</h2>
+                    <div style={{ color: 'white', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Update Club Info</div>
                     <div style={{ color: '#8890c0', fontSize: 12 }}>Changes will be reviewed before going live</div>
                   </div>
                   <button onClick={() => setShowUpdateForm(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
@@ -460,7 +475,7 @@ export default function ClubDetail() {
             {!showReviewForm && !reviewSuccess && (
               <button onClick={async () => {
                 const { data: { user } } = await supabase.auth.getUser()
-                if (!user) { window.location.href = '/auth'; return }
+                if (!user) { window.location.href = `/auth?redirect=/clubs/${id}`; return }
                 setShowReviewForm(true)
               }}
                 style={{ background: '#FF2D78', border: 'none', borderRadius: 20, color: 'white', padding: '5px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
