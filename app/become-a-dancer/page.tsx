@@ -139,7 +139,6 @@ export default function BecomeADancer() {
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How to get featured</div>
 
-        {/* Step 1 */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>1</div>
           <div>
@@ -152,7 +151,6 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        {/* Step 2 — highlighted as most important */}
         <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', marginBottom: 20, display: 'flex', gap: 14 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
           <div>
@@ -166,7 +164,6 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        {/* Step 3 */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 4 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>3</div>
           <div>
@@ -176,18 +173,21 @@ export default function BecomeADancer() {
         </div>
       </div>
 
+      {/* Form section */}
       <div style={{ padding: '20px' }}>
 
-        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', marginBottom: 24 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, lineHeight: 1.5 }}>Already have Fansly? You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link.</div>
+        <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '14px 16px', marginBottom: 24 }}>
+          <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Already on Fansly?</div>
+          <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5 }}>You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link.</div>
         </div>
 
-        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>Your info</div>
+        <div style={{ color: '#FF2D78', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>Your info</div>
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Photos (up to 3)</div>
-          <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>First photo becomes your profile picture. All photos appear on your profile page.</div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+        {/* Photos */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📷 Photos <span style={{ color: '#8890c0', fontWeight: 400 }}>(up to 3)</span></div>
+          <div style={{ color: '#555', fontSize: 11, marginBottom: 12 }}>First photo becomes your profile picture. All photos appear on your profile page.</div>
+          <div style={{ display: 'flex', gap: 10 }}>
             {photoPreviews.map((preview, i) => (
               <div key={i} style={{ position: 'relative', width: 80, height: 80, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
                 <img src={preview} alt={`photo ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -195,60 +195,66 @@ export default function BecomeADancer() {
                   style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', color: 'white', width: 20, height: 20, fontSize: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   x
                 </button>
-                {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,45,120,0.8)', color: 'white', fontSize: 9, textAlign: 'center', padding: '2px 0' }}>Profile pic</div>}
+                {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(255,45,120,0.85)', color: 'white', fontSize: 9, textAlign: 'center', padding: '2px 0' }}>Profile pic</div>}
               </div>
             ))}
             {photos.length < 3 && (
-              <label style={{ width: 80, height: 80, borderRadius: 10, background: '#131629', border: '2px dashed #3a3d60', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, flexDirection: 'column', gap: 4 }}>
+              <label style={{ width: 80, height: 80, borderRadius: 10, background: '#0D0F1E', border: '2px dashed #FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, flexDirection: 'column', gap: 4 }}>
                 <span style={{ fontSize: 24 }}>📷</span>
-                <span style={{ color: '#8890c0', fontSize: 9 }}>Add photo</span>
+                <span style={{ color: '#FF2D78', fontSize: 9, fontWeight: 600 }}>Add photo</span>
                 <input type="file" accept="image/*" multiple onChange={handlePhotoChange} style={{ display: 'none' }} />
               </label>
             )}
           </div>
         </div>
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Stage name</div>
+        {/* Stage name */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>💃 Stage name</div>
           <input value={stageName} onChange={e => setStageName(e.target.value)} placeholder="Your stage name"
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Fansly profile link</div>
+        {/* Fansly link */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>🔗 Fansly profile link</div>
           <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="https://fansly.com/yourname"
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Your email <span style={{ color: '#555', fontSize: 11 }}>(optional — we will notify you when approved)</span></div>
+        {/* Email */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📧 Email <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional</span></div>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 8 }}>We will notify you when your profile goes live</div>
           <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="text"
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 6 }}>Which clubs do you perform at? (pick up to 3)</div>
+        {/* Clubs */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 24 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>🏛️ Where do you perform? <span style={{ color: '#8890c0', fontSize: 11, fontWeight: 400 }}>pick up to 3</span></div>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>Select the clubs or venues you work at</div>
           <input value={clubSearch} onChange={e => setClubSearch(e.target.value)} placeholder="Search clubs by name or city..."
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 8 }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 10 }} />
           {selectedClubs.length > 0 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
               {selectedClubs.map(name => (
                 <span key={name} onClick={() => toggleClub(name)} style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '3px 10px', fontSize: 11, cursor: 'pointer' }}>
-                  {name} x
+                  {name} ✕
                 </span>
               ))}
             </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
             {filteredClubs.length === 0
               ? <div style={{ color: '#8890c0', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>No clubs found</div>
               : filteredClubs.map(club => {
                 const selected = selectedClubs.includes(club.name)
                 return (
                   <div key={club.id} onClick={() => toggleClub(club.name)}
-                    style={{ background: selected ? '#1a0d2e' : '#131629', border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`, borderRadius: 10, padding: '12px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1 }}>
+                    style={{ background: selected ? '#1a0d2e' : '#0D0F1E', border: `1px solid ${selected ? '#FF2D78' : '#2a2d50'}`, borderRadius: 10, padding: '10px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1 }}>
                     <div>
-                      <div style={{ color: 'white', fontSize: 14 }}>{club.name}</div>
+                      <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
                       <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
                     </div>
                     {selected && <span style={{ color: '#FF2D78', fontSize: 18 }}>✓</span>}
@@ -258,11 +264,15 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        {error && <div style={{ color: '#ff4444', fontSize: 13, marginBottom: 12 }}>{error}</div>}
+        {error && (
+          <div style={{ background: '#2e1a1a', border: '1px solid #ff4444', borderRadius: 10, padding: '12px 14px', color: '#ff4444', fontSize: 13, marginBottom: 14 }}>
+            {error}
+          </div>
+        )}
 
         <button onClick={handleSubmit} disabled={loading}
-          style={{ width: '100%', background: loading ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '15px', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}>
-          {loading ? 'Submitting...' : 'Apply to be Featured'}
+          style={{ width: '100%', background: loading ? '#333' : 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', border: 'none', borderRadius: 12, padding: '16px', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 4px 20px rgba(255,45,120,0.4)' }}>
+          {loading ? 'Submitting...' : '💃 Apply to be Featured'}
         </button>
 
         <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginTop: 12 }}>
