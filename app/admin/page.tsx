@@ -14,12 +14,13 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [password, setPassword] = useState('')
   const [pwError, setPwError] = useState('')
-  const [tab, setTab] = useState<'applications' | 'clubs' | 'dancers' | 'reviews' | 'users'>('applications')
+  const [tab, setTab] = useState<'applications' | 'clubs' | 'dancers' | 'reviews' | 'users' | 'updates'>('applications')
   const [applications, setApplications] = useState<any[]>([])
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
+  const [updateRequests, setUpdateRequests] = useState<any[]>([])
   const [replyText, setReplyText] = useState<Record<string, string>>({})
   const [showAddClub, setShowAddClub] = useState(false)
   const [editClub, setEditClub] = useState<any>(null)
@@ -49,6 +50,7 @@ export default function AdminPage() {
       fetchDancers()
       fetchReviews()
       fetchUsers()
+      fetchUpdateRequests()
     }
   }, [authed])
 
@@ -76,11 +78,22 @@ export default function AdminPage() {
   }
 
   async function fetchUsers() {
+    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    setUsers(data || [])
+  }
+
+  async function fetchUpdateRequests() {
     const { data } = await supabase
-      .from('profiles')
+      .from('club_update_requests')
       .select('*')
       .order('created_at', { ascending: false })
-    setUsers(data || [])
+    setUpdateRequests(data || [])
+  }
+
+  async function dismissUpdateRequest(id: string) {
+    await supabase.from('club_update_requests').update({ status: 'reviewed' }).eq('id', id)
+    setMessage('Request marked as reviewed.')
+    fetchUpdateRequests()
   }
 
   async function deleteUserAvatar(userId: string) {
@@ -111,12 +124,7 @@ export default function AdminPage() {
     await fetch('/api/notify-dancer-approved', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        stage_name: app.stage_name,
-        email: app.email,
-        is_featured: true,
-        dancer_id: data.id,
-      })
+      body: JSON.stringify({ stage_name: app.stage_name, email: app.email, is_featured: true, dancer_id: data.id })
     })
     setMessage(`${app.stage_name} approved!`)
     fetchApplications()
@@ -237,7 +245,6 @@ export default function AdminPage() {
     setSaving(true)
     let photoUrl = editDancer?.photo_url || ''
     let photoUrls: string[] = editDancer?.photo_urls || []
-
     if (dancerPhotos.length > 0) {
       const uploadedUrls: string[] = []
       for (const photo of dancerPhotos) {
@@ -251,7 +258,6 @@ export default function AdminPage() {
       photoUrls = [...uploadedUrls, ...photoUrls].slice(0, 3)
       photoUrl = photoUrls[0]
     }
-
     const payload = {
       stage_name: dancerForm.stage_name,
       fansly_url: dancerForm.fansly_url || null,
@@ -337,14 +343,15 @@ export default function AdminPage() {
       )}
 
       <div style={{ display: 'flex', borderBottom: '1px solid #1e2140', margin: '0 16px', overflowX: 'auto' }}>
-        {(['applications', 'clubs', 'dancers', 'reviews', 'users'] as const).map(t => (
+        {(['applications', 'clubs', 'dancers', 'reviews', 'users', 'updates'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             style={{ flexShrink: 0, padding: '12px 10px', background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? '#FF2D78' : 'transparent'}`, color: tab === t ? '#FF2D78' : '#8890c0', fontSize: 12, cursor: 'pointer', textTransform: 'capitalize' }}>
             {t === 'applications' ? `Apps (${applications.filter(a => a.status === 'pending').length})`
               : t === 'clubs' ? `Clubs (${clubs.length})`
               : t === 'dancers' ? `Dancers (${dancers.length})`
               : t === 'reviews' ? `Reviews (${reviews.length})`
-              : `Users (${users.length})`}
+              : t === 'users' ? `Users (${users.length})`
+              : `Updates (${updateRequests.filter(r => r.status === 'pending').length})`}
           </button>
         ))}
       </div>
@@ -451,6 +458,7 @@ export default function AdminPage() {
                   Delete
                 </button>
               </div>
+              {review.title && <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{review.title}</div>}
               <div style={{ color: '#ccc', fontSize: 13, marginBottom: 10, lineHeight: 1.5 }}>{review.review}</div>
               <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>{new Date(review.created_at).toLocaleDateString()}</div>
               {review.admin_reply ? (
@@ -460,11 +468,8 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div>
-                  <textarea
-                    value={replyText[review.id] || ''}
-                    onChange={e => setReplyText(prev => ({ ...prev, [review.id]: e.target.value }))}
-                    placeholder="Write a reply as TittyMaps Team..."
-                    rows={2}
+                  <textarea value={replyText[review.id] || ''} onChange={e => setReplyText(prev => ({ ...prev, [review.id]: e.target.value }))}
+                    placeholder="Write a reply as TittyMaps Team..." rows={2}
                     style={{ width: '100%', background: '#0D0F1E', border: '1px solid #1e2140', borderRadius: 8, padding: '8px 10px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical', marginBottom: 6 }} />
                   <button onClick={() => submitReply(review.id)}
                     style={{ background: '#FF2D78', border: 'none', borderRadius: 8, color: 'white', padding: '6px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
@@ -510,6 +515,67 @@ export default function AdminPage() {
                   {user.banned ? 'Banned' : 'Ban user'}
                 </button>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab === 'updates' && (
+        <div style={{ padding: '16px' }}>
+          {updateRequests.length === 0 ? (
+            <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
+              <div style={{ color: '#8890c0', fontSize: 14 }}>No update requests yet</div>
+            </div>
+          ) : updateRequests.map(req => (
+            <div key={req.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${req.status === 'reviewed' ? '#3a3d60' : '#FFD700'}`, padding: 16, marginBottom: 12, opacity: req.status === 'reviewed' ? 0.6 : 1 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                <div>
+                  <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{req.club_name}</div>
+                  <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 2 }}>Submitted by: {req.profile_username ? `@${req.profile_username}` : 'Anonymous'}</div>
+                  <div style={{ color: '#8890c0', fontSize: 11 }}>{new Date(req.created_at).toLocaleDateString()}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <span style={{ fontSize: 11, color: req.status === 'reviewed' ? '#3acd60' : '#FFD700', textTransform: 'uppercase', letterSpacing: 1 }}>{req.status}</span>
+                  <button onClick={() => window.location.href = `/clubs/${req.club_id}`}
+                    style={{ background: 'transparent', border: '1px solid #3a3d60', borderRadius: 8, color: '#8890c0', padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>
+                    View club
+                  </button>
+                  {req.status === 'pending' && (
+                    <button onClick={() => dismissUpdateRequest(req.id)}
+                      style={{ background: '#3acd60', border: 'none', borderRadius: 8, color: 'white', padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontWeight: 600 }}>
+                      Mark reviewed
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+                {req.name && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Name: </span><span style={{ color: 'white', fontSize: 12 }}>{req.name}</span></div>}
+                {req.address && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Address: </span><span style={{ color: 'white', fontSize: 12 }}>{req.address}</span></div>}
+                {req.city && <div><span style={{ color: '#8890c0', fontSize: 11 }}>City: </span><span style={{ color: 'white', fontSize: 12 }}>{req.city}</span></div>}
+                {req.state && <div><span style={{ color: '#8890c0', fontSize: 11 }}>State: </span><span style={{ color: 'white', fontSize: 12 }}>{req.state}</span></div>}
+                {req.nude_level && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Nude level: </span><span style={{ color: 'white', fontSize: 12 }}>{req.nude_level}</span></div>}
+                {req.bar_type && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Bar type: </span><span style={{ color: 'white', fontSize: 12 }}>{req.bar_type}</span></div>}
+                {req.cover_charge && <div><span style={{ color: '#8890c0', fontSize: 11 }}>Cover: </span><span style={{ color: 'white', fontSize: 12 }}>{req.cover_charge}</span></div>}
+              </div>
+              {req.hours && Object.values(req.hours).some((h: any) => h) && (
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 4 }}>Hours:</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
+                    {Object.entries(req.hours).filter(([, v]) => v).map(([day, hours]) => (
+                      <div key={day} style={{ fontSize: 11 }}>
+                        <span style={{ color: '#8890c0' }}>{day}: </span>
+                        <span style={{ color: 'white' }}>{hours as string}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {req.additional_comments && (
+                <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #1e2140', padding: '10px 12px' }}>
+                  <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 4 }}>Additional comments:</div>
+                  <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5 }}>{req.additional_comments}</div>
+                </div>
+              )}
             </div>
           ))}
         </div>
