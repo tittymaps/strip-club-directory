@@ -85,7 +85,7 @@ export default function AdminPage() {
   async function fetchUpdateRequests() {
     const { data } = await supabase
       .from('club_update_requests')
-      .select('*')
+      .select('*, clubs(name, address, city, state, nude_level, bar_type, cover_charge, hours)')
       .order('created_at', { ascending: false })
     setUpdateRequests(data || [])
   }
@@ -550,50 +550,53 @@ export default function AdminPage() {
               </div>
               <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #2a2d50', padding: '10px 12px', marginBottom: 10 }}>
                 <div style={{ color: '#FF2D78', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>📝 Suggested changes</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  {req.name && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Club name</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.name}</div>
-                    </div>
-                  )}
-                  {req.address && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Address</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.address}</div>
-                    </div>
-                  )}
-                  {req.city && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>City</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.city}</div>
-                    </div>
-                  )}
-                  {req.state && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>State</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.state}</div>
-                    </div>
-                  )}
-                  {req.nude_level && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Nude level</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.nude_level}</div>
-                    </div>
-                  )}
-                  {req.bar_type && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Bar type</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.bar_type}</div>
-                    </div>
-                  )}
-                  {req.cover_charge && (
-                    <div style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
-                      <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>Cover charge</div>
-                      <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req.cover_charge}</div>
-                    </div>
-                  )}
-                </div>
+                {(() => {
+                  const orig = req.clubs || {}
+                  const fields = [
+                    { key: 'name', label: 'Club name' },
+                    { key: 'address', label: 'Address' },
+                    { key: 'city', label: 'City' },
+                    { key: 'state', label: 'State' },
+                    { key: 'nude_level', label: 'Nude level' },
+                    { key: 'bar_type', label: 'Bar type' },
+                    { key: 'cover_charge', label: 'Cover charge' },
+                  ]
+                  const changedFields = fields.filter(f => req[f.key] && req[f.key] !== orig[f.key])
+                  const changedHours: [string, string][] = req.hours
+                    ? Object.entries(req.hours).filter(([day, val]) =>
+                        val && val !== (orig.hours?.[day] || '')
+                      ) as [string, string][]
+                    : []
+                  const hasChanges = changedFields.length > 0 || changedHours.length > 0
+                  if (!hasChanges) return <div style={{ color: '#555', fontSize: 12 }}>No specific field changes detected — see additional comments below.</div>
+                  return (
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: changedHours.length > 0 ? 8 : 0 }}>
+                        {changedFields.map(f => (
+                          <div key={f.key} style={{ background: '#1a1d35', borderRadius: 6, padding: '6px 10px', border: '1px solid #3a3d60' }}>
+                            <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 2 }}>{f.label}</div>
+                            <div style={{ color: '#555', fontSize: 11, marginBottom: 2, textDecoration: 'line-through' }}>{orig[f.key] || '—'}</div>
+                            <div style={{ color: '#FFD700', fontSize: 12, fontWeight: 600 }}>{req[f.key]}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {changedHours.length > 0 && (
+                        <div style={{ background: '#1a1d35', borderRadius: 6, padding: '8px 10px', border: '1px solid #3a3d60' }}>
+                          <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 6 }}>Hours changes</div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                            {changedHours.map(([day, val]) => (
+                              <div key={day}>
+                                <span style={{ color: '#8890c0', fontSize: 11 }}>{day}: </span>
+                                <span style={{ color: '#555', fontSize: 11, textDecoration: 'line-through', marginRight: 4 }}>{orig.hours?.[day] || 'Closed'}</span>
+                                <span style={{ color: '#FFD700', fontSize: 11, fontWeight: 600 }}>{val}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
               </div>
               {req.hours && Object.values(req.hours).some((h: any) => h) && (
                 <div style={{ marginBottom: 10 }}>
