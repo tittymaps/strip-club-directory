@@ -157,6 +157,7 @@ export default function BecomeADancer() {
             <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Most important step ⭐</div>
             <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
             <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible. 🫡</div>
+<div style={{ color: 'white', fontSize: 13, fontWeight: 700, marginBottom: 10, letterSpacing: 0.5 }}>CLICK THE BUTTON BELOW TO BECOME A CREATOR WITH OUR LINK ⬇️⬇️⬇️</div>
             <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
               style={{ display: 'inline-block', background: '#FF2D78', color: 'white', borderRadius: 20, padding: '6px 16px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
               Apply as creator through our link →
