@@ -177,18 +177,20 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', marginBottom: 20, display: 'flex', gap: 14 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
-          <div>
-            <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Most important step ⭐</div>
-            <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
-            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible.</div>
-             <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', outline: '3px solid rgba(255,45,120,0.4)', outlineOffset: 3, marginTop: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3, opacity: 0.85 }}>👆 Tap to unlock your Featured badge</div>
-              <div>Apply as creator through our link →</div>
-            </a>
+        <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
+            <div>
+              <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Most important step ⭐</div>
+              <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
+              <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible.</div>
+            </div>
           </div>
+          <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', outline: '3px solid rgba(255,45,120,0.4)', outlineOffset: 3 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3, opacity: 0.85 }}>👆 Tap to unlock your Featured badge</div>
+            <div>Apply as creator through our link →</div>
+          </a>
         </div>
 
         <div style={{ display: 'flex', gap: 14, marginBottom: 4 }}>
