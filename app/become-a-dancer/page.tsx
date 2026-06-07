@@ -130,10 +130,36 @@ export default function BecomeADancer() {
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
       </div>
 
-      <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
+     <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
         <div style={{ fontSize: 44, marginBottom: 12 }}>💃</div>
         <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>Get Featured on TittyMaps</h1>
-        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto' }}>Reach thousands of club-goers in your area looking for performers near them.</p>
+        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>Reach thousands of club-goers in your area looking for performers near them.</p>
+
+        <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', maxWidth: 360, margin: '0 auto', textAlign: 'left' }}>
+          <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>⭐ What you get with a Featured badge</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>🔝</span>
+              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>Always at the top</strong> — your profile shows up first on every applicable club and dancer list</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>⭐</span>
+              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>Featured badge</strong> — a gold star badge that signals you are a verified featured performer</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>💰</span>
+              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>We are incentivized to promote you</strong> — we earn a referral bonus from Fansly so we have every reason to drive fans to your profile</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>🔗</span>
+              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>Direct Fansly link</strong> — every visitor to your profile gets a direct link to your Fansly content</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 12, background: '#0D0F1E', borderRadius: 10, padding: '10px 12px', border: '1px solid #3a3d60' }}>
+            <div style={{ color: '#FFD700', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>⚠️ How to unlock Featured</div>
+            <div style={{ color: '#ccc', fontSize: 12, lineHeight: 1.6 }}>Featured placements are <strong style={{ color: 'white' }}>only available</strong> to dancers who sign up as a Fansly creator <strong style={{ color: 'white' }}>through our referral link</strong> in Step 2 below. This is free and takes less than a minute.</div>
+          </div>
+        </div>
       </div>
 
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
