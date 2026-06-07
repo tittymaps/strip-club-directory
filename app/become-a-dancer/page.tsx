@@ -183,11 +183,13 @@ export default function BecomeADancer() {
             <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Most important step ⭐</div>
             <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
             <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible.</div>
-             <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', outline: '3px solid rgba(255,45,120,0.4)', outlineOffset: 3 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3, opacity: 0.85 }}>👆 Tap to unlock your Featured badge</div>
-              <div>Apply as creator through our link →</div>
-            </a>
+             <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', outline: '3px solid rgba(255,45,120,0.4)', outlineOffset: 3 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3, opacity: 0.85 }}>👆 Tap to unlock your Featured badge</div>
+                <div>Apply as creator through our link →</div>
+              </a>
+            </div>
           </div>
         </div>
 
