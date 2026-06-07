@@ -299,7 +299,7 @@ export default function BecomeADancer() {
 
         <button onClick={handleSubmit} disabled={loading}
           style={{ width: '100%', background: loading ? '#333' : 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', border: 'none', borderRadius: 12, padding: '16px', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 4px 20px rgba(255,45,120,0.4)' }}>
-          {loading ? 'Submitting...' : '💃 Apply to be Featured'}
+          {loading ? 'Submitting...' : '💃 Submit Dancer Application'}
         </button>
 
         <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginTop: 12 }}>
