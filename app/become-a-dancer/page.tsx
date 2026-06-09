@@ -220,7 +220,7 @@ export default function BecomeADancer() {
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>📋</div>
             <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>Dancer Info</div>
           </div>
-          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Fill out the form below — this takes less than 2 minutes and gets your profile live on TittyMaps.</div>
+          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>This takes less than 2 minutes and gets your profile live on TittyMaps.</div>
         </div>
 
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
