@@ -70,7 +70,6 @@ export default function ClubDetail() {
     }
   }, [id])
 
-  // Auto-open update form if redirected back from auth
   useEffect(() => {
     if (club) {
       const params = new URLSearchParams(window.location.search)
@@ -234,6 +233,16 @@ export default function ClubDetail() {
     )
   }
 
+  const AddDancerCard = () => (
+    <div
+      onClick={() => window.location.href = '/become-a-dancer'}
+      style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#0D0F1E', border: '2px dashed #FF2D78', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+      <div style={{ fontSize: 32 }}>💃</div>
+      <div style={{ background: '#FF2D78', color: 'white', fontSize: 10, fontWeight: 700, fontFamily: 'sans-serif', borderRadius: 20, padding: '4px 10px' }}>+ Add Dancer</div>
+      <div style={{ color: '#8890c0', fontSize: 9, fontFamily: 'sans-serif', textAlign: 'center', lineHeight: 1.3, padding: '0 8px' }}>Perform here?<br/>Get featured!</div>
+    </div>
+  )
+
   if (!club) return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ color: '#FF2D78', fontSize: 16 }}>Loading...</div>
@@ -242,6 +251,7 @@ export default function ClubDetail() {
 
   const todayKey = getTodayKey()
   const todayHours = club.hours?.[todayKey]
+  const isBarista = club.nude_level === 'bikini' && club.bar_type === 'cafe'
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 100 }}>
@@ -277,7 +287,6 @@ export default function ClubDetail() {
                   </div>
                   <button onClick={() => setShowUpdateForm(false)} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 20, cursor: 'pointer' }}>✕</button>
                 </div>
-
                 {[
                   { label: 'Club name', key: 'name', placeholder: 'Club name' },
                   { label: 'Address', key: 'address', placeholder: 'Street address' },
@@ -293,7 +302,6 @@ export default function ClubDetail() {
                       style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box' }} />
                   </div>
                 ))}
-
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Nude level</div>
                   <select value={updateForm.nude_level} onChange={e => setUpdateForm(prev => ({ ...prev, nude_level: e.target.value }))}
@@ -304,7 +312,6 @@ export default function ClubDetail() {
                     <option value="bikini">Bikini</option>
                   </select>
                 </div>
-
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Bar type</div>
                   <select value={updateForm.bar_type} onChange={e => setUpdateForm(prev => ({ ...prev, bar_type: e.target.value }))}
@@ -316,7 +323,6 @@ export default function ClubDetail() {
                     <option value="none">No bar</option>
                   </select>
                 </div>
-
                 <div style={{ marginBottom: 12 }}>
                   <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Hours</div>
                   {DAYS.map(day => (
@@ -329,7 +335,6 @@ export default function ClubDetail() {
                     </div>
                   ))}
                 </div>
-
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 4 }}>Additional comments</div>
                   <textarea value={updateForm.additional_comments}
@@ -338,7 +343,6 @@ export default function ClubDetail() {
                     rows={3}
                     style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '10px 12px', color: 'white', fontSize: 13, boxSizing: 'border-box', resize: 'vertical' }} />
                 </div>
-
                 <button onClick={submitUpdate} disabled={updateLoading}
                   style={{ width: '100%', background: updateLoading ? '#333' : '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: updateLoading ? 'not-allowed' : 'pointer' }}>
                   {updateLoading ? 'Submitting...' : 'Submit Update Request'}
@@ -439,34 +443,27 @@ export default function ClubDetail() {
 
         <div style={{ marginTop: 16 }}>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
-            {club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'}
+            {isBarista ? 'Baristas' : 'Dancers'}
           </div>
-          {dancers.length === 0 ? (
-            <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>💃</div>
-              <div style={{ color: '#8890c0', fontSize: 13 }}>No featured {club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'baristas' : 'dancers'} yet</div>
-              <div style={{ color: '#555', fontSize: 11, marginTop: 4 }}>{club.nude_level === 'bikini' && club.bar_type === 'cafe' ? 'Baristas' : 'Dancers'} can be featured here through our affiliate program</div>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-              {dancers.map(dancer => {
-                const photo = dancer.photo_urls?.[0] || dancer.photo_url
-                return (
-                  <div key={dancer.id}
-                    onClick={() => window.location.href = `/dancers/${dancer.id}`}
-                    style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
-                    {photo
-                      ? <img src={`${photo}?width=400&quality=75`} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>}
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
-                      <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{dancer.stage_name}</div>
-                      {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
-                    </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {dancers.map(dancer => {
+              const photo = dancer.photo_urls?.[0] || dancer.photo_url
+              return (
+                <div key={dancer.id}
+                  onClick={() => window.location.href = `/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                  {photo
+                    ? <img src={`${photo}?width=400&quality=75`} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>}
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
+                    <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{dancer.stage_name}</div>
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
                   </div>
-                )
-              })}
-            </div>
-          )}
+                </div>
+              )
+            })}
+            <AddDancerCard />
+          </div>
         </div>
 
         <div style={{ marginTop: 20 }}>
