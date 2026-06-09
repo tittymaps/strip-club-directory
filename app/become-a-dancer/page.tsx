@@ -130,10 +130,11 @@ export default function BecomeADancer() {
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
       </div>
 
-     <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
+      {/* Hero */}
+      <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
         <div style={{ fontSize: 44, marginBottom: 12 }}>💃</div>
         <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>Get Featured on TittyMaps</h1>
-        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>Reach thousands of club-goers in your area looking for performers near them.</p>
+        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>Your customers want to subscribe to you! Let them find your links! 🔗</p>
 
         <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', maxWidth: 360, margin: '0 auto', textAlign: 'left' }}>
           <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>⭐ What you get with a Featured badge</div>
@@ -162,9 +163,11 @@ export default function BecomeADancer() {
         </div>
       </div>
 
+      {/* Steps */}
       <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How to get featured</div>
 
+        {/* Step 1 */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>1</div>
           <div>
@@ -177,6 +180,7 @@ export default function BecomeADancer() {
           </div>
         </div>
 
+        {/* Step 2 */}
         <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', marginBottom: 20 }}>
           <div style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
@@ -193,6 +197,7 @@ export default function BecomeADancer() {
           </a>
         </div>
 
+        {/* Step 3 */}
         <div style={{ display: 'flex', gap: 14, marginBottom: 4 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>3</div>
           <div>
@@ -203,16 +208,16 @@ export default function BecomeADancer() {
       </div>
 
       {/* Form section */}
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '20px', background: '#0a0b14', borderTop: '2px solid #FF2D78' }}>
 
-        <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '14px 16px', marginBottom: 24 }}>
-          <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Already on Fansly?</div>
-          <div style={{ color: '#ccc', fontSize: 13, lineHeight: 1.5 }}>You can still get listed as a Dancer without the Featured badge. Just fill out the form below and leave your existing Fansly link.</div>
+        <div style={{ background: '#131629', borderRadius: 14, border: '2px solid #FF2D78', padding: '14px 16px', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>📋</div>
+            <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>Dancer Info</div>
+          </div>
+          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Fill out the form below — this takes less than 2 minutes and gets your profile live on TittyMaps.</div>
         </div>
 
-        <div style={{ color: '#FF2D78', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700 }}>Your info</div>
-
-        {/* Photos */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📷 Photos <span style={{ color: '#8890c0', fontWeight: 400 }}>(up to 3)</span></div>
           <div style={{ color: '#555', fontSize: 11, marginBottom: 12 }}>First photo becomes your profile picture. All photos appear on your profile page.</div>
@@ -237,21 +242,18 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        {/* Stage name */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>💃 Stage name</div>
           <input value={stageName} onChange={e => setStageName(e.target.value)} placeholder="Your stage name"
             style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
-        {/* Fansly link */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>🔗 Fansly profile link</div>
           <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="https://fansly.com/yourname"
             style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
-        {/* Email */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📧 Email <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional</span></div>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 8 }}>We will notify you when your profile goes live</div>
@@ -259,7 +261,6 @@ export default function BecomeADancer() {
             style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
         </div>
 
-        {/* Clubs */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 24 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>🏛️ Where do you perform? <span style={{ color: '#8890c0', fontSize: 11, fontWeight: 400 }}>pick up to 3</span></div>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>Select the clubs or venues you work at</div>
