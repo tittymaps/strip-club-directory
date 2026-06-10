@@ -35,6 +35,13 @@ function getTodayFullName() {
   return days[new Date().getDay()]
 }
 
+function is24Hours(hours: any) {
+  if (!hours) return false
+  return Object.values(hours).some((h: any) =>
+    typeof h === 'string' && h.toLowerCase().includes('24')
+  )
+}
+
 export default function ClubDetail() {
   const { id } = useParams()
   const router = useRouter()
@@ -233,16 +240,6 @@ export default function ClubDetail() {
     )
   }
 
-  const AddDancerCard = () => (
-    <div
-      onClick={() => window.location.href = '/become-a-dancer'}
-      style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#0D0F1E', border: '2px dashed #FF2D78', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-      <div style={{ fontSize: 32 }}>💃</div>
-      <div style={{ background: '#FF2D78', color: 'white', fontSize: 10, fontWeight: 700, fontFamily: 'sans-serif', borderRadius: 20, padding: '4px 10px' }}>+ Add Dancer</div>
-      <div style={{ color: '#8890c0', fontSize: 9, fontFamily: 'sans-serif', textAlign: 'center', lineHeight: 1.3, padding: '0 8px' }}>Perform here?<br/>Get featured!</div>
-    </div>
-  )
-
   if (!club) return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ color: '#FF2D78', fontSize: 16 }}>Loading...</div>
@@ -252,6 +249,21 @@ export default function ClubDetail() {
   const todayKey = getTodayKey()
   const todayHours = club.hours?.[todayKey]
   const isBarista = club.nude_level === 'bikini' && club.bar_type === 'cafe'
+  const isLingerie = club.nude_level === 'full_nude' && club.bar_type === 'none' && is24Hours(club.hours)
+
+  const sectionLabel = isLingerie ? 'Models' : isBarista ? 'Baristas' : 'Dancers'
+  const addLabel = isLingerie ? '+ Add Model' : isBarista ? '+ Add Barista' : '+ Add Dancer'
+  const addSubtitle = isLingerie ? 'Model here?\nGet featured!' : isBarista ? 'Work here?\nGet featured!' : 'Perform here?\nGet featured!'
+
+  const AddPerformerCard = () => (
+    <div
+      onClick={() => window.location.href = '/become-a-dancer'}
+      style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#0D0F1E', border: '2px dashed #FF2D78', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+      <div style={{ fontSize: 32 }}>💃</div>
+      <div style={{ background: '#FF2D78', color: 'white', fontSize: 10, fontWeight: 700, fontFamily: 'sans-serif', borderRadius: 20, padding: '4px 10px' }}>{addLabel}</div>
+      <div style={{ color: '#8890c0', fontSize: 9, fontFamily: 'sans-serif', textAlign: 'center', lineHeight: 1.3, padding: '0 8px' }}>{addSubtitle.split('\n').map((line, i) => <span key={i}>{line}{i === 0 ? <br/> : ''}</span>)}</div>
+    </div>
+  )
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 100 }}>
@@ -443,7 +455,7 @@ export default function ClubDetail() {
 
         <div style={{ marginTop: 16 }}>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
-            {isBarista ? 'Baristas' : 'Dancers'}
+            {sectionLabel}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
             {dancers.map(dancer => {
@@ -462,7 +474,7 @@ export default function ClubDetail() {
                 </div>
               )
             })}
-            <AddDancerCard />
+            <AddPerformerCard />
           </div>
         </div>
 
