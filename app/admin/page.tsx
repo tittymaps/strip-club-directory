@@ -22,6 +22,10 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([])
   const [updateRequests, setUpdateRequests] = useState<any[]>([])
   const [replyText, setReplyText] = useState<Record<string, string>>({})
+  const [clubsSearch, setClubsSearch] = useState('')
+  const [dancersSearch, setDancersSearch] = useState('')
+  const [usersSearch, setUsersSearch] = useState('')
+  const [dancerClubSearch, setDancerClubSearch] = useState('')
   const [showAddClub, setShowAddClub] = useState(false)
   const [editClub, setEditClub] = useState<any>(null)
   const [clubPhoto, setClubPhoto] = useState<File | null>(null)
@@ -184,6 +188,7 @@ export default function AdminPage() {
     setEditDancer(null)
     setDancerPhotos([])
     setDancerPhotoPreviews([])
+    setDancerClubSearch('')
     setDancerForm({ stage_name: '', fansly_url: '', is_featured: false, club_ids: [] })
     setShowAddDancer(true)
   }
@@ -192,6 +197,7 @@ export default function AdminPage() {
     setEditDancer(dancer)
     setDancerPhotos([])
     setDancerPhotoPreviews([])
+    setDancerClubSearch('')
     setDancerForm({
       stage_name: dancer.stage_name || '',
       fansly_url: dancer.fansly_url || '',
@@ -308,6 +314,25 @@ export default function AdminPage() {
     fetchReviews()
   }
 
+  const filteredClubsTab = clubs.filter(c =>
+    c.name.toLowerCase().includes(clubsSearch.toLowerCase()) ||
+    c.city.toLowerCase().includes(clubsSearch.toLowerCase()) ||
+    c.state.toLowerCase().includes(clubsSearch.toLowerCase())
+  )
+
+  const filteredDancersTab = dancers.filter(d =>
+    d.stage_name.toLowerCase().includes(dancersSearch.toLowerCase())
+  )
+
+  const filteredUsersTab = users.filter(u =>
+    u.username.toLowerCase().includes(usersSearch.toLowerCase())
+  )
+
+  const filteredDancerModalClubs = clubs.filter(c =>
+    c.name.toLowerCase().includes(dancerClubSearch.toLowerCase()) ||
+    c.city.toLowerCase().includes(dancerClubSearch.toLowerCase())
+  )
+
   if (!authed) return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'sans-serif' }}>
       <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
@@ -389,10 +414,16 @@ export default function AdminPage() {
 
       {tab === 'clubs' && (
         <div style={{ padding: '16px' }}>
-          <button onClick={openAddClub} style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}>
+          <button onClick={openAddClub} style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 12 }}>
             + Add New Club
           </button>
-          {clubs.map(club => (
+          <input value={clubsSearch} onChange={e => setClubsSearch(e.target.value)} placeholder="Search clubs by name, city, or state..."
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 16 }} />
+          {filteredClubsTab.length === 0 ? (
+            <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
+              <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found</div>
+            </div>
+          ) : filteredClubsTab.map(club => (
             <div key={club.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
               {club.photo_url && <img src={club.photo_url} alt={club.name} style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
               <div style={{ flex: 1 }}>
@@ -410,10 +441,16 @@ export default function AdminPage() {
 
       {tab === 'dancers' && (
         <div style={{ padding: '16px' }}>
-          <button onClick={openAddDancer} style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 16 }}>
+          <button onClick={openAddDancer} style={{ width: '100%', background: '#FF2D78', color: 'white', border: 'none', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 12 }}>
             + Add New Dancer
           </button>
-          {dancers.map(dancer => (
+          <input value={dancersSearch} onChange={e => setDancersSearch(e.target.value)} placeholder="Search dancers by stage name..."
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 16 }} />
+          {filteredDancersTab.length === 0 ? (
+            <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
+              <div style={{ color: '#8890c0', fontSize: 14 }}>No dancers found</div>
+            </div>
+          ) : filteredDancersTab.map(dancer => (
             <div key={dancer.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {dancer.photo_url ? <img src={dancer.photo_url} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '💃'}
@@ -484,11 +521,13 @@ export default function AdminPage() {
 
       {tab === 'users' && (
         <div style={{ padding: '16px' }}>
-          {users.length === 0 ? (
+          <input value={usersSearch} onChange={e => setUsersSearch(e.target.value)} placeholder="Search users by username..."
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 16 }} />
+          {filteredUsersTab.length === 0 ? (
             <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center' }}>
-              <div style={{ color: '#8890c0', fontSize: 14 }}>No users yet</div>
+              <div style={{ color: '#8890c0', fontSize: 14 }}>No users found</div>
             </div>
-          ) : users.map(user => (
+          ) : filteredUsersTab.map(user => (
             <div key={user.id} style={{ background: '#131629', borderRadius: 12, border: `1px solid ${user.banned ? '#ff4444' : '#1e2140'}`, padding: 14, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#2a1a40', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                 {user.avatar_url
@@ -598,19 +637,6 @@ export default function AdminPage() {
                   )
                 })()}
               </div>
-              {req.hours && Object.values(req.hours).some((h: any) => h) && (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 4 }}>Hours:</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
-                    {Object.entries(req.hours).filter(([, v]) => v).map(([day, hours]) => (
-                      <div key={day} style={{ fontSize: 11 }}>
-                        <span style={{ color: '#8890c0' }}>{day}: </span>
-                        <span style={{ color: 'white' }}>{hours as string}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
               {req.additional_comments && (
                 <div style={{ background: '#0D0F1E', borderRadius: 8, border: '1px solid #1e2140', padding: '10px 12px' }}>
                   <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 4 }}>Additional comments:</div>
@@ -753,20 +779,24 @@ export default function AdminPage() {
             </div>
             <div style={{ marginBottom: 16 }}>
               <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>Clubs</div>
+              <input value={dancerClubSearch} onChange={e => setDancerClubSearch(e.target.value)} placeholder="Search clubs by name or city..."
+                style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 8, padding: '9px 12px', color: 'white', fontSize: 12, boxSizing: 'border-box', marginBottom: 8 }} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
-                {clubs.map(club => {
-                  const selected = dancerForm.club_ids.includes(club.id)
-                  return (
-                    <div key={club.id} onClick={() => toggleDancerClub(club.id)}
-                      style={{ background: selected ? '#1a0d2e' : '#131629', border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`, borderRadius: 8, padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
-                        <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+                {filteredDancerModalClubs.length === 0
+                  ? <div style={{ color: '#8890c0', fontSize: 12, padding: '8px 0', textAlign: 'center' }}>No clubs found</div>
+                  : filteredDancerModalClubs.map(club => {
+                    const selected = dancerForm.club_ids.includes(club.id)
+                    return (
+                      <div key={club.id} onClick={() => toggleDancerClub(club.id)}
+                        style={{ background: selected ? '#1a0d2e' : '#131629', border: `1px solid ${selected ? '#FF2D78' : '#1e2140'}`, borderRadius: 8, padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
+                          <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+                        </div>
+                        {selected && <span style={{ color: '#FF2D78' }}>✓</span>}
                       </div>
-                      {selected && <span style={{ color: '#FF2D78' }}>✓</span>}
-                    </div>
-                  )
-                })}
+                    )
+                  })}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
