@@ -24,6 +24,7 @@ const STATE_NAMES: Record<string, string> = {
 
 export default function ClubsPage() {
   const [clubs, setClubs] = useState<any[]>([])
+  const [dancers, setDancers] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [suggestions, setSuggestions] = useState<any[]>([])
@@ -31,7 +32,7 @@ export default function ClubsPage() {
   const searchRef = useRef<any>(null)
 
   useEffect(() => {
-    fetchClubs()
+    fetchData()
   }, [])
 
   useEffect(() => {
@@ -44,9 +45,19 @@ export default function ClubsPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  async function fetchClubs() {
-    const { data } = await supabase.from('clubs').select('*').order('is_featured', { ascending: false })
-    setClubs(data || [])
+  async function fetchData() {
+    const [{ data: clubData }, { data: dancerData }] = await Promise.all([
+      supabase.from('clubs').select('*').order('is_featured', { ascending: false }),
+      supabase.from('dancers').select('club_ids, is_featured').not('club_ids', 'is', null)
+    ])
+    setClubs(clubData || [])
+    setDancers(dancerData || [])
+  }
+
+  function getClubPriority(club: any, clubsWithFeaturedDancers: Set<string>): number {
+    if (club.is_featured) return 0
+    if (clubsWithFeaturedDancers.has(club.id)) return 1
+    return 2
   }
 
   function handleSearchChange(value: string) {
@@ -105,6 +116,13 @@ export default function ClubsPage() {
     { key: 'none', label: '❌ No bar' },
   ]
 
+  const clubsWithFeaturedDancers = new Set<string>()
+  dancers.forEach(dancer => {
+    if (dancer.is_featured && dancer.club_ids) {
+      dancer.club_ids.forEach((cid: string) => clubsWithFeaturedDancers.add(cid))
+    }
+  })
+
   const filtered = clubs.filter(c => {
     const matchesSearch = search === '' ||
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -121,7 +139,7 @@ export default function ClubsPage() {
       filter === 'none' ? c.bar_type === 'none' :
       filter === 'featured' ? c.is_featured : true
     return matchesSearch && matchesFilter
-  })
+  }).sort((a, b) => getClubPriority(a, clubsWithFeaturedDancers) - getClubPriority(b, clubsWithFeaturedDancers))
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
@@ -193,7 +211,7 @@ export default function ClubsPage() {
                   borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
                   position: 'relative', aspectRatio: '5/3',
                   background: '#131629',
-                  border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`
+                  border: `1px solid ${club.is_featured ? '#FFD700' : clubsWithFeaturedDancers.has(club.id) ? '#FF2D78' : '#1e2140'}`
                 }}>
                 {club.photo_url
                   ? <img
@@ -211,6 +229,7 @@ export default function ClubsPage() {
                   <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {STATE_NAMES[club.state] || club.state}</div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>★ Featured</span>}
+                    {!club.is_featured && clubsWithFeaturedDancers.has(club.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>💃 Has dancers</span>}
                     <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
                       {club.nude_level === 'full_nude' ? '🐱' : club.nude_level === 'bikini' ? '👙' : '🍒'}
                     </span>
