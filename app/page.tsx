@@ -64,7 +64,6 @@ export default function Home() {
       if (d.club_ids) d.club_ids.forEach((cid: string) => withDancers.add(cid))
     })
     clubsWithDancersRef.current = withDancers
-
     setDancers(dancerList)
     allClubsForMap.current = clubList
 
@@ -203,8 +202,8 @@ export default function Home() {
       paint: {
         'circle-color': ['case', ['==', ['get', 'selected'], 1], '#a01040', '#FF2D78'],
         'circle-radius': 14,
-        'circle-stroke-width': 3,
-        'circle-stroke-color': ['case', ['==', ['get', 'selected'], 1], 'white', '#FFD700'],
+        'circle-stroke-width': 3.5,
+        'circle-stroke-color': ['case', ['==', ['get', 'selected'], 1], 'white', '#a01040'],
       }
     })
 
@@ -375,7 +374,7 @@ export default function Home() {
                 <div style={{ fontSize: 11, color: '#8890c0', marginBottom: 6 }}>{selectedClub.city}, {selectedClub.state}{selectedClub.address ? ` — ${selectedClub.address}` : ''}</div>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {selectedClub.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
-                  {!selectedClub.is_featured && clubsWithDancersRef.current.has(selectedClub.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
+                  {clubsWithDancersRef.current.has(selectedClub.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
                   <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                     {selectedClub.nude_level === 'full_nude' ? '🐱 Full nude' : selectedClub.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                   </span>
