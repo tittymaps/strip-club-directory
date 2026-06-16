@@ -16,6 +16,7 @@ export default function Home() {
   const mapContainer = useRef<any>(null)
   const map = useRef<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
+  const [dancers, setDancers] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const filterRef = useRef<string>('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
@@ -23,9 +24,10 @@ export default function Home() {
   const selectedClubRef = useRef<any>(null)
   const allClubs = useRef<any[]>([])
   const allClubsForMap = useRef<any[]>([])
+  const clubsWithDancersRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
-    fetchClubs()
+    fetchData()
   }, [])
 
   useEffect(() => {
@@ -42,10 +44,29 @@ export default function Home() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   }
 
-  async function fetchClubs() {
-    const { data } = await supabase.from('clubs').select('*')
-    const clubData = data || []
-    allClubsForMap.current = clubData
+  function getClubPriority(club: any): number {
+    if (club.is_featured) return 0
+    if (clubsWithDancersRef.current.has(club.id)) return 1
+    return 2
+  }
+
+  async function fetchData() {
+    const [{ data: clubData }, { data: dancerData }] = await Promise.all([
+      supabase.from('clubs').select('*'),
+      supabase.from('dancers').select('club_ids').not('club_ids', 'is', null)
+    ])
+
+    const clubList = clubData || []
+    const dancerList = dancerData || []
+
+    const withDancers = new Set<string>()
+    dancerList.forEach((d: any) => {
+      if (d.club_ids) d.club_ids.forEach((cid: string) => withDancers.add(cid))
+    })
+    clubsWithDancersRef.current = withDancers
+
+    setDancers(dancerList)
+    allClubsForMap.current = clubList
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -54,38 +75,35 @@ export default function Home() {
           const userLon = pos.coords.longitude
           setUserLocation({ lat: userLat, lon: userLon })
 
-          const withDistance = clubData
+          const withDistance = clubList
             .filter(c => c.latitude && c.longitude)
             .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
             .filter(c => c.distance <= 215)
+            .sort((a, b) => {
+              const pa = getClubPriority(a)
+              const pb = getClubPriority(b)
+              if (pa !== pb) return pa - pb
+              return a.distance - b.distance
+            })
 
-          const featured = withDistance.filter(c => c.is_featured).sort((a, b) => a.distance - b.distance)
-          const standard = withDistance.filter(c => !c.is_featured).sort((a, b) => a.distance - b.distance)
-          const sorted = [...featured, ...standard]
-          allClubs.current = sorted
-          setClubs(sorted)
-          initMap(clubData, userLat, userLon)
+          allClubs.current = withDistance
+          setClubs(withDistance)
+          initMap(clubList, userLat, userLon)
         },
         () => {
-          const featured = clubData.filter(c => c.is_featured)
-          const standard = clubData.filter(c => !c.is_featured)
-          const shuffled = [...standard].sort(() => Math.random() - 0.5)
-          const remaining = Math.max(0, 20 - featured.length)
-          const result = [...featured, ...shuffled.slice(0, remaining)]
-          allClubs.current = result
-          setClubs(result)
-          initMap(clubData, 39.5, -98.35)
+          const sorted = [...clubList].sort((a, b) => getClubPriority(a) - getClubPriority(b))
+          const top20 = sorted.slice(0, 20)
+          allClubs.current = top20
+          setClubs(top20)
+          initMap(clubList, 39.5, -98.35)
         }
       )
     } else {
-      const featured = clubData.filter(c => c.is_featured)
-      const standard = clubData.filter(c => !c.is_featured)
-      const shuffled = [...standard].sort(() => Math.random() - 0.5)
-      const remaining = Math.max(0, 20 - featured.length)
-      const result = [...featured, ...shuffled.slice(0, remaining)]
-      allClubs.current = result
-      setClubs(result)
-      initMap(clubData, 39.5, -98.35)
+      const sorted = [...clubList].sort((a, b) => getClubPriority(a) - getClubPriority(b))
+      const top20 = sorted.slice(0, 20)
+      allClubs.current = top20
+      setClubs(top20)
+      initMap(clubList, 39.5, -98.35)
     }
   }
 
@@ -104,6 +122,7 @@ export default function Home() {
             nude_level: c.nude_level,
             bar_type: c.bar_type,
             is_featured: c.is_featured ? 1 : 0,
+            has_dancers: clubsWithDancersRef.current.has(c.id) ? 1 : 0,
             selected: c.id === selectedId ? 1 : 0,
           },
           geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }
@@ -177,10 +196,23 @@ export default function Home() {
     })
 
     map.current.addLayer({
+      id: 'unclustered-has-dancers',
+      type: 'circle',
+      source: 'clubs',
+      filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 0], ['==', ['get', 'has_dancers'], 1]],
+      paint: {
+        'circle-color': ['case', ['==', ['get', 'selected'], 1], '#a01040', '#FF2D78'],
+        'circle-radius': 14,
+        'circle-stroke-width': 3,
+        'circle-stroke-color': ['case', ['==', ['get', 'selected'], 1], 'white', '#FFD700'],
+      }
+    })
+
+    map.current.addLayer({
       id: 'unclustered-standard',
       type: 'circle',
       source: 'clubs',
-      filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 0]],
+      filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'is_featured'], 0], ['==', ['get', 'has_dancers'], 0]],
       paint: {
         'circle-color': ['case', ['==', ['get', 'selected'], 1], '#a01040', '#FF2D78'],
         'circle-radius': 14,
@@ -217,23 +249,22 @@ export default function Home() {
       const props = e.features[0].properties
       const club = allClubsForMap.current.find(c => c.id === props.id)
       if (!club) return
-
       const currentSelected = selectedClubRef.current
       if (currentSelected && currentSelected.id === club.id) {
         window.location.href = `/clubs/${club.id}`
         return
       }
-
       setSelectedClub(club)
       updateSelectedPinById(club.id)
     }
 
     map.current.on('click', 'unclustered-featured', handlePinClick)
+    map.current.on('click', 'unclustered-has-dancers', handlePinClick)
     map.current.on('click', 'unclustered-standard', handlePinClick)
 
     map.current.on('click', (e: any) => {
       const features = map.current.queryRenderedFeatures(e.point, {
-        layers: ['unclustered-featured', 'unclustered-standard', 'clusters']
+        layers: ['unclustered-featured', 'unclustered-has-dancers', 'unclustered-standard', 'clusters']
       })
       if (features.length === 0) {
         setSelectedClub(null)
@@ -242,7 +273,7 @@ export default function Home() {
       }
     })
 
-    ;['clusters', 'unclustered-featured', 'unclustered-standard'].forEach(layer => {
+    ;['clusters', 'unclustered-featured', 'unclustered-has-dancers', 'unclustered-standard'].forEach(layer => {
       map.current.on('mouseenter', layer, () => { map.current.getCanvas().style.cursor = 'pointer' })
       map.current.on('mouseleave', layer, () => { map.current.getCanvas().style.cursor = '' })
     })
@@ -344,6 +375,7 @@ export default function Home() {
                 <div style={{ fontSize: 11, color: '#8890c0', marginBottom: 6 }}>{selectedClub.city}, {selectedClub.state}{selectedClub.address ? ` — ${selectedClub.address}` : ''}</div>
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {selectedClub.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                  {!selectedClub.is_featured && clubsWithDancersRef.current.has(selectedClub.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
                   <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                     {selectedClub.nude_level === 'full_nude' ? '🐱 Full nude' : selectedClub.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                   </span>
@@ -377,7 +409,7 @@ export default function Home() {
         ))}
       </div>
 
-      <div style={{ padding: '8px 12px' }}>
+      <div style={{ padding: '8px 12px', paddingBottom: 100 }}>
         <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>
           {userLocation ? `${filtered.length} clubs within 215 miles` : `${filtered.length} clubs`}
         </div>
@@ -387,12 +419,12 @@ export default function Home() {
             style={{
               background: selectedClub?.id === club.id ? '#1a0d20' : '#131629',
               borderRadius: 12, marginBottom: 8, padding: 12,
-              border: `1px solid ${selectedClub?.id === club.id ? '#FF2D78' : club.is_featured ? '#FFD700' : '#1e2140'}`,
+              border: `1px solid ${selectedClub?.id === club.id ? '#FF2D78' : club.is_featured ? '#FFD700' : clubsWithDancersRef.current.has(club.id) ? '#FF2D78' : '#1e2140'}`,
               display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
             }}>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
               {club.photo_url
-                ? <img src={club.photo_url ? `${club.photo_url}?width=400&quality=75` : ''} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={`${club.photo_url}?width=400&quality=75`} alt={club.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : (club.is_featured ? '🌟' : '💜')
               }
             </div>
@@ -408,6 +440,7 @@ export default function Home() {
               </div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                {clubsWithDancersRef.current.has(club.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
                 <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                   {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                 </span>
