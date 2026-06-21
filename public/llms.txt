@@ -1,0 +1,20 @@
+# TittyMaps
+
+> TittyMaps is a directory of strip clubs and bikini coffee shops across the United States, with an interactive map, club details, reviews, and performer profiles.
+
+## About
+TittyMaps (tittymaps.com) helps people find strip clubs, bikini coffee shops, and lingerie modeling studios near them. The site includes hours, cover charges, nude level (full nude, topless, bikini), bar type (full bar, BYOB, cafe, no bar), and user reviews for each venue.
+
+Performers can be featured on club pages with photos and a link to their Fansly profile. "Featured Dancers" appear at strip clubs, "Featured Baristas" appear at bikini coffee shops, and "Featured Models" appear at lingerie modeling studios (full nude, no bar, open 24 hours).
+
+## Key pages
+- [Browse all clubs](https://tittymaps.com/clubs): Searchable directory of all listed venues
+- [Interactive map](https://tittymaps.com/): Map view of all clubs with location-based sorting
+- [Browse by state](https://tittymaps.com/states): State-by-state directory of clubs
+- [Strip clubs near me](https://tittymaps.com/strip-clubs-near-me): Location-based strip club search
+- [Bikini baristas near me](https://tittymaps.com/bikini-baristas-near-me): Location-based bikini coffee shop search
+- [Lingerie modeling studios near me](https://tittymaps.com/lingerie-modeling-near-me): Full nude, no bar, 24 hour venues
+- [Become a featured dancer](https://tittymaps.com/become-a-dancer): Information for performers who want to be featured
+
+## Notes
+Club and city pages include FAQ-style answer blocks (best venues, nude level breakdowns, alcohol service) with structured data for direct citation. Data updates regularly as new venues and performers are added.
