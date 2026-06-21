@@ -207,7 +207,7 @@ export default function CityPage() {
         <div style={{ padding: '16px 16px 0' }}>
           <h2 style={{ color: 'white', fontSize: 17, fontWeight: 700, margin: '0 0 8px' }}>Is {cityName} strip club full nude or topless?</h2>
           <p style={{ color: '#ccc', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-            {cityName} has {fullNudeCount} full nude club{fullNudeCount === 1 ? '' : 's'}, {toplessCount} topless club{toplessCount === 1 ? '' : 's'}, and {bikiniCount} bikini venue{bikiniCount === 1 ? '' : 's'}. In most states, full nude clubs are restricted from serving alcohol, so they're often BYOB or no-bar venues, while topless clubs are more likely to have a full bar since they fall under standard liquor licensing rules.
+            {cityName} has {fullNudeCount} full nude club{fullNudeCount === 1 ? '' : 's'}, {toplessCount} topless club{toplessCount === 1 ? '' : 's'}, and {bikiniCount} bikini venue{bikiniCount === 1 ? '' : 's'}. In most states, full nude clubs are restricted from serving alcohol, so they&apos;re often BYOB or no-bar venues, while topless clubs are more likely to have a full bar since they fall under standard liquor licensing rules.
           </p>
         </div>
       )}
