@@ -1,7 +1,5 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import { createClient } from '@supabase/supabase-js'
 import ProfileButton from './components/ProfileButton'
 
@@ -10,11 +8,11 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
-
 export default function Home() {
   const mapContainer = useRef<any>(null)
   const map = useRef<any>(null)
+  const mapboxgl = useRef<any>(null)
+  const [mapLoading, setMapLoading] = useState(true)
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
@@ -25,14 +23,29 @@ export default function Home() {
   const allClubs = useRef<any[]>([])
   const allClubsForMap = useRef<any[]>([])
   const clubsWithDancersRef = useRef<Set<string>>(new Set())
+  const pendingMapInit = useRef<{ clubData: any[], lat: number, lon: number } | null>(null)
 
   useEffect(() => {
     fetchData()
+    loadMapbox()
   }, [])
 
   useEffect(() => {
     selectedClubRef.current = selectedClub
   }, [selectedClub])
+
+  async function loadMapbox() {
+    const mod = await import('mapbox-gl')
+    await import('mapbox-gl/dist/mapbox-gl.css')
+    mapboxgl.current = mod.default
+    mapboxgl.current.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
+    setMapLoading(false)
+    if (pendingMapInit.current) {
+      const { clubData, lat, lon } = pendingMapInit.current
+      initMap(clubData, lat, lon)
+      pendingMapInit.current = null
+    }
+  }
 
   function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     const R = 3958.8
@@ -87,14 +100,22 @@ export default function Home() {
 
           allClubs.current = withDistance
           setClubs(withDistance)
-          initMap(clubList, userLat, userLon)
+          if (mapboxgl.current) {
+            initMap(clubList, userLat, userLon)
+          } else {
+            pendingMapInit.current = { clubData: clubList, lat: userLat, lon: userLon }
+          }
         },
         () => {
           const sorted = [...clubList].sort((a, b) => getClubPriority(a) - getClubPriority(b))
           const top20 = sorted.slice(0, 20)
           allClubs.current = top20
           setClubs(top20)
-          initMap(clubList, 39.5, -98.35)
+          if (mapboxgl.current) {
+            initMap(clubList, 39.5, -98.35)
+          } else {
+            pendingMapInit.current = { clubData: clubList, lat: 39.5, lon: -98.35 }
+          }
         }
       )
     } else {
@@ -102,7 +123,11 @@ export default function Home() {
       const top20 = sorted.slice(0, 20)
       allClubs.current = top20
       setClubs(top20)
-      initMap(clubList, 39.5, -98.35)
+      if (mapboxgl.current) {
+        initMap(clubList, 39.5, -98.35)
+      } else {
+        pendingMapInit.current = { clubData: clubList, lat: 39.5, lon: -98.35 }
+      }
     }
   }
 
@@ -130,14 +155,14 @@ export default function Home() {
   }
 
   function initMap(clubData: any[], lat: number, lon: number) {
-    if (map.current) return
-    map.current = new mapboxgl.Map({
+    if (map.current || !mapboxgl.current) return
+    map.current = new mapboxgl.current.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
       center: [lon, lat],
       zoom: 5,
     })
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
+    map.current.addControl(new mapboxgl.current.NavigationControl(), 'top-right')
     map.current.on('load', () => {
       setupMapLayers(clubData)
     })
@@ -352,7 +377,13 @@ export default function Home() {
       </div>
 
       <div style={{ position: 'relative' }}>
-        <div ref={mapContainer} style={{ height: '44vh', width: '100%' }} />
+        <div ref={mapContainer} style={{ height: '44vh', width: '100%', background: '#131629' }}>
+          {mapLoading && (
+            <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ color: '#FF2D78', fontSize: 14 }}>Loading map...</div>
+            </div>
+          )}
+        </div>
 
         {selectedClub && (
           <div style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 10 }}>
@@ -366,7 +397,7 @@ export default function Home() {
               }}>
               <div style={{ width: 52, height: 52, borderRadius: 10, background: selectedClub.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                 {selectedClub.photo_url
-                  ? <img src={selectedClub.photo_url} alt={selectedClub.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <img src={`${selectedClub.photo_url}?width=200&quality=75`} alt={selectedClub.name} width={52} height={52} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : (selectedClub.is_featured ? '🌟' : '💜')}
               </div>
               <div style={{ flex: 1 }}>
