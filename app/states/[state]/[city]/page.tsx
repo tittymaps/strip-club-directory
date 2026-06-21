@@ -33,6 +33,7 @@ export default function CityPage() {
   const stateName = STATE_NAMES[stateCode] || stateCode
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -56,6 +57,7 @@ export default function CityPage() {
       d.club_ids?.some((id: string) => clubIds.includes(id))
     )
     setDancers(cityDancers)
+    setLoaded(true)
   }
 
   const fullNudeCount = clubs.filter(c => c.nude_level === 'full_nude').length
@@ -105,6 +107,31 @@ export default function CityPage() {
       }
     ]
   } : null
+
+  if (!loaded) {
+    return (
+      <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
+        <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+          <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
+          <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
+          <ProfileButton />
+        </div>
+        <div style={{ padding: '16px 16px 8px' }}>
+          <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Strip Clubs in {cityName}, {stateCode} — Full Directory</h1>
+          <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>{stateName} · Loading...</p>
+        </div>
+        <div style={{ padding: '8px 16px 0' }}>
+          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, minHeight: 280 }} />
+        </div>
+        <div style={{ padding: '20px 16px 8px' }}>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>All Clubs</div>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{ background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12, border: '1px solid #1e2140', height: 72 }} />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
@@ -251,7 +278,7 @@ export default function CityPage() {
             }}>
             <div style={{ width: 48, height: 48, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
               {club.photo_url
-                ? <img src={`${club.photo_url}?width=400&quality=75`} alt={club.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={`${club.photo_url}?width=250&quality=70`} alt={club.name} loading="lazy" width={48} height={48} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : (club.is_featured ? '🌟' : '💜')
               }
             </div>
@@ -283,7 +310,7 @@ export default function CityPage() {
                   onClick={() => window.location.href = `/dancers/${dancer.id}`}
                   style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
                   {photo
-                    ? <img src={`${photo}?width=400&quality=75`} alt={dancer.stage_name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={`${photo}?width=250&quality=70`} alt={dancer.stage_name} loading="lazy" width={250} height={333} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
                   }
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
