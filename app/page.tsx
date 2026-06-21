@@ -423,7 +423,7 @@ export default function Home() {
             }}>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
               {club.photo_url
-                ? <img src={`${club.photo_url}?width=400&quality=75`} alt={club.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={`${club.photo_url}?width=250&quality=70`} alt={club.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : (club.is_featured ? '🌟' : '💜')
               }
             </div>
