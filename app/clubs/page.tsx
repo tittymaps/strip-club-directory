@@ -218,6 +218,8 @@ export default function ClubsPage() {
                       src={`${club.photo_url}?width=250&quality=70`}
                       alt={club.name}
                       loading={index < 6 ? 'eager' : 'lazy'}
+                      width={250}
+                      height={150}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48, background: club.is_featured ? '#1a1200' : '#131629' }}>
