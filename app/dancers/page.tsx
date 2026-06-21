@@ -201,7 +201,7 @@ export default function Dancers() {
                   onClick={() => window.location.href = `/dancers/${dancer.id}`}
                   style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
                   {photo
-                    ? <img src={`${photo}?width=400&quality=75`} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={`${photo}?width=250&quality=70`} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>💃</div>
                   }
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', padding: '24px 12px 12px' }}>
