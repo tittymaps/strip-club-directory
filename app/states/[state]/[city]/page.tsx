@@ -1,7 +1,4 @@
-'use client'
-import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { useParams, useRouter } from 'next/navigation'
 import ProfileButton from '../../../components/ProfileButton'
 
 const supabase = createClient(
@@ -25,40 +22,27 @@ const STATE_NAMES: Record<string, string> = {
 
 const MONTH_YEAR = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
-export default function CityPage() {
-  const { state, city } = useParams()
-  const router = useRouter()
-  const stateCode = (state as string).toUpperCase()
-  const cityName = decodeURIComponent(city as string)
+export default async function CityPage({ params }: { params: { state: string, city: string } }) {
+  const stateCode = params.state.toUpperCase()
+  const cityName = decodeURIComponent(params.city)
   const stateName = STATE_NAMES[stateCode] || stateCode
-  const [clubs, setClubs] = useState<any[]>([])
-  const [dancers, setDancers] = useState<any[]>([])
-  const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
-    fetchData()
-  }, [stateCode, cityName])
+  const { data: clubData } = await supabase
+    .from('clubs')
+    .select('*')
+    .eq('state', stateCode)
+    .ilike('city', cityName)
+    .order('is_featured', { ascending: false })
+  const clubs = clubData || []
 
-  async function fetchData() {
-    const { data: clubData } = await supabase
-      .from('clubs')
-      .select('*')
-      .eq('state', stateCode)
-      .ilike('city', cityName)
-      .order('is_featured', { ascending: false })
-    setClubs(clubData || [])
-
-    const { data: dancerData } = await supabase
-      .from('dancers')
-      .select('*')
-      .order('is_featured', { ascending: false })
-    const clubIds = (clubData || []).map((c: any) => c.id)
-    const cityDancers = (dancerData || []).filter((d: any) =>
-      d.club_ids?.some((id: string) => clubIds.includes(id))
-    )
-    setDancers(cityDancers)
-    setLoaded(true)
-  }
+  const { data: dancerData } = await supabase
+    .from('dancers')
+    .select('*')
+    .order('is_featured', { ascending: false })
+  const clubIds = clubs.map((c: any) => c.id)
+  const dancers = (dancerData || []).filter((d: any) =>
+    d.club_ids?.some((id: string) => clubIds.includes(id))
+  )
 
   const fullNudeCount = clubs.filter(c => c.nude_level === 'full_nude').length
   const toplessCount = clubs.filter(c => c.nude_level === 'topless').length
@@ -108,31 +92,6 @@ export default function CityPage() {
     ]
   } : null
 
-  if (!loaded) {
-    return (
-      <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
-        <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
-          <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
-          <ProfileButton />
-        </div>
-        <div style={{ padding: '16px 16px 8px' }}>
-          <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Strip Clubs in {cityName}, {stateCode} — Full Directory</h1>
-          <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>{stateName} · Loading...</p>
-        </div>
-        <div style={{ padding: '8px 16px 0' }}>
-          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, minHeight: 280 }} />
-        </div>
-        <div style={{ padding: '20px 16px 8px' }}>
-          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>All Clubs</div>
-          {[1, 2, 3].map(i => (
-            <div key={i} style={{ background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12, border: '1px solid #1e2140', height: 72 }} />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
 
@@ -141,7 +100,7 @@ export default function CityPage() {
       )}
 
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-        <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
+        <a href="/states" style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer', textDecoration: 'none' }}>← Back</a>
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
         <ProfileButton />
       </div>
@@ -221,9 +180,9 @@ export default function CityPage() {
           <ol style={{ color: '#ccc', fontSize: 13, lineHeight: 1.8, paddingLeft: 20, margin: 0 }}>
             {topClubs.map(club => (
               <li key={club.id}>
-                <span onClick={() => window.location.href = `/clubs/${club.id}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>
+                <a href={`/clubs/${club.id}`} style={{ color: '#7ab8ff', textDecoration: 'underline' }}>
                   {club.name}
-                </span>
+                </a>
               </li>
             ))}
           </ol>
@@ -251,9 +210,9 @@ export default function CityPage() {
             <ul style={{ color: '#ccc', fontSize: 13, lineHeight: 1.8, paddingLeft: 20, margin: 0 }}>
               {alcoholClubs.map(club => (
                 <li key={club.id}>
-                  <span onClick={() => window.location.href = `/clubs/${club.id}`} style={{ color: '#7ab8ff', textDecoration: 'underline', cursor: 'pointer' }}>
+                  <a href={`/clubs/${club.id}`} style={{ color: '#7ab8ff', textDecoration: 'underline' }}>
                     {club.name}
-                  </span>
+                  </a>
                   {' '}({club.bar_type === 'full_bar' ? 'full bar' : 'BYOB'})
                 </li>
               ))}
@@ -269,12 +228,13 @@ export default function CityPage() {
             <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found in {cityName}</div>
           </div>
         ) : clubs.map(club => (
-          <div key={club.id}
-            onClick={() => window.location.href = `/clubs/${club.id}`}
+          <a key={club.id}
+            href={`/clubs/${club.id}`}
             style={{
               background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
               border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
-              display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
+              display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer',
+              textDecoration: 'none', color: 'inherit'
             }}>
             <div style={{ width: 48, height: 48, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
               {club.photo_url
@@ -295,7 +255,7 @@ export default function CityPage() {
               </span>
               </div>
             </div>
-          </div>
+          </a>
         ))}
       </div>
 
@@ -306,9 +266,9 @@ export default function CityPage() {
             {dancers.map(dancer => {
               const photo = dancer.photo_urls?.[0] || dancer.photo_url
               return (
-                <div key={dancer.id}
-                  onClick={() => window.location.href = `/dancers/${dancer.id}`}
-                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                <a key={dancer.id}
+                  href={`/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}`, textDecoration: 'none', display: 'block' }}>
                   {photo
                     ? <img src={`${photo}?width=250&quality=70`} alt={dancer.stage_name} loading="lazy" width={250} height={333} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
@@ -317,7 +277,7 @@ export default function CityPage() {
                     <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{dancer.stage_name}</div>
                     {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
                   </div>
-                </div>
+                </a>
               )
             })}
           </div>
