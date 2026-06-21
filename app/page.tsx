@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import ProfileButton from './components/ProfileButton'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 const supabase = createClient(
   'https://ssruvoxuwlksmbmubcfv.supabase.co',
@@ -36,7 +37,6 @@ export default function Home() {
 
   async function loadMapbox() {
     const mod = await import('mapbox-gl')
-    await import('mapbox-gl/dist/mapbox-gl.css')
     mapboxgl.current = mod.default
     mapboxgl.current.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
     setMapLoading(false)
