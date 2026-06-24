@@ -42,7 +42,11 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
   const { stateCode, cityName } = parseSlug(params.slug)
   const stateName = STATE_NAMES[stateCode] || stateCode
 
-  const { data: allClubs } = await supabase.from('clubs').select('*')
+  const [{ data: allClubs }, { data: dancerData }] = await Promise.all([
+    supabase.from('clubs').select('*'),
+    supabase.from('dancers').select('*').order('is_featured', { ascending: false })
+  ])
+
   const clubs = allClubs || []
 
   const cityClub = clubs.find(c =>
@@ -79,6 +83,11 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
       if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1
       return a.distance - b.distance
     })
+
+  const nearbyClubIds = nearbyClubs.map(c => c.id)
+  const nearbyDancers = (dancerData || []).filter((d: any) =>
+    d.club_ids?.some((id: string) => nearbyClubIds.includes(id))
+  )
 
   const fullNudeCount = nearbyClubs.filter(c => c.nude_level === 'full_nude').length
   const toplessCount = nearbyClubs.filter(c => c.nude_level === 'topless').length
@@ -280,7 +289,32 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
         ))}
       </div>
 
-      <div style={{ padding: '8px 16px 0' }}>
+      {nearbyDancers.length > 0 && (
+        <div style={{ padding: '8px 16px' }}>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers Near {cityName}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {nearbyDancers.map((dancer: any) => {
+              const photo = dancer.photo_urls?.[0] || dancer.photo_url
+              return (
+                <a key={dancer.id}
+                  href={`/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}`, textDecoration: 'none', display: 'block' }}>
+                  {photo
+                    ? <img src={`${photo}?width=250&quality=70`} alt={dancer.stage_name} loading="lazy" width={250} height={333} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
+                  }
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
+                    <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{dancer.stage_name}</div>
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
+                  </div>
+                </a>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      <div style={{ padding: '8px 16px 16px' }}>
         <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20 }}>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Browse More</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
