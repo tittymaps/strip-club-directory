@@ -9,7 +9,6 @@ const supabase = createClient(
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://tittymaps.com'
 
-  // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, changeFrequency: 'daily', priority: 1.0 },
     { url: `${baseUrl}/strip-clubs-near-me`, changeFrequency: 'daily' as const, priority: 1.0 },
@@ -21,51 +20,61 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/become-a-dancer`, changeFrequency: 'monthly', priority: 0.6 },
   ]
 
-  // Club pages
   const { data: clubs } = await supabase
     .from('clubs')
-    .select('id, updated_at')
+    .select('id, state, city, latitude, updated_at')
 
- const clubPages: MetadataRoute.Sitemap = (clubs || []).map(club => ({
+  const clubPages: MetadataRoute.Sitemap = (clubs || []).map(club => ({
     url: `${baseUrl}/clubs/${club.id}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
-  // State pages
-  const { data: stateData } = await supabase
-    .from('clubs')
-    .select('state')
+  const stateSet: Record<string, boolean> = {}
+  const statePages: MetadataRoute.Sitemap = (clubs || [])
+    .filter(c => {
+      if (!c.state || stateSet[c.state]) return false
+      stateSet[c.state] = true
+      return true
+    })
+    .map(c => ({
+      url: `${baseUrl}/states/${c.state.toLowerCase()}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }))
 
-  const states = Array.from(new Set((stateData || []).map(c => c.state).filter(Boolean)))
-  const statePages: MetadataRoute.Sitemap = states.map(state => ({
-    url: `${baseUrl}/states/${state.toLowerCase()}`,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
+  const citySet: Record<string, boolean> = {}
+  const cityPages: MetadataRoute.Sitemap = (clubs || [])
+    .filter(c => {
+      if (!c.state || !c.city) return false
+      const key = `${c.state}-${c.city}`
+      if (citySet[key]) return false
+      citySet[key] = true
+      return true
+    })
+    .map(c => ({
+      url: `${baseUrl}/states/${c.state.toLowerCase()}/${encodeURIComponent(c.city)}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }))
 
-  // City pages
-  const { data: cityData } = await supabase
-    .from('clubs')
-    .select('state, city')
+  const nearSlugSet: Record<string, boolean> = {}
+  const nearPages: MetadataRoute.Sitemap = (clubs || [])
+    .filter(c => {
+      if (!c.state || !c.city || !c.latitude) return false
+      const slug = `${c.city.toLowerCase().replace(/\s+/g, '-')}-${c.state.toLowerCase()}`
+      if (nearSlugSet[slug]) return false
+      nearSlugSet[slug] = true
+      return true
+    })
+    .map(c => ({
+      url: `${baseUrl}/strip-clubs-near/${c.city.toLowerCase().replace(/\s+/g, '-')}-${c.state.toLowerCase()}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }))
 
-  const citySet = new Set<string>()
-  const cityPages: MetadataRoute.Sitemap = []
-  ;(cityData || []).forEach(c => {
-    if (!c.state || !c.city) return
-    const key = `${c.state}-${c.city}`
-    if (!citySet.has(key)) {
-      citySet.add(key)
-      cityPages.push({
-        url: `${baseUrl}/states/${c.state.toLowerCase()}/${encodeURIComponent(c.city)}`,
-        changeFrequency: 'weekly',
-        priority: 0.7,
-      })
-    }
-  })
-
-  // Dancer pages
   const { data: dancers } = await supabase
     .from('dancers')
     .select('id, created_at')
@@ -82,6 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...clubPages,
     ...statePages,
     ...cityPages,
+    ...nearPages,
     ...dancerPages,
   ]
 }
