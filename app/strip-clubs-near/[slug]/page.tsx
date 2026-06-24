@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import ProfileButton from '../../../components/ProfileButton'
+import ProfileButton from '../../components/ProfileButton'
 
 const supabase = createClient(
   'https://ssruvoxuwlksmbmubcfv.supabase.co',
