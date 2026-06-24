@@ -90,6 +90,7 @@ export default function ClubsPage() {
         const club = clubs.find(c => c.city === city)
         if (club) {
           results.push({ type: 'city', label: city, sublabel: STATE_NAMES[club.state] || club.state, href: `/states/${club.state.toLowerCase()}/${encodeURIComponent(city)}`, icon: '📍' })
+          results.push({ type: 'near', label: `Near ${city}`, sublabel: `Clubs within 50 miles`, href: `/strip-clubs-near/${city.toLowerCase().replace(/\s+/g, '-')}-${club.state.toLowerCase()}`, icon: '📡' })
         }
       }
     })
