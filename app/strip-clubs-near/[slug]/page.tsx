@@ -89,13 +89,15 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
     d.club_ids?.some((id: string) => nearbyClubIds.includes(id))
   )
 
-  const fullNudeCount = nearbyClubs.filter(c => c.nude_level === 'full_nude').length
-  const toplessCount = nearbyClubs.filter(c => c.nude_level === 'topless').length
-  const bikiniCount = nearbyClubs.filter(c => c.nude_level === 'bikini').length
-  const fullBarCount = nearbyClubs.filter(c => c.bar_type === 'full_bar').length
-  const byobCount = nearbyClubs.filter(c => c.bar_type === 'byob').length
-  const cafeCount = nearbyClubs.filter(c => c.bar_type === 'cafe').length
-  const noBarCount = nearbyClubs.filter(c => c.bar_type === 'none').length
+  const bikiniCafeCount = nearbyClubs.filter(c => c.nude_level === 'bikini' && c.bar_type === 'cafe').length
+  const nearbyStripClubs = nearbyClubs.filter(c => !(c.nude_level === 'bikini' && c.bar_type === 'cafe'))
+  const stripClubCount = nearbyStripClubs.length
+  const fullNudeCount = nearbyStripClubs.filter(c => c.nude_level === 'full_nude').length
+  const toplessCount = nearbyStripClubs.filter(c => c.nude_level === 'topless').length
+  const bikiniCount = nearbyStripClubs.filter(c => c.nude_level === 'bikini').length
+  const fullBarCount = nearbyStripClubs.filter(c => c.bar_type === 'full_bar').length
+  const byobCount = nearbyStripClubs.filter(c => c.bar_type === 'byob').length
+  const noBarCount = nearbyStripClubs.filter(c => c.bar_type === 'none').length
   const alcoholClubs = nearbyClubs.filter(c => c.bar_type === 'full_bar' || c.bar_type === 'byob')
   const topClubs = nearbyClubs.slice(0, 5)
 
@@ -116,7 +118,7 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
         "name": `How many strip clubs are within 50 miles of ${cityName}, ${stateCode}?`,
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `There are ${nearbyClubs.length} strip clubs within 50 miles of ${cityName}, ${stateName}, including ${fullNudeCount} full nude, ${toplessCount} topless, and ${bikiniCount} bikini venues.`
+          "text": `There are ${stripClubCount} strip clubs${bikiniCafeCount > 0 ? ` and ${bikiniCafeCount} bikini coffee shops` : ''} within 50 miles of ${cityName}, ${stateName}, including ${fullNudeCount} full nude, ${toplessCount} topless, and ${bikiniCount} bikini venues.`
         }
       },
       {
@@ -145,21 +147,29 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
 
       <div style={{ padding: '16px 16px 8px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Strip Clubs Near {cityName}, {stateCode}</h1>
-        <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>{nearbyClubs.length} clubs within 50 miles of {cityName}, {stateName}</p>
+        <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>
+          {stripClubCount} strip club{stripClubCount === 1 ? '' : 's'}{bikiniCafeCount > 0 ? ` · ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''} within 50 miles of {cityName}, {stateName}
+        </p>
       </div>
 
       <div style={{ padding: '8px 16px 0' }}>
         <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16 }}>
           <p style={{ color: '#ccc', fontSize: 14, lineHeight: 1.6, margin: '0 0 14px' }}>
-            TittyMaps lists {nearbyClubs.length} strip club{nearbyClubs.length === 1 ? '' : 's'} within 50 miles of {cityName}, {stateName} — including {fullNudeCount > 0 ? `${fullNudeCount} full nude` : ''}{fullNudeCount > 0 && (toplessCount > 0 || bikiniCount > 0) ? ', ' : ''}{toplessCount > 0 ? `${toplessCount} topless` : ''}{toplessCount > 0 && bikiniCount > 0 ? ' and ' : ''}{bikiniCount > 0 ? `${bikiniCount} bikini` : ''} venue{nearbyClubs.length === 1 ? '' : 's'}. Sorted by featured status then distance.
+            TittyMaps lists {stripClubCount} strip club{stripClubCount === 1 ? '' : 's'}{bikiniCafeCount > 0 ? ` and ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''} within 50 miles of {cityName}, {stateName}. Sorted by featured status then distance.
           </p>
 
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <tbody>
               <tr style={{ borderBottom: '1px solid #1e2140' }}>
-                <td style={{ padding: '8px 0', color: '#8890c0' }}>Clubs within 50 miles</td>
-                <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{nearbyClubs.length}</td>
+                <td style={{ padding: '8px 0', color: '#8890c0' }}>Strip clubs within 50 miles</td>
+                <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{stripClubCount}</td>
               </tr>
+              {bikiniCafeCount > 0 && (
+                <tr style={{ borderBottom: '1px solid #1e2140' }}>
+                  <td style={{ padding: '8px 0', color: '#8890c0' }}>🧋 Bikini coffee shops</td>
+                  <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{bikiniCafeCount}</td>
+                </tr>
+              )}
               {fullNudeCount > 0 && (
                 <tr style={{ borderBottom: '1px solid #1e2140' }}>
                   <td style={{ padding: '8px 0', color: '#8890c0' }}>🐱 Full nude</td>
@@ -188,12 +198,6 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
                 <tr style={{ borderBottom: '1px solid #1e2140' }}>
                   <td style={{ padding: '8px 0', color: '#8890c0' }}>🍺 BYOB</td>
                   <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{byobCount}</td>
-                </tr>
-              )}
-              {cafeCount > 0 && (
-                <tr style={{ borderBottom: '1px solid #1e2140' }}>
-                  <td style={{ padding: '8px 0', color: '#8890c0' }}>🧋 Cafe</td>
-                  <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{cafeCount}</td>
                 </tr>
               )}
               {noBarCount > 0 && (
@@ -227,7 +231,7 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
       <div style={{ padding: '16px 16px 0' }}>
         <h2 style={{ color: 'white', fontSize: 17, fontWeight: 700, margin: '0 0 8px' }}>How many strip clubs are within 50 miles of {cityName}?</h2>
         <p style={{ color: '#ccc', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-          There are {nearbyClubs.length} strip club{nearbyClubs.length === 1 ? '' : 's'} within 50 miles of {cityName}, {stateName} listed on TittyMaps, including {fullNudeCount} full nude, {toplessCount} topless, and {bikiniCount} bikini venue{bikiniCount === 1 ? '' : 's'}.
+          There are {stripClubCount} strip club{stripClubCount === 1 ? '' : 's'}{bikiniCafeCount > 0 ? ` and ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''} within 50 miles of {cityName}, {stateName} listed on TittyMaps, including {fullNudeCount} full nude, {toplessCount} topless, and {bikiniCount} bikini venue{bikiniCount === 1 ? '' : 's'}.
         </p>
       </div>
 
@@ -252,7 +256,7 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
 
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
-          All {nearbyClubs.length} clubs within 50 miles
+          All {nearbyClubs.length} venues within 50 miles
         </div>
         {nearbyClubs.map(club => (
           <a key={club.id}
@@ -277,12 +281,17 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
               </div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
-                <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
-                </span>
-                <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-                </span>
+                {club.nude_level === 'bikini' && club.bar_type === 'cafe'
+                  ? <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🧋 Bikini Coffee</span>
+                  : <>
+                    <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                      {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
+                    </span>
+                    <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                      {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+                    </span>
+                  </>
+                }
               </div>
             </div>
           </a>
