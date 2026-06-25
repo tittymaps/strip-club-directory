@@ -22,6 +22,21 @@ const STATE_NAMES: Record<string, string> = {
 
 const MONTH_YEAR = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
+function is24Hours(hours: any): boolean {
+  if (!hours) return false
+  return Object.values(hours).some((h: any) =>
+    typeof h === 'string' && h.toLowerCase().includes('24')
+  )
+}
+
+function isLingerieStudio(club: any): boolean {
+  return club.nude_level === 'full_nude' && club.bar_type === 'none' && is24Hours(club.hours)
+}
+
+function isBikiniCafe(club: any): boolean {
+  return club.nude_level === 'bikini' && club.bar_type === 'cafe'
+}
+
 export default async function CityPage({ params }: { params: { state: string, city: string } }) {
   const stateCode = params.state.toUpperCase()
   const cityName = decodeURIComponent(params.city)
@@ -44,8 +59,9 @@ export default async function CityPage({ params }: { params: { state: string, ci
     d.club_ids?.some((id: string) => clubIds.includes(id))
   )
 
-  const bikiniCafeCount = clubs.filter(c => c.nude_level === 'bikini' && c.bar_type === 'cafe').length
-  const stripClubs = clubs.filter(c => !(c.nude_level === 'bikini' && c.bar_type === 'cafe'))
+  const bikiniCafeCount = clubs.filter(isBikiniCafe).length
+  const lingerieCount = clubs.filter(isLingerieStudio).length
+  const stripClubs = clubs.filter(c => !isBikiniCafe(c) && !isLingerieStudio(c))
   const stripClubCount = stripClubs.length
   const fullNudeCount = stripClubs.filter(c => c.nude_level === 'full_nude').length
   const toplessCount = stripClubs.filter(c => c.nude_level === 'topless').length
@@ -77,7 +93,7 @@ export default async function CityPage({ params }: { params: { state: string, ci
         "name": `Are strip clubs in ${cityName}, ${stateCode} full nude or topless?`,
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `${cityName} has ${fullNudeCount} full nude club${fullNudeCount === 1 ? '' : 's'}, ${toplessCount} topless club${toplessCount === 1 ? '' : 's'}${bikiniCount > 0 ? `, and ${bikiniCount} bikini club${bikiniCount === 1 ? '' : 's'}` : ''}${bikiniCafeCount > 0 ? `, plus ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''}. Full nude clubs typically do not serve alcohol due to local regulations, while topless clubs often have a full bar.`
+          "text": `${cityName} has ${fullNudeCount} full nude club${fullNudeCount === 1 ? '' : 's'}, ${toplessCount} topless club${toplessCount === 1 ? '' : 's'}${bikiniCount > 0 ? `, and ${bikiniCount} bikini club${bikiniCount === 1 ? '' : 's'}` : ''}${bikiniCafeCount > 0 ? `, plus ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''}${lingerieCount > 0 ? `, and ${lingerieCount} lingerie modeling studio${lingerieCount === 1 ? '' : 's'}` : ''}. Full nude clubs typically do not serve alcohol due to local regulations, while topless clubs often have a full bar.`
         }
       },
       {
@@ -109,7 +125,11 @@ export default async function CityPage({ params }: { params: { state: string, ci
       <div style={{ padding: '16px 16px 8px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Strip Clubs in {cityName}, {stateCode} — Full Directory</h1>
         <p style={{ color: '#8890c0', fontSize: 13, margin: 0 }}>
-          {stateName} · {stripClubCount} strip club{stripClubCount === 1 ? '' : 's'}{bikiniCafeCount > 0 ? ` · ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''} · {dancers.length} featured dancers
+          {stateName}
+          {stripClubCount > 0 ? ` · ${stripClubCount} strip club${stripClubCount === 1 ? '' : 's'}` : ''}
+          {bikiniCafeCount > 0 ? ` · ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''}
+          {lingerieCount > 0 ? ` · ${lingerieCount} lingerie studio${lingerieCount === 1 ? '' : 's'}` : ''}
+          {dancers.length > 0 ? ` · ${dancers.length} featured dancer${dancers.length === 1 ? '' : 's'}` : ''}
         </p>
       </div>
 
@@ -117,19 +137,30 @@ export default async function CityPage({ params }: { params: { state: string, ci
         <div style={{ padding: '8px 16px 0' }}>
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16 }}>
             <p style={{ color: '#ccc', fontSize: 14, lineHeight: 1.6, margin: '0 0 14px' }}>
-              TittyMaps lists {stripClubCount} strip club{stripClubCount === 1 ? '' : 's'}{bikiniCafeCount > 0 ? ` and ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''} in {cityName}, {stateName}. Updated {MONTH_YEAR}. Browse the full list below or filter by category to find the right club near you.
+              TittyMaps lists {stripClubCount > 0 ? `${stripClubCount} strip club${stripClubCount === 1 ? '' : 's'}` : ''}
+              {bikiniCafeCount > 0 ? `${stripClubCount > 0 ? ', ' : ''}${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''}
+              {lingerieCount > 0 ? `${stripClubCount > 0 || bikiniCafeCount > 0 ? ', and ' : ''}${lingerieCount} lingerie modeling studio${lingerieCount === 1 ? '' : 's'}` : ''}
+              {' '}in {cityName}, {stateName}. Updated {MONTH_YEAR}.
             </p>
 
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <tbody>
-                <tr style={{ borderBottom: '1px solid #1e2140' }}>
-                  <td style={{ padding: '8px 0', color: '#8890c0' }}>Strip clubs in {cityName}</td>
-                  <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{stripClubCount}</td>
-                </tr>
+                {stripClubCount > 0 && (
+                  <tr style={{ borderBottom: '1px solid #1e2140' }}>
+                    <td style={{ padding: '8px 0', color: '#8890c0' }}>Strip clubs in {cityName}</td>
+                    <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{stripClubCount}</td>
+                  </tr>
+                )}
                 {bikiniCafeCount > 0 && (
                   <tr style={{ borderBottom: '1px solid #1e2140' }}>
                     <td style={{ padding: '8px 0', color: '#8890c0' }}>🧋 Bikini coffee shops</td>
                     <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{bikiniCafeCount}</td>
+                  </tr>
+                )}
+                {lingerieCount > 0 && (
+                  <tr style={{ borderBottom: '1px solid #1e2140' }}>
+                    <td style={{ padding: '8px 0', color: '#8890c0' }}>💋 Lingerie modeling studios</td>
+                    <td style={{ padding: '8px 0', color: 'white', textAlign: 'right', fontWeight: 600 }}>{lingerieCount}</td>
                   </tr>
                 )}
                 {fullNudeCount > 0 && (
@@ -186,6 +217,7 @@ export default async function CityPage({ params }: { params: { state: string, ci
                 <a href={`/clubs/${club.id}`} style={{ color: '#7ab8ff', textDecoration: 'underline' }}>
                   {club.name}
                 </a>
+                {isBikiniCafe(club) ? ' (bikini coffee shop)' : isLingerieStudio(club) ? ' (lingerie modeling studio)' : ''}
               </li>
             ))}
           </ol>
@@ -196,7 +228,7 @@ export default async function CityPage({ params }: { params: { state: string, ci
         <div style={{ padding: '16px 16px 0' }}>
           <h2 style={{ color: 'white', fontSize: 17, fontWeight: 700, margin: '0 0 8px' }}>Are strip clubs in {cityName}, {stateCode} full nude or topless?</h2>
           <p style={{ color: '#ccc', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-            {cityName} has {fullNudeCount} full nude club{fullNudeCount === 1 ? '' : 's'}, {toplessCount} topless club{toplessCount === 1 ? '' : 's'}{bikiniCount > 0 ? `, and ${bikiniCount} bikini club${bikiniCount === 1 ? '' : 's'}` : ''}{bikiniCafeCount > 0 ? `, plus ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''}. In most states, full nude clubs are restricted from serving alcohol, so they&apos;re often BYOB or no-bar venues, while topless clubs are more likely to have a full bar since they fall under standard liquor licensing rules.
+            {cityName} has {fullNudeCount} full nude club{fullNudeCount === 1 ? '' : 's'}, {toplessCount} topless club{toplessCount === 1 ? '' : 's'}{bikiniCount > 0 ? `, and ${bikiniCount} bikini club${bikiniCount === 1 ? '' : 's'}` : ''}{bikiniCafeCount > 0 ? `, plus ${bikiniCafeCount} bikini coffee shop${bikiniCafeCount === 1 ? '' : 's'}` : ''}{lingerieCount > 0 ? `, and ${lingerieCount} lingerie modeling studio${lingerieCount === 1 ? '' : 's'}` : ''}. In most states, full nude clubs are restricted from serving alcohol, so they&apos;re often BYOB or no-bar venues, while topless clubs are more likely to have a full bar since they fall under standard liquor licensing rules.
           </p>
         </div>
       )}
@@ -250,8 +282,10 @@ export default async function CityPage({ params }: { params: { state: string, ci
               <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 6 }}>{club.city}, {club.state}</div>
               <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                 {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
-                {club.nude_level === 'bikini' && club.bar_type === 'cafe'
+                {isBikiniCafe(club)
                   ? <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🧋 Bikini Coffee</span>
+                  : isLingerieStudio(club)
+                  ? <span style={{ background: '#2a1a2e', color: '#cc88ff', border: '1px solid #9944cc', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💋 Lingerie Studio</span>
                   : <>
                     <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                       {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
