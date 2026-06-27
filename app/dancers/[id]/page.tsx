@@ -37,18 +37,19 @@ export default function DancerProfile() {
     </div>
   )
 
-  const fanslyUrl = dancer.is_featured
-    ? (dancer.fansly_url || '')
-    : `https://fansly.com/tittymaps?r=${FANSLY_REF}`
+  const fanslyUrl = dancer.fansly_url || `https://fansly.com/tittymaps?r=${FANSLY_REF}`
 
   const allPhotos: string[] = dancer.photo_urls && dancer.photo_urls.length > 0
     ? dancer.photo_urls
     : dancer.photo_url ? [dancer.photo_url] : []
 
-  return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 40 }}>
+  const isBikiniBarista = clubs.length > 0 && clubs.every(c => c.nude_level === 'bikini' && c.bar_type === 'cafe')
+  const roleLabel = isBikiniBarista ? 'Barista' : 'Dancer'
 
-      {/* Lightbox with swipe */}
+  return (
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: dancer.fansly_url ? 90 : 40 }}>
+
+      {/* Lightbox */}
       {fullPhotoIndex !== null && allPhotos.length > 0 && (
         <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
@@ -88,6 +89,16 @@ export default function DancerProfile() {
         </div>
       )}
 
+      {/* Sticky Fansly CTA */}
+      {dancer.fansly_url && (
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99, background: '#0a0b14', borderTop: '1px solid #FF2D78', padding: '10px 16px' }}>
+          <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.4)' }}>
+            💋 Subscribe to {dancer.stage_name} on Fansly
+          </a>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <button onClick={() => router.back()} style={{ position: 'absolute', left: 16, background: 'transparent', border: '1px solid #3a3d60', borderRadius: 20, color: '#8890c0', padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>← Back</button>
@@ -99,52 +110,69 @@ export default function DancerProfile() {
         <div onClick={() => allPhotos.length > 0 && setFullPhotoIndex(0)}
           style={{ width: 90, height: 90, borderRadius: '50%', background: '#2a1a40', border: '3px solid #FF2D78', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, margin: '0 auto 14px', cursor: allPhotos.length > 0 ? 'pointer' : 'default' }}>
           {allPhotos[0]
-            ? <img src={allPhotos[0]} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <img src={`${allPhotos[0]}?width=200&quality=80`} alt={dancer.stage_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : '💃'}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 6 }}>
           <h1 style={{ color: 'white', fontSize: 22, fontWeight: 700, margin: 0 }}>{dancer.stage_name}</h1>
           {dancer.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
         </div>
+        {dancer.fansly_url && (
+          <p style={{ color: '#8890c0', fontSize: 13, margin: '6px 0 0', lineHeight: 1.5 }}>
+            Subscribe for exclusive photos and videos not shown here 🔥
+          </p>
+        )}
       </div>
 
       <div style={{ padding: '16px' }}>
 
-        {/* Fansly button */}
-        {dancer.fansly_url && (
-          <div style={{ marginBottom: 16 }}>
-            {!dancer.is_featured && (
-              <div style={{ background: '#131629', borderRadius: 10, border: '1px solid #1e2140', padding: '10px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: '#8890c0', fontSize: 12 }}>Fansly:</span>
-                <span style={{ color: '#8890c0', fontSize: 13 }}>{dancer.fansly_url}</span>
-              </div>
-            )}
-            <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'block', background: '#FF2D78', color: 'white', textAlign: 'center', padding: '14px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none' }}>
-              Follow on Fansly
-            </a>
-          </div>
-        )}
-
-        {/* Photo gallery */}
+        {/* Photo gallery — shown first to engage before CTA */}
         {allPhotos.length > 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Photos</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
               {allPhotos.map((url, i) => (
                 <div key={i} onClick={() => setFullPhotoIndex(i)}
                   style={{ aspectRatio: '1', borderRadius: 10, overflow: 'hidden', cursor: 'pointer', background: '#131629' }}>
-                  <img src={url} alt={`photo ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={`${url}?width=250&quality=70`} alt={`${dancer.stage_name} photo ${i + 1}`} width={250} height={250} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               ))}
+            </div>
+
+            {/* CTA after photos */}
+            {dancer.fansly_url && (
+              <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
+                <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Want to see more? 🔥</div>
+                <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>
+                  {dancer.stage_name} posts exclusive content on Fansly that isn&apos;t available anywhere else.
+                </div>
+                <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.3)' }}>
+                  🔥 See Exclusive Content on Fansly
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Fansly button if no photos */}
+        {allPhotos.length === 0 && dancer.fansly_url && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center', marginBottom: 12 }}>
+              <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Find {dancer.stage_name} on Fansly 🔥</div>
+              <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>Subscribe for exclusive photos and videos.</div>
+              <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.3)' }}>
+                🔥 See Exclusive Content on Fansly
+              </a>
             </div>
           </div>
         )}
 
         {/* Clubs */}
         {clubs.length > 0 && (
-          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16 }}>
-           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Ask For {dancer.stage_name} At</div>
+          <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginBottom: 16 }}>
+            <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Ask For {dancer.stage_name} At</div>
             {clubs.map(club => (
               <div key={club.id} onClick={() => window.location.href = `/clubs/${club.id}`}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1e2140', cursor: 'pointer' }}>
@@ -152,6 +180,19 @@ export default function DancerProfile() {
                 <span style={{ color: '#8890c0', fontSize: 12 }}>{club.city}, {club.state} →</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Bottom CTA for engaged scrollers */}
+        {dancer.fansly_url && (
+          <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', textAlign: 'center', marginBottom: 16 }}>
+            <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 10 }}>
+              Support {dancer.stage_name} by subscribing to her Fansly — exclusive content, direct access, and more 💜
+            </div>
+            <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.3)' }}>
+              💋 Subscribe to {dancer.stage_name} on Fansly
+            </a>
           </div>
         )}
 
