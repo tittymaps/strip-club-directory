@@ -95,9 +95,7 @@ export default function DancerProfile() {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99, background: '#0a0b14', borderTop: '1px solid #FF2D78', padding: '10px 16px' }}>
         <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
           style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.4)' }}>
-          {dancer.is_featured
-            ? `💋 Subscribe to ${dancer.stage_name} on Fansly`
-            : `🔥 Find ${dancer.stage_name} on Fansly`}
+          💋 Subscribe to {dancer.stage_name} on Fansly
         </a>
       </div>
 
@@ -120,9 +118,7 @@ export default function DancerProfile() {
           {dancer.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured {roleLabel}</span>}
         </div>
         <p style={{ color: '#8890c0', fontSize: 13, margin: '6px 0 0', lineHeight: 1.5 }}>
-          {dancer.is_featured
-            ? `Subscribe for exclusive photos and videos not shown here 🔥`
-            : `Find ${dancer.stage_name} on Fansly for exclusive content 🔥`}
+          Subscribe for exclusive photos and videos not shown here 🔥
         </p>
       </div>
 
@@ -144,7 +140,7 @@ export default function DancerProfile() {
             {/* Mid-page CTA after photos */}
             <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
               <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
-                {dancer.is_featured ? 'Want to see more? 🔥' : `Find ${dancer.stage_name} on Fansly 🔥`}
+                Want to see more? 🔥
               </div>
               <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>
                 {dancer.is_featured
@@ -153,7 +149,7 @@ export default function DancerProfile() {
               </div>
               <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
                 style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.3)' }}>
-                {dancer.is_featured ? '🔥 See Exclusive Content on Fansly' : `🔥 Find ${dancer.stage_name} on Fansly`}
+                🔥 See Exclusive Content on Fansly
               </a>
             </div>
           </div>
@@ -164,7 +160,7 @@ export default function DancerProfile() {
           <div style={{ marginBottom: 16 }}>
             <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
               <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
-                {dancer.is_featured ? `Find ${dancer.stage_name} on Fansly 🔥` : `Find ${dancer.stage_name} on Fansly 🔥`}
+                Want to see more? 🔥
               </div>
               <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>
                 {dancer.is_featured
@@ -173,7 +169,7 @@ export default function DancerProfile() {
               </div>
               <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
                 style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.3)' }}>
-                {dancer.is_featured ? '🔥 See Exclusive Content on Fansly' : `🔥 Find ${dancer.stage_name} on Fansly`}
+                🔥 See Exclusive Content on Fansly
               </a>
             </div>
           </div>
@@ -193,7 +189,7 @@ export default function DancerProfile() {
           </div>
         )}
 
-        {/* Bottom CTA for engaged scrollers */}
+        {/* Bottom CTA */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', textAlign: 'center', marginBottom: 16 }}>
           <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 10 }}>
             {dancer.is_featured
@@ -202,9 +198,7 @@ export default function DancerProfile() {
           </div>
           <a href={fanslyUrl} target="_blank" rel="noopener noreferrer"
             style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', textAlign: 'center', padding: '13px', borderRadius: 10, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(255,45,120,0.3)' }}>
-            {dancer.is_featured
-              ? `💋 Subscribe to ${dancer.stage_name} on Fansly`
-              : `🔥 Find ${dancer.stage_name} on Fansly`}
+            💋 Subscribe to {dancer.stage_name} on Fansly
           </a>
         </div>
 
