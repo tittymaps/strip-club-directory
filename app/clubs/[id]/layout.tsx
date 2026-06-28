@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const { data: club } = await supabase
     .from('clubs')
-    .select('name, city, state, nude_level, bar_type')
+    .select('name, city, state, nude_level, bar_type, hours')
     .eq('id', params.id)
     .single()
 
@@ -19,14 +19,23 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 
   const isBikiniCafe = club.nude_level === 'bikini' && club.bar_type === 'cafe'
-  const categoryLabel = isBikiniCafe ? 'Bikini Coffee Shop' : 'Strip Club'
+  const isLingerieStudio = club.nude_level === 'full_nude' && club.bar_type === 'none' &&
+    club.hours && Object.values(club.hours).some((h: any) => typeof h === 'string' && h.toLowerCase().includes('24'))
+
+  const categoryLabel = isBikiniCafe
+    ? 'Bikini Coffee Shop'
+    : isLingerieStudio
+    ? 'Lingerie Modeling Studio'
+    : 'Strip Club'
+
   const nudeLabel = club.nude_level === 'full_nude' ? 'full nude' : club.nude_level === 'bikini' ? 'bikini' : 'topless'
   const barLabel = club.bar_type === 'full_bar' ? 'with a full bar' : club.bar_type === 'byob' ? 'BYOB' : club.bar_type === 'cafe' ? 'coffee shop' : ''
+  const performerLabel = isBikiniCafe ? 'baristas' : isLingerieStudio ? 'models' : 'dancers'
   const canonicalUrl = `https://tittymaps.com/clubs/${params.id}`
 
   return {
     title: `${club.name} - ${categoryLabel} in ${club.city}, ${club.state} | TittyMaps`,
-    description: `${club.name} is a ${nudeLabel} ${categoryLabel.toLowerCase()} in ${club.city}, ${club.state}${barLabel ? ' ' + barLabel : ''}. View hours, cover charge, reviews and featured ${isBikiniCafe ? 'baristas' : 'dancers'}.`,
+    description: `${club.name} is a ${nudeLabel} ${categoryLabel.toLowerCase()} in ${club.city}, ${club.state}${barLabel ? ' ' + barLabel : ''}. View hours, cover charge, reviews and featured ${performerLabel}.`,
     alternates: {
       canonical: canonicalUrl,
     },
