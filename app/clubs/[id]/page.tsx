@@ -42,6 +42,22 @@ function is24Hours(hours: any) {
   )
 }
 
+function TwitterBanner() {
+  return (
+    <a href="https://x.com/TittyMaps" target="_blank" rel="noopener noreferrer"
+      style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', textDecoration: 'none' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Stay in the loop</div>
+        <div style={{ color: '#8890c0', fontSize: 12 }}>Follow us for new clubs, dancers and updates — <span style={{ color: '#FF2D78', fontWeight: 600 }}>@TittyMaps</span></div>
+      </div>
+      <div style={{ background: '#000', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 20, flexShrink: 0 }}>Follow</div>
+    </a>
+  )
+}
+
 export default function ClubDetail() {
   const { id } = useParams()
   const router = useRouter()
@@ -494,8 +510,9 @@ export default function ClubDetail() {
           </div>
 
           {reviewSuccess && (
-            <div style={{ background: '#1a2e1a', border: '1px solid #3acd60', borderRadius: 10, padding: '12px 14px', color: '#7aff9a', fontSize: 13, marginBottom: 12 }}>
-              Your review has been posted!
+            <div style={{ background: '#1a2e1a', border: '1px solid #3acd60', borderRadius: 10, padding: '12px 14px', marginBottom: 12 }}>
+              <div style={{ color: '#7aff9a', fontSize: 13, marginBottom: 8 }}>Your review has been posted! ✅</div>
+              <TwitterBanner />
             </div>
           )}
 
@@ -607,6 +624,11 @@ export default function ClubDetail() {
             ))}
           </div>
         )}
+
+        <div style={{ marginBottom: 20 }}>
+          <TwitterBanner />
+        </div>
+
       </div>
     </div>
   )
