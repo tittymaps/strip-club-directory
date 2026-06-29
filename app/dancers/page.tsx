@@ -22,6 +22,22 @@ const STATE_NAMES: Record<string, string> = {
   DC: 'Washington D.C.'
 }
 
+function TwitterBanner({ message }: { message: string }) {
+  return (
+    <a href="https://x.com/TittyMaps" target="_blank" rel="noopener noreferrer"
+      style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', textDecoration: 'none', marginBottom: 16 }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Stay in the loop</div>
+        <div style={{ color: '#8890c0', fontSize: 12 }}>{message} <span style={{ color: '#FF2D78', fontWeight: 600 }}>@TittyMaps</span></div>
+      </div>
+      <div style={{ background: '#000', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 20, flexShrink: 0 }}>Follow</div>
+    </a>
+  )
+}
+
 export default function Dancers() {
   const [dancers, setDancers] = useState<any[]>([])
   const [clubs, setClubs] = useState<any[]>([])
@@ -182,7 +198,11 @@ export default function Dancers() {
         </div>
       </div>
 
-      <div style={{ padding: '8px 16px' }}>
+      <div style={{ padding: '0 16px 8px' }}>
+        <TwitterBanner message="Follow us for new clubs, dancers and updates —" />
+      </div>
+
+      <div style={{ padding: '0 16px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>
           Dancers & Baristas {search ? `— ${filtered.length} results` : ''}
         </div>
