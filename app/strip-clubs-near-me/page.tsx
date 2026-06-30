@@ -25,14 +25,12 @@ const STATE_NAMES: Record<string, string> = {
 export default function StripClubsNearMe() {
   const [clubs, setClubs] = useState<any[]>([])
   const [dancers, setDancers] = useState<any[]>([])
-  const [states, setStates] = useState<{ state: string, count: number }[]>([])
   const [loading, setLoading] = useState(true)
   const [locationName, setLocationName] = useState('')
   const [nearCity, setNearCity] = useState('')
   const [nearState, setNearState] = useState('')
 
   useEffect(() => {
-    fetchStates()
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         pos => fetchNearbyClubs(pos.coords.latitude, pos.coords.longitude),
@@ -71,21 +69,6 @@ export default function StripClubsNearMe() {
     )
     setDancers(nearbyDancers)
     setLoading(false)
-  }
-
-  async function fetchStates() {
-    const { data } = await supabase.from('clubs').select('state')
-    if (!data) return
-    const counts: Record<string, number> = {}
-    data.forEach(c => { if (c.state) counts[c.state] = (counts[c.state] || 0) + 1 })
-    const sorted = Object.entries(counts)
-      .map(([state, count]) => ({ state, count }))
-      .sort((a, b) => {
-        const nameA = STATE_NAMES[a.state] || a.state
-        const nameB = STATE_NAMES[b.state] || b.state
-        return nameA.localeCompare(nameB)
-      })
-    setStates(sorted)
   }
 
   function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -190,8 +173,8 @@ export default function StripClubsNearMe() {
         </div>
       )}
 
-      <div style={{ padding: '8px 16px' }}>
-        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20, marginBottom: 16 }}>
+      <div style={{ padding: '8px 16px 0' }}>
+        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20 }}>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Browse More</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {nearCity && nearState && (
@@ -204,23 +187,6 @@ export default function StripClubsNearMe() {
             <a href="/states" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ Browse by state</a>
             <a href="/" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ View all clubs on the map</a>
           </div>
-        </div>
-      </div>
-
-      <div style={{ padding: '0 16px 8px' }}>
-        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Browse Strip Clubs by State</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {states.map(({ state, count }) => (
-            <div key={state}
-              onClick={() => window.location.href = `/states/${state.toLowerCase()}`}
-              style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
-              <div>
-                <div style={{ color: 'white', fontSize: 14, fontWeight: 600 }}>Strip Clubs in {STATE_NAMES[state] || state}</div>
-                <div style={{ color: '#8890c0', fontSize: 11 }}>{count} {count === 1 ? 'club' : 'clubs'}</div>
-              </div>
-              <span style={{ color: '#FF2D78', fontSize: 16 }}>→</span>
-            </div>
-          ))}
         </div>
       </div>
 
