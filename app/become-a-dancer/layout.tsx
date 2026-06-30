@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Become a Featured Dancer | TittyMaps',
-  description: 'Get your dancer profile listed on TittyMaps. Reach thousands of club-goers in your area. Sign up through our Fansly link to become a featured dancer.',
+  description: 'Get your profile in front of thousands of club-goers. Featured dancers get a direct Fansly link, gold badge, and top placement on every club page. Sign up free.',
   alternates: {
     canonical: 'https://tittymaps.com/become-a-dancer',
   },
