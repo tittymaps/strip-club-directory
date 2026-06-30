@@ -22,6 +22,22 @@ const STATE_NAMES: Record<string, string> = {
   DC: 'Washington D.C.'
 }
 
+function TwitterBanner() {
+  return (
+    <a href="https://x.com/TittyMaps" target="_blank" rel="noopener noreferrer"
+      style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', textDecoration: 'none' }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Stay in the loop</div>
+        <div style={{ color: '#8890c0', fontSize: 12 }}>Follow us for new clubs, dancers and updates — <span style={{ color: '#FF2D78', fontWeight: 600 }}>@TittyMaps</span></div>
+      </div>
+      <div style={{ background: '#000', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 20, flexShrink: 0 }}>Follow</div>
+    </a>
+  )
+}
+
 export default function StatesPage() {
   const [states, setStates] = useState<{ code: string, name: string, count: number }[]>([])
   const [search, setSearch] = useState('')
@@ -99,8 +115,9 @@ export default function StatesPage() {
             value={search}
             onChange={e => { setSearch(e.target.value); setShowSuggestions(true) }}
             onFocus={() => setShowSuggestions(true)}
+            onKeyDown={e => { if (e.key === 'Enter') { setShowSuggestions(false); (e.target as HTMLInputElement).blur() } }}
             placeholder="Search states..."
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }}
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
           />
           {search.length > 0 && (
             <button onClick={() => { setSearch(''); setShowSuggestions(false) }}
@@ -156,6 +173,11 @@ export default function StatesPage() {
           </div>
         )}
       </div>
+
+      <div style={{ padding: '16px 16px 0' }}>
+        <TwitterBanner />
+      </div>
+
     </div>
   )
 }
