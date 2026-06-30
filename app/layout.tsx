@@ -20,18 +20,28 @@ export const metadata: Metadata = {
     description: 'Find strip clubs near you. Browse by location, check nude levels, bar type, hours and cover charges.',
     url: 'https://tittymaps.com',
     siteName: 'TittyMaps',
+    images: [
+      {
+        url: 'https://tittymaps.com/logo-pins.png',
+        width: 512,
+        height: 512,
+        alt: 'TittyMaps',
+      }
+    ],
     type: 'website',
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    shortcut: '/favicon.ico',
   },
   manifest: '/site.webmanifest',
 }
+
 export default function RootLayout({
   children,
 }: {
@@ -39,7 +49,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-     <body style={{ margin: 0, paddingBottom: 80, background: '#0D0F1E' }}>
+      <body style={{ margin: 0, paddingBottom: 80, background: '#0D0F1E' }}>
         {children}
         <BottomNav />
         <Analytics />
