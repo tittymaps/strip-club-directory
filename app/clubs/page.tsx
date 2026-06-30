@@ -246,6 +246,11 @@ export default function ClubsPage() {
           </div>
         )}
       </div>
+    
+      <div style={{ padding: '16px 16px 0' }}>
+        <TwitterBanner message="Follow us for new clubs, dancers and updates —" />
+      </div>
+    
     </div>
   )
 }
