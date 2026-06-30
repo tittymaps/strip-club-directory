@@ -24,9 +24,12 @@ const STATE_NAMES: Record<string, string> = {
 
 export default function StripClubsNearMe() {
   const [clubs, setClubs] = useState<any[]>([])
+  const [dancers, setDancers] = useState<any[]>([])
   const [states, setStates] = useState<{ state: string, count: number }[]>([])
   const [loading, setLoading] = useState(true)
   const [locationName, setLocationName] = useState('')
+  const [nearCity, setNearCity] = useState('')
+  const [nearState, setNearState] = useState('')
 
   useEffect(() => {
     fetchStates()
@@ -41,17 +44,32 @@ export default function StripClubsNearMe() {
   }, [])
 
   async function fetchNearbyClubs(lat: number, lon: number) {
-    const { data } = await supabase.from('clubs').select('*')
-    if (!data) { setLoading(false); return }
-    const sorted = data
+    const [{ data: clubData }, { data: dancerData }] = await Promise.all([
+      supabase.from('clubs').select('*'),
+      supabase.from('dancers').select('*').order('is_featured', { ascending: false })
+    ])
+
+    if (!clubData) { setLoading(false); return }
+
+    const sorted = clubData
       .filter(c => c.latitude && c.longitude)
       .map(c => ({ ...c, distance: getDistance(lat, lon, c.latitude, c.longitude) }))
       .sort((a, b) => a.distance - b.distance)
       .slice(0, 10)
+
     setClubs(sorted)
+
     if (sorted.length > 0) {
       setLocationName(`near ${sorted[0].city}, ${sorted[0].state}`)
+      setNearCity(sorted[0].city)
+      setNearState(sorted[0].state)
     }
+
+    const clubIds = sorted.map(c => c.id)
+    const nearbyDancers = (dancerData || []).filter((d: any) =>
+      d.club_ids?.some((id: string) => clubIds.includes(id))
+    )
+    setDancers(nearbyDancers)
     setLoading(false)
   }
 
@@ -81,16 +99,17 @@ export default function StripClubsNearMe() {
   }
 
   return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif' }}>
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
+
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-       <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
+        <img src="/logo-pins.png" alt="TittyMaps" onClick={() => window.location.href = '/'} style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', position: 'absolute', left: 16, cursor: 'pointer' }} />
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
         <ProfileButton />
       </div>
 
       <div style={{ padding: '20px 16px 8px' }}>
         <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>Strip Clubs Near Me</h1>
-        <p style={{ color: '#8890c0', fontSize: 14, margin: '0 0 4px' }}>
+        <p style={{ color: '#8890c0', fontSize: 14, margin: 0 }}>
           Find strip clubs and gentlemens clubs near your location. Browse full nude and topless clubs with full bar or BYOB.
         </p>
       </div>
@@ -115,7 +134,7 @@ export default function StripClubsNearMe() {
                 }}>
                 <div style={{ width: 48, height: 48, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                   {club.photo_url
-                    ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={`${club.photo_url}?width=250&quality=70`} alt={club.name} width={48} height={48} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : (club.is_featured ? '🌟' : '💜')}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -129,16 +148,13 @@ export default function StripClubsNearMe() {
                     <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                       {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                     </span>
-                    <span style={{ background: '#1a2a3d', color: '#7ab8ff', border: '1px solid #3a7acd', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                      {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : '🍺 BYOB'}
+                    <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                      {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
                     </span>
                   </div>
                 </div>
               </div>
             ))}
-            <div style={{ textAlign: 'center', marginTop: 8 }}>
-              <a href="/" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>View all clubs on the map →</a>
-            </div>
           </>
         ) : (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center', marginBottom: 16 }}>
@@ -149,7 +165,49 @@ export default function StripClubsNearMe() {
         )}
       </div>
 
+      {dancers.length > 0 && (
+        <div style={{ padding: '8px 16px' }}>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers Near You</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            {dancers.map((dancer: any) => {
+              const photo = dancer.photo_urls?.[0] || dancer.photo_url
+              return (
+                <div key={dancer.id}
+                  onClick={() => window.location.href = `/dancers/${dancer.id}`}
+                  style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${dancer.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                  {photo
+                    ? <img src={`${photo}?width=250&quality=70`} alt={dancer.stage_name} loading="lazy" width={250} height={333} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💃</div>
+                  }
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
+                    <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{dancer.stage_name}</div>
+                    {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div style={{ padding: '8px 16px' }}>
+        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20, marginBottom: 16 }}>
+          <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Browse More</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {nearCity && nearState && (
+              <a href={`/strip-clubs-near/${nearCity.toLowerCase().replace(/\s+/g, '-')}-${nearState.toLowerCase()}`} style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ All strip clubs within 50 miles of {nearCity}</a>
+            )}
+            {nearState && (
+              <a href={`/states/${nearState.toLowerCase()}`} style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ All strip clubs in {STATE_NAMES[nearState] || nearState}</a>
+            )}
+            <a href="/clubs" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ Browse all clubs nationwide</a>
+            <a href="/states" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ Browse by state</a>
+            <a href="/" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ View all clubs on the map</a>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: '0 16px 8px' }}>
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Browse Strip Clubs by State</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {states.map(({ state, count }) => (
