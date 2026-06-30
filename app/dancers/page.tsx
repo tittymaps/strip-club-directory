@@ -170,8 +170,9 @@ export default function Dancers() {
             value={search}
             onChange={e => { setSearch(e.target.value); setShowSuggestions(true) }}
             onFocus={() => setShowSuggestions(true)}
+            onKeyDown={e => { if (e.key === 'Enter') { setShowSuggestions(false); (e.target as HTMLInputElement).blur() } }}
             placeholder="Search dancers, clubs, cities, states..."
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }}
+            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
           />
           {search.length > 0 && (
             <button onClick={() => { setSearch(''); setShowSuggestions(false) }}
