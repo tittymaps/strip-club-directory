@@ -321,6 +321,18 @@ export default async function CityPage({ params }: { params: { state: string, ci
                     <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{dancer.stage_name}</div>
                     {dancer.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
                   </div>
+
+                  <div style={{ padding: '8px 16px 0' }}>
+        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20 }}>
+          <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Browse More</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <a href={`/strip-clubs-near/${cityName.toLowerCase().replace(/\s+/g, '-')}-${stateCode.toLowerCase()}`} style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ Strip clubs within 50 miles of {cityName}</a>
+            <a href={`/states/${stateCode.toLowerCase()}`} style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ All strip clubs in {stateName}</a>
+            <a href="/clubs" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ Browse all clubs nationwide</a>
+            <a href="/states" style={{ color: '#FF2D78', fontSize: 13, textDecoration: 'none' }}>→ Browse by state</a>
+          </div>
+        </div>
+      </div>
                 </a>
               )
             })}
