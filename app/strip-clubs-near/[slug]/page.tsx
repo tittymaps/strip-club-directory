@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import ProfileButton from '../../components/ProfileButton'
 
+export const revalidate = 0
+
 const supabase = createClient(
   'https://ssruvoxuwlksmbmubcfv.supabase.co',
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
