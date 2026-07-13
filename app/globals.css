@@ -25,11 +25,11 @@ body {
 @media (min-width: 768px) {
   .clubs-grid {
     grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
 
 @media (min-width: 768px) {
   .dancers-grid {
     grid-template-columns: repeat(4, 1fr) !important;
-  }
-}
   }
 }
