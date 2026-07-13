@@ -473,7 +473,7 @@ export default function ClubDetail() {
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
             {sectionLabel}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="performers-grid">
             {dancers.map(dancer => {
               const photo = dancer.photo_urls?.[0] || dancer.photo_url
               return (
