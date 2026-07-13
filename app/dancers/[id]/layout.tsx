@@ -6,6 +6,17 @@ const supabase = createClient(
   'sb_publishable_HpBo6b0DnC-J1B9LL0u26Q_wkkAIAEl'
 )
 
+function extractFanslyUsername(fanslyUrl: string): string | null {
+  if (!fanslyUrl) return null
+  try {
+    const url = new URL(fanslyUrl)
+    const parts = url.pathname.split('/').filter(Boolean)
+    return parts[0] || null
+  } catch {
+    return null
+  }
+}
+
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const { data: dancer } = await supabase
     .from('dancers')
@@ -24,7 +35,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       .from('clubs')
       .select('name, city, state, nude_level, bar_type')
       .in('id', dancer.club_ids)
-
     if (clubs && clubs.length > 0) {
       clubNames = clubs.map(c => c.name)
       const citySet: Record<string, boolean> = {}
@@ -38,12 +48,26 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const featuredLabel = dancer.is_featured ? 'Featured ' : ''
   const locationText = cities.length > 0 ? ` in ${cities.slice(0, 2).join(' & ')}` : ''
   const clubText = clubNames.length > 0 ? ` at ${clubNames.slice(0, 2).join(' & ')}` : ''
-  const fanslyText = dancer.fansly_url ? ' Follow on Fansly for exclusive content.' : ''
+  const fanslyUsername = extractFanslyUsername(dancer.fansly_url)
+  const fanslyText = fanslyUsername
+    ? ` Follow ${fanslyUsername} on Fansly for exclusive content.`
+    : dancer.fansly_url ? ' Follow on Fansly for exclusive content.' : ''
   const canonicalUrl = `https://tittymaps.com/dancers/${params.id}`
+
+  const keywords = [
+    dancer.stage_name,
+    fanslyUsername,
+    roleLabel,
+    ...clubNames.slice(0, 2),
+    ...cities.slice(0, 2),
+    'TittyMaps',
+    'Fansly',
+  ].filter(Boolean).join(', ')
 
   return {
     title: `${dancer.stage_name} - ${featuredLabel}${roleLabel}${clubText} | TittyMaps`,
     description: `View ${dancer.stage_name}'s profile on TittyMaps. ${featuredLabel}${roleLabel}${clubText}${locationText}.${fanslyText}`,
+    keywords,
     alternates: {
       canonical: canonicalUrl,
     },
