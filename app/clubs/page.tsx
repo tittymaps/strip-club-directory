@@ -22,6 +22,12 @@ const STATE_NAMES: Record<string, string> = {
   DC: 'Washington D.C.'
 }
 
+const NEAR_ME_PAGES = [
+  { label: 'Strip Clubs Near Me', sublabel: 'Find clubs near your location', href: '/strip-clubs-near-me', icon: '📍' },
+  { label: 'Bikini Coffee Near Me', sublabel: 'Find bikini baristas near you', href: '/bikini-baristas-near-me', icon: '🧋' },
+  { label: 'Lingerie Modeling Near Me', sublabel: 'Find lingerie studios near you', href: '/lingerie-modeling-near-me', icon: '💋' },
+]
+
 function TwitterBanner() {
   return (
     <a href="https://x.com/TittyMaps" target="_blank" rel="noopener noreferrer"
@@ -93,12 +99,22 @@ export default function ClubsPage() {
     const q = value.toLowerCase()
     const results: any[] = []
 
+    // Near me suggestions
+    const nearMeTerms = ['near me', 'near', 'close', 'location', 'nearby']
+    if (nearMeTerms.some(term => term.includes(q) || q.includes(term.split(' ')[0]))) {
+      NEAR_ME_PAGES.forEach(page => {
+        results.push({ type: 'near me', label: page.label, sublabel: page.sublabel, href: page.href, icon: page.icon })
+      })
+    }
+
+    // Club name suggestions
     clubs.forEach(club => {
       if (club.name.toLowerCase().includes(q)) {
         results.push({ type: 'club', label: club.name, sublabel: `${club.city}, ${STATE_NAMES[club.state] || club.state}`, href: `/clubs/${club.id}`, icon: '🏛️' })
       }
     })
 
+    // City suggestions
     const cityMap: Record<string, boolean> = {}
     clubs.forEach(c => { cityMap[c.city] = true })
     Object.keys(cityMap).forEach(city => {
@@ -111,6 +127,7 @@ export default function ClubsPage() {
       }
     })
 
+    // State suggestions
     Object.entries(STATE_NAMES).forEach(([code, name]) => {
       if (name.toLowerCase().includes(q) || code.toLowerCase().includes(q)) {
         if (clubs.some(c => c.state === code)) {
