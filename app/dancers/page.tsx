@@ -210,7 +210,7 @@ export default function Dancers() {
             <div style={{ color: '#8890c0', fontSize: 14 }}>No dancers found</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="dancers-grid">
             {filtered.map(dancer => {
               const photo = dancer.photo_urls?.[0] || dancer.photo_url
               return (
