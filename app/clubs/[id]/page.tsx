@@ -524,10 +524,8 @@ export default function ClubDetail() {
                 <div style={{ display: 'flex', gap: 6 }}>
                   {[1,2,3,4,5].map(s => (
                     <span key={s}
-                      onClick={() => { setReviewRating(s); setReviewHover(0) }}
-                      onMouseEnter={() => setReviewHover(s)}
-                      onMouseLeave={() => setReviewHover(0)}
-                      style={{ fontSize: 28, cursor: 'pointer', color: s <= (reviewHover || reviewRating) ? '#FFD700' : '#3a3d60' }}>★</span>
+                      onClick={() => setReviewRating(s)}
+                      style={{ fontSize: 28, cursor: 'pointer', color: s <= reviewRating ? '#FFD700' : '#3a3d60' }}>★</span>
                   ))}
                 </div>
               </div>
