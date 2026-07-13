@@ -101,10 +101,23 @@ export default function ClubsPage() {
 
     // Near me suggestions
     const nearMeTerms = ['near me', 'near', 'close', 'location', 'nearby']
-    if (nearMeTerms.some(term => term.includes(q) || q.includes(term.split(' ')[0]))) {
+    const stripClubTerms = ['strip club', 'strip', 'gentlemen', 'nude', 'topless']
+    const bikiniTerms = ['bikini', 'barista', 'coffee']
+    const lingerieTerms = ['lingerie', 'modeling', 'studio']
+
+    const showNearMe = nearMeTerms.some(term => term.includes(q) || q.includes(term.split(' ')[0]))
+    const showStrip = stripClubTerms.some(term => term.includes(q) || q.includes(term))
+    const showBikini = bikiniTerms.some(term => term.includes(q) || q.includes(term))
+    const showLingerie = lingerieTerms.some(term => term.includes(q) || q.includes(term))
+
+    if (showNearMe) {
       NEAR_ME_PAGES.forEach(page => {
         results.push({ type: 'near me', label: page.label, sublabel: page.sublabel, href: page.href, icon: page.icon })
       })
+    } else {
+      if (showStrip) results.push({ type: 'near me', label: NEAR_ME_PAGES[0].label, sublabel: NEAR_ME_PAGES[0].sublabel, href: NEAR_ME_PAGES[0].href, icon: NEAR_ME_PAGES[0].icon })
+      if (showBikini) results.push({ type: 'near me', label: NEAR_ME_PAGES[1].label, sublabel: NEAR_ME_PAGES[1].sublabel, href: NEAR_ME_PAGES[1].href, icon: NEAR_ME_PAGES[1].icon })
+      if (showLingerie) results.push({ type: 'near me', label: NEAR_ME_PAGES[2].label, sublabel: NEAR_ME_PAGES[2].sublabel, href: NEAR_ME_PAGES[2].href, icon: NEAR_ME_PAGES[2].icon })
     }
 
     // Club name suggestions
