@@ -259,7 +259,7 @@ export default function ClubsPage() {
             <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="clubs-grid">
             {filtered.map((club, index) => (
               <div key={club.id}
                 onClick={() => window.location.href = `/clubs/${club.id}`}
