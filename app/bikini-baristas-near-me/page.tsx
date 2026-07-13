@@ -171,7 +171,7 @@ export default function BikiniBaristasNearMe() {
         {dancers.length > 0 && (
           <div style={{ marginTop: 24 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Baristas</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="dancers-grid">
               {dancers.map(dancer => {
                 const photo = dancer.photo_urls?.[0] || dancer.photo_url
                 return (
