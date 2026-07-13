@@ -11,6 +11,7 @@ const supabase = createClient(
 
 export default function LingerieModelingNearMe() {
   const [clubs, setClubs] = useState<any[]>([])
+  const [models, setModels] = useState<any[]>([])
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
 
   useEffect(() => {
@@ -28,18 +29,25 @@ export default function LingerieModelingNearMe() {
   }
 
   async function fetchClubs() {
-    const { data } = await supabase
-      .from('clubs')
-      .select('*')
-      .eq('nude_level', 'full_nude')
-      .eq('bar_type', 'none')
+    const [{ data: clubData }, { data: dancerData }] = await Promise.all([
+      supabase.from('clubs').select('*').eq('nude_level', 'full_nude').eq('bar_type', 'none'),
+      supabase.from('dancers').select('*').order('is_featured', { ascending: false })
+    ])
 
-    const filtered = (data || []).filter(c => {
+    const filtered = (clubData || []).filter(c => {
       if (!c.hours) return false
       return Object.values(c.hours).some((h: any) =>
         typeof h === 'string' && h.toLowerCase().includes('24')
       )
     })
+
+    const processClubs = (clubList: any[]) => {
+      const clubIds = clubList.map(c => c.id)
+      const nearbyModels = (dancerData || []).filter((d: any) =>
+        d.club_ids?.some((id: string) => clubIds.includes(id))
+      )
+      setModels(nearbyModels)
+    }
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -52,17 +60,18 @@ export default function LingerieModelingNearMe() {
             .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
             .sort((a, b) => a.distance - b.distance)
           setClubs(withDistance)
+          processClubs(withDistance)
         },
         () => {
-          const featured = filtered.filter(c => c.is_featured)
-          const standard = filtered.filter(c => !c.is_featured)
-          setClubs([...featured, ...standard])
+          const sorted = [...filtered.filter(c => c.is_featured), ...filtered.filter(c => !c.is_featured)]
+          setClubs(sorted)
+          processClubs(sorted)
         }
       )
     } else {
-      const featured = filtered.filter(c => c.is_featured)
-      const standard = filtered.filter(c => !c.is_featured)
-      setClubs([...featured, ...standard])
+      const sorted = [...filtered.filter(c => c.is_featured), ...filtered.filter(c => !c.is_featured)]
+      setClubs(sorted)
+      processClubs(sorted)
     }
   }
 
@@ -104,7 +113,7 @@ export default function LingerieModelingNearMe() {
             style={{ background: '#131629', borderRadius: 12, marginBottom: 10, padding: 14, border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`, display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer' }}>
             <div style={{ width: 52, height: 52, borderRadius: 12, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
               {club.photo_url
-                ? <img src={`${club.photo_url}?width=200&quality=75`} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={`${club.photo_url}?width=200&quality=75`} alt={club.name} width={52} height={52} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : '💋'}
             </div>
             <div style={{ flex: 1 }}>
@@ -125,7 +134,32 @@ export default function LingerieModelingNearMe() {
           </div>
         ))}
 
-        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20, marginTop: 16 }}>
+        {models.length > 0 && (
+          <div style={{ marginTop: 8, marginBottom: 16 }}>
+            <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Models</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+              {models.map((model: any) => {
+                const photo = model.photo_urls?.[0] || model.photo_url
+                return (
+                  <div key={model.id}
+                    onClick={() => window.location.href = `/dancers/${model.id}`}
+                    style={{ borderRadius: 12, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', background: '#131629', border: `1px solid ${model.is_featured ? '#FFD700' : '#1e2140'}` }}>
+                    {photo
+                      ? <img src={`${photo}?width=250&quality=70`} alt={model.stage_name} loading="lazy" width={250} height={333} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>💋</div>
+                    }
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.9))', padding: '20px 10px 10px' }}>
+                      <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{model.stage_name}</div>
+                      {model.is_featured && <div style={{ color: '#FFD700', fontSize: 10 }}>★ Featured</div>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 20, marginTop: 8 }}>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>What is a Lingerie Modeling Studio?</div>
           <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.7 }}>
             Lingerie modeling studios are private adult entertainment venues where performers model lingerie or go fully nude in a one-on-one or small group setting. Unlike traditional strip clubs they typically have no bar, no alcohol, and are often open 24 hours a day. They offer a more private and personal experience than a standard gentlemen&apos;s club.
