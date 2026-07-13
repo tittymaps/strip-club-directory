@@ -137,7 +137,7 @@ export default function LingerieModelingNearMe() {
         {models.length > 0 && (
           <div style={{ marginTop: 8, marginBottom: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Models</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="dancers-grid">
               {models.map((model: any) => {
                 const photo = model.photo_urls?.[0] || model.photo_url
                 return (
