@@ -21,3 +21,9 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+@media (min-width: 768px) {
+  .clubs-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
