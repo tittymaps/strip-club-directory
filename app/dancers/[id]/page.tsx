@@ -63,7 +63,7 @@ export default function DancerProfile() {
               else setFullPhotoIndex(prev => prev !== null ? Math.max(prev - 1, 0) : null)
             }
           }}>
-          <img src={allPhotos[fullPhotoIndex]} alt="full size" style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain' }} />
+          <img src={allPhotos[fullPhotoIndex]} alt="full size" onClick={() => setFullPhotoIndex(null)} style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain', cursor: 'pointer' }} />
           <button onClick={() => setFullPhotoIndex(null)}
             style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', width: 36, height: 36, fontSize: 16, cursor: 'pointer' }}>
             ✕
