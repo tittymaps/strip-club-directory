@@ -33,3 +33,9 @@ body {
     grid-template-columns: repeat(4, 1fr) !important;
   }
 }
+
+@media (min-width: 768px) {
+  .performers-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
