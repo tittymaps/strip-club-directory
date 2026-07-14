@@ -107,7 +107,9 @@ export default function LingerieModelingNearMe() {
             <div style={{ fontSize: 40, marginBottom: 12 }}>💋</div>
             <div style={{ color: '#8890c0', fontSize: 14 }}>No lingerie modeling studios found</div>
           </div>
-        ) : clubs.map(club => (
+       ) : (
+          <div className="state-clubs-grid">
+          {clubs.map(club => (
           <div key={club.id}
             onClick={() => window.location.href = `/clubs/${club.id}`}
             style={{ background: '#131629', borderRadius: 12, marginBottom: 10, padding: 14, border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`, display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer' }}>
@@ -131,8 +133,10 @@ export default function LingerieModelingNearMe() {
                 <span style={{ background: '#1a2e1a', color: '#7aff9a', border: '1px solid #3acd60', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>🕐 Open 24hrs</span>
               </div>
             </div>
-          </div>
+         </div>
         ))}
+          </div>
+        )}
 
         {models.length > 0 && (
           <div style={{ marginTop: 8, marginBottom: 16 }}>
