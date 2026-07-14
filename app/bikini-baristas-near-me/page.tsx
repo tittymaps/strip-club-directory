@@ -135,6 +135,7 @@ export default function BikiniBaristasNearMe() {
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
               {clubs.length} bikini barista {clubs.length === 1 ? 'location' : 'locations'} {locationName}
             </div>
+           <div className="state-clubs-grid">
             {clubs.map(club => (
               <div key={club.id}
                 onClick={() => window.location.href = `/clubs/${club.id}`}
@@ -164,7 +165,8 @@ export default function BikiniBaristasNearMe() {
                   </div>
                 </div>
               </div>
-            ))}
+           ))}
+            </div>
           </>
         )}
 
