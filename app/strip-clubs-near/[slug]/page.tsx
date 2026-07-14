@@ -336,8 +336,9 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
           </a>
         ))}
         </div>
+      </div>
 
-      {nearbyDancers.length > 0 &&
+      {nearbyDancers.length > 0 && (
         <div style={{ padding: '8px 16px' }}>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers Near {cityName}</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="dancers-grid">
