@@ -39,3 +39,14 @@ body {
     grid-template-columns: repeat(4, 1fr) !important;
   }
 }
+
+@media (min-width: 768px) {
+  .state-clubs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .state-clubs-grid > div {
+    margin-bottom: 0;
+  }
+}
