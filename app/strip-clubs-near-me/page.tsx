@@ -109,6 +109,7 @@ export default function StripClubsNearMe() {
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
               Closest clubs {locationName}
             </div>
+            <div className="state-clubs-grid">
             {clubs.map(club => (
               <div key={club.id}
                 onClick={() => window.location.href = `/clubs/${club.id}`}
@@ -139,7 +140,8 @@ export default function StripClubsNearMe() {
                   </div>
                 </div>
               </div>
-            ))}
+           ))}
+            </div>
           </>
         ) : (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center', marginBottom: 16 }}>
