@@ -264,7 +264,9 @@ export default async function CityPage({ params }: { params: { state: string, ci
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center', marginBottom: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found in {cityName}</div>
           </div>
-        ) : clubs.map(club => (
+        ) : (
+          <div className="state-clubs-grid">
+            {clubs.map(club => (
           <a key={club.id}
             href={`/clubs/${club.id}`}
             style={{
@@ -299,8 +301,10 @@ export default async function CityPage({ params }: { params: { state: string, ci
                 }
               </div>
             </div>
-          </a>
+         </a>
         ))}
+          </div>
+        )}
       </div>
 
       {dancers.length > 0 && (
