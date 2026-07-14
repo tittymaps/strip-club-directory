@@ -102,14 +102,16 @@ export default function StatePage() {
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 28, textAlign: 'center', marginBottom: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 14 }}>No clubs found</div>
           </div>
-        ) : filteredClubs.map(club => (
+        ) : (
+          <div className="state-clubs-grid">
+            {filteredClubs.map(club => (
           <div key={club.id}
             onClick={() => window.location.href = `/clubs/${club.id}`}
             style={{
               background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
               border: `1px solid ${club.is_featured ? '#FFD700' : '#1e2140'}`,
               display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
-            }}>
+         }}>
             <div style={{ width: 48, height: 48, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
               {club.photo_url
                 ? <img src={club.photo_url} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -128,9 +130,11 @@ export default function StatePage() {
                 {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
               </span>
               </div>
-            </div>
+           </div>
           </div>
         ))}
+          </div>
+        )}
       </div>
 
       {/* Dancers grid */}
