@@ -294,7 +294,8 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
         <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
           All {nearbyClubs.length} venues within 50 miles
         </div>
-        {nearbyClubs.map(club => (
+        <div className="state-clubs-grid">
+          {nearbyClubs.map(club => (
           <a key={club.id}
             href={`/clubs/${club.id}`}
             style={{
@@ -334,9 +335,9 @@ export default async function StripClubsNearPage({ params }: { params: { slug: s
             </div>
           </a>
         ))}
-      </div>
+        </div>
 
-      {nearbyDancers.length > 0 && (
+      {nearbyDancers.length > 0 &&
         <div style={{ padding: '8px 16px' }}>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Featured Dancers Near {cityName}</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="dancers-grid">
