@@ -455,10 +455,11 @@ export default function Home() {
         ))}
       </div>
 
-      <div style={{ padding: '8px 12px', paddingBottom: 100 }}>
+     <div style={{ padding: '8px 12px', paddingBottom: 100 }}>
         <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>
           {userLocation ? `${filtered.length} clubs within 215 miles` : `${filtered.length} clubs`}
         </div>
+        <div className="state-clubs-grid">
         {filtered.map((club) => (
           <div key={club.id}
             onClick={() => window.location.href = `/clubs/${club.id}`}
@@ -497,6 +498,7 @@ export default function Home() {
             </div>
           </div>
         ))}
+        </div>
 
         <div style={{ paddingTop: 8 }}>
           <TwitterBanner />
