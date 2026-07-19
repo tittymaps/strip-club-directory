@@ -158,7 +158,7 @@ export default function Dancers() {
       <div style={{ background: '#0D0F1E', borderBottom: '1px solid #1e2140', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
         <a href="/become-a-dancer"
           style={{ position: 'absolute', left: 16, background: '#FF2D78', color: 'white', borderRadius: 20, padding: '5px 12px', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>
-          Get Featured
+          + Get Listed
         </a>
         <img src="/logo-text.png" alt="TittyMaps.com" style={{ height: 60, objectFit: 'contain' }} />
         <ProfileButton />
