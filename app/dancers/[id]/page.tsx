@@ -81,35 +81,54 @@ export default function DancerProfile() {
       {/* Lightbox */}
       {fullPhotoIndex !== null && allPhotos.length > 0 && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.97)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-          onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.97)', zIndex: 1000, overflow: 'hidden' }}
+          onTouchStart={e => {
+            touchStartX.current = e.touches[0].clientX
+          }}
+          onTouchMove={e => {
+            const delta = e.touches[0].clientX - touchStartX.current
+            const container = document.getElementById('lightbox-track')
+            if (container) container.style.transform = `translateX(calc(-${fullPhotoIndex * 100}% + ${delta}px))`
+          }}
           onTouchEnd={e => {
             const diff = touchStartX.current - e.changedTouches[0].clientX
-            if (Math.abs(diff) > 40) {
-              if (diff > 0 && fullPhotoIndex < allPhotos.length - 1) {
-                goToPhoto(fullPhotoIndex + 1, 'left')
-              } else if (diff < 0 && fullPhotoIndex > 0) {
-                goToPhoto(fullPhotoIndex - 1, 'right')
+            const container = document.getElementById('lightbox-track')
+            if (Math.abs(diff) > 60) {
+              const newIndex = diff > 0
+                ? Math.min(fullPhotoIndex + 1, allPhotos.length - 1)
+                : Math.max(fullPhotoIndex - 1, 0)
+              setFullPhotoIndex(newIndex)
+              if (container) {
+                container.style.transition = 'transform 0.25s ease'
+                container.style.transform = `translateX(-${newIndex * 100}%)`
+                setTimeout(() => { if (container) container.style.transition = '' }, 250)
+              }
+            } else {
+              if (container) {
+                container.style.transition = 'transform 0.25s ease'
+                container.style.transform = `translateX(-${fullPhotoIndex * 100}%)`
+                setTimeout(() => { if (container) container.style.transition = '' }, 250)
               }
             }
           }}>
 
-          {/* Photo with slide animation */}
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, boxSizing: 'border-box' }}>
-            <img
-              key={fullPhotoIndex}
-              src={allPhotos[fullPhotoIndex]}
-              alt="full size"
-              onClick={() => setFullPhotoIndex(null)}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '90vh',
-                borderRadius: 12,
-                objectFit: 'contain',
-                cursor: 'pointer',
-                ...slideStyle
-              }}
-            />
+          {/* Full-width photo track */}
+          <div
+            id="lightbox-track"
+            style={{
+              display: 'flex',
+              width: `${allPhotos.length * 100}%`,
+              height: '100%',
+              transform: `translateX(-${fullPhotoIndex * 100 / allPhotos.length}%)`,
+              willChange: 'transform',
+            }}>
+            {allPhotos.map((url, i) => (
+              <div key={i}
+                style={{ width: `${100 / allPhotos.length}%`, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, boxSizing: 'border-box', flexShrink: 0 }}
+                onClick={() => setFullPhotoIndex(null)}>
+                <img src={url} alt={`photo ${i + 1}`} style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain', cursor: 'pointer', userSelect: 'none', pointerEvents: 'none' }} />
+              </div>
+            ))}
           </div>
 
           {/* Close button */}
@@ -118,37 +137,34 @@ export default function DancerProfile() {
             ✕
           </button>
 
-          {/* Prev button */}
+          {/* Prev/Next buttons */}
           {fullPhotoIndex > 0 && (
-            <button onClick={() => goToPhoto(fullPhotoIndex - 1, 'right')}
+            <button onClick={() => setFullPhotoIndex(fullPhotoIndex - 1)}
               style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 44, height: 44, fontSize: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ‹
             </button>
           )}
-
-          {/* Next button */}
           {fullPhotoIndex < allPhotos.length - 1 && (
-            <button onClick={() => goToPhoto(fullPhotoIndex + 1, 'left')}
+            <button onClick={() => setFullPhotoIndex(fullPhotoIndex + 1)}
               style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 44, height: 44, fontSize: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ›
             </button>
           )}
 
-          {/* Dot indicators */}
+          {/* Counter */}
+          <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center' }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{fullPhotoIndex + 1} / {allPhotos.length}</span>
+          </div>
+
+          {/* Dots */}
           {allPhotos.length > 1 && (
             <div style={{ position: 'absolute', bottom: 24, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8 }}>
               {allPhotos.map((_, i) => (
-                <div key={i}
-                  onClick={() => goToPhoto(i, i > fullPhotoIndex ? 'left' : 'right')}
+                <div key={i} onClick={() => setFullPhotoIndex(i)}
                   style={{ width: i === fullPhotoIndex ? 20 : 6, height: 6, borderRadius: 3, background: i === fullPhotoIndex ? '#FF2D78' : 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'width 0.2s ease, background 0.2s ease' }} />
               ))}
             </div>
           )}
-
-          {/* Photo counter */}
-          <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center' }}>
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{fullPhotoIndex + 1} / {allPhotos.length}</span>
-          </div>
         </div>
       )}
 
