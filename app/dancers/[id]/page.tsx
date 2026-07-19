@@ -16,61 +16,19 @@ export default function DancerProfile() {
   const [dancer, setDancer] = useState<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
   const [fullPhotoIndex, setFullPhotoIndex] = useState<number | null>(null)
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
-  const [isAnimating, setIsAnimating] = useState(false)
   const touchStartX = useRef(0)
+  const allPhotosRef = useRef<string[]>([])
 
   useEffect(() => {
     if (id) fetchDancer()
   }, [id])
 
   useEffect(() => {
-    if (slideDirection) {
-      const timer = setTimeout(() => {
-        setSlideDirection(null)
-        setIsAnimating(false)
-      }, 300)
-      return () => clearTimeout(timer)
-    }
-  }, [slideDirection])
-
-  async function fetchDancer() {
-    const { data } = await supabase.from('dancers').select('*').eq('id', id).single()
-    setDancer(data)
-    if (data?.club_ids?.length) {
-      const { data: clubData } = await supabase.from('clubs').select('id, name, city, state, nude_level, bar_type').in('id', data.club_ids)
-      setClubs(clubData || [])
-    }
-  }
-
-  function goToPhoto(newIndex: number, direction: 'left' | 'right') {
-    if (isAnimating) return
-    setIsAnimating(true)
-    setSlideDirection(direction)
-    setTimeout(() => {
-      setFullPhotoIndex(newIndex)
-    }, 150)
-  }
-
-  if (!dancer) return (
-    <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#FF2D78', fontSize: 16 }}>Loading...</div>
-    </div>
-  )
-
-  const fanslyUrl = dancer.is_featured && dancer.fansly_url
-    ? dancer.fansly_url
-    : `https://fansly.com/tittymaps?r=${FANSLY_REF}`
-
-  const allPhotos: string[] = dancer.photo_urls && dancer.photo_urls.length > 0
-    ? dancer.photo_urls
-    : dancer.photo_url ? [dancer.photo_url] : []
-
-  useEffect(() => {
     if (fullPhotoIndex === null) return
     const currentIndex = fullPhotoIndex
+    const photos = allPhotosRef.current
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight' && currentIndex < allPhotos.length - 1) {
+      if (e.key === 'ArrowRight' && currentIndex < photos.length - 1) {
         const track = document.getElementById('lightbox-track')
         const newIndex = currentIndex + 1
         setFullPhotoIndex(newIndex)
@@ -94,16 +52,35 @@ export default function DancerProfile() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [fullPhotoIndex, allPhotos.length])
+  }, [fullPhotoIndex])
+
+  async function fetchDancer() {
+    const { data } = await supabase.from('dancers').select('*').eq('id', id).single()
+    setDancer(data)
+    if (data?.club_ids?.length) {
+      const { data: clubData } = await supabase.from('clubs').select('id, name, city, state, nude_level, bar_type').in('id', data.club_ids)
+      setClubs(clubData || [])
+    }
+  }
+
+  if (!dancer) return (
+    <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#FF2D78', fontSize: 16 }}>Loading...</div>
+    </div>
+  )
+
+  const fanslyUrl = dancer.is_featured && dancer.fansly_url
+    ? dancer.fansly_url
+    : `https://fansly.com/tittymaps?r=${FANSLY_REF}`
+
+  const allPhotos: string[] = dancer.photo_urls && dancer.photo_urls.length > 0
+    ? dancer.photo_urls
+    : dancer.photo_url ? [dancer.photo_url] : []
+
+  allPhotosRef.current = allPhotos
 
   const isBikiniBarista = clubs.length > 0 && clubs.every((c: any) => c.nude_level === 'bikini' && c.bar_type === 'cafe')
   const roleLabel = isBikiniBarista ? 'Barista' : 'Dancer'
-
-  const slideStyle = slideDirection === 'left'
-    ? { transform: 'translateX(-60px)', opacity: 0, transition: 'transform 0.15s ease, opacity 0.15s ease' }
-    : slideDirection === 'right'
-    ? { transform: 'translateX(60px)', opacity: 0, transition: 'transform 0.15s ease, opacity 0.15s ease' }
-    : { transform: 'translateX(0)', opacity: 1, transition: 'transform 0.15s ease, opacity 0.15s ease' }
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 90 }}>
@@ -118,10 +95,7 @@ export default function DancerProfile() {
           onTouchMove={e => {
             const delta = e.touches[0].clientX - touchStartX.current
             const track = document.getElementById('lightbox-track')
-            if (track) {
-              const baseX = -(fullPhotoIndex * window.innerWidth)
-              track.style.transform = `translateX(${baseX + delta}px)`
-            }
+            if (track) track.style.transform = `translateX(calc(-${fullPhotoIndex * 100}% + ${delta}px))`
           }}
           onTouchEnd={e => {
             const diff = touchStartX.current - e.changedTouches[0].clientX
@@ -152,7 +126,7 @@ export default function DancerProfile() {
             {allPhotos.map((url, i) => (
               <div key={i}
                 style={{ width: '100vw', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, boxSizing: 'border-box', flexShrink: 0 }}
-                onClick={() => { if (Math.abs(touchStartX.current - (touchStartX.current)) < 5) setFullPhotoIndex(null) }}>
+                onClick={() => setFullPhotoIndex(null)}>
                 <img
                   src={url}
                   alt={`photo ${i + 1}`}
@@ -260,7 +234,6 @@ export default function DancerProfile() {
               ))}
             </div>
 
-            {/* Mid-page CTA after photos */}
             <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
               <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Want to see more? 🔥</div>
               <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>
@@ -276,7 +249,6 @@ export default function DancerProfile() {
           </div>
         )}
 
-        {/* CTA when no photos */}
         {allPhotos.length === 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
@@ -294,7 +266,6 @@ export default function DancerProfile() {
           </div>
         )}
 
-        {/* Clubs */}
         {clubs.length > 0 && (
           <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: 16, marginBottom: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Ask For {dancer.stage_name} At</div>
@@ -308,7 +279,6 @@ export default function DancerProfile() {
           </div>
         )}
 
-        {/* Bottom CTA */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', textAlign: 'center', marginBottom: 16 }}>
           <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 10 }}>
             {dancer.is_featured
