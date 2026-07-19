@@ -205,7 +205,7 @@ export default function ClubsPage() {
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             onKeyDown={e => { if (e.key === 'Enter') { setShowSuggestions(false); (e.target as HTMLInputElement).blur() } }}
             placeholder="Search clubs, cities, or states..."
-            style={{ width: '100%', background: '#131629', border: '2px solid #FF2D78', borderRadius: showSuggestions ? '10px 10px 0 0' : 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
+           style={{ width: '100%', background: '#131629', border: '2px solid #FF2D78', borderRadius: showSuggestions ? '10px 10px 0 0' : 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
           />
           {search.length > 0 && (
             <button onClick={() => { handleSearchChange(''); setShowSuggestions(false) }}
