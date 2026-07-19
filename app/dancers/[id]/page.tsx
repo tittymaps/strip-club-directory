@@ -66,10 +66,6 @@ export default function DancerProfile() {
     ? dancer.photo_urls
     : dancer.photo_url ? [dancer.photo_url] : []
 
-  const allPhotos: string[] = dancer.photo_urls && dancer.photo_urls.length > 0
-    ? dancer.photo_urls
-    : dancer.photo_url ? [dancer.photo_url] : []
-
   useEffect(() => {
     if (fullPhotoIndex === null) return
     const currentIndex = fullPhotoIndex
