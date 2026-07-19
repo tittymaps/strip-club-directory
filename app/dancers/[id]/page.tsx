@@ -34,6 +34,35 @@ export default function DancerProfile() {
     }
   }, [slideDirection])
 
+  useEffect(() => {
+    if (fullPhotoIndex === null) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight' && fullPhotoIndex < allPhotos.length - 1) {
+        const track = document.getElementById('lightbox-track')
+        const newIndex = fullPhotoIndex + 1
+        setFullPhotoIndex(newIndex)
+        if (track) {
+          track.style.transition = 'transform 0.25s ease'
+          track.style.transform = `translateX(${-(newIndex * window.innerWidth)}px)`
+          setTimeout(() => { if (track) track.style.transition = '' }, 260)
+        }
+      }
+      if (e.key === 'ArrowLeft' && fullPhotoIndex > 0) {
+        const track = document.getElementById('lightbox-track')
+        const newIndex = fullPhotoIndex - 1
+        setFullPhotoIndex(newIndex)
+        if (track) {
+          track.style.transition = 'transform 0.25s ease'
+          track.style.transform = `translateX(${-(newIndex * window.innerWidth)}px)`
+          setTimeout(() => { if (track) track.style.transition = '' }, 260)
+        }
+      }
+      if (e.key === 'Escape') setFullPhotoIndex(null)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [fullPhotoIndex, allPhotos.length])
+
   async function fetchDancer() {
     const { data } = await supabase.from('dancers').select('*').eq('id', id).single()
     setDancer(data)
