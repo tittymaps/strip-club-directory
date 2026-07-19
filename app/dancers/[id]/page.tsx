@@ -36,10 +36,11 @@ export default function DancerProfile() {
 
   useEffect(() => {
     if (fullPhotoIndex === null) return
+    const currentIndex = fullPhotoIndex
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight' && fullPhotoIndex < allPhotos.length - 1) {
+      if (e.key === 'ArrowRight' && currentIndex < allPhotos.length - 1) {
         const track = document.getElementById('lightbox-track')
-        const newIndex = fullPhotoIndex + 1
+        const newIndex = currentIndex + 1
         setFullPhotoIndex(newIndex)
         if (track) {
           track.style.transition = 'transform 0.25s ease'
@@ -47,9 +48,9 @@ export default function DancerProfile() {
           setTimeout(() => { if (track) track.style.transition = '' }, 260)
         }
       }
-      if (e.key === 'ArrowLeft' && fullPhotoIndex > 0) {
+      if (e.key === 'ArrowLeft' && currentIndex > 0) {
         const track = document.getElementById('lightbox-track')
-        const newIndex = fullPhotoIndex - 1
+        const newIndex = currentIndex - 1
         setFullPhotoIndex(newIndex)
         if (track) {
           track.style.transition = 'transform 0.25s ease'
