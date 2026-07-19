@@ -174,6 +174,7 @@ export default function Dancers() {
       </a>
 
       <div style={{ padding: '16px 16px 8px' }}>
+        <div style={{ color: '#8890c0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>🔍 Search dancers, clubs or locations</div>
         <div ref={searchRef} style={{ position: 'relative' }}>
           <input
             value={search}
@@ -181,7 +182,7 @@ export default function Dancers() {
             onFocus={() => setShowSuggestions(true)}
             onKeyDown={e => { if (e.key === 'Enter') { setShowSuggestions(false); (e.target as HTMLInputElement).blur() } }}
             placeholder="Search dancers, clubs, cities, states..."
-            style={{ width: '100%', background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
+            style={{ width: '100%', background: '#131629', border: '2px solid #FF2D78', borderRadius: 10, padding: '13px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
           />
           {search.length > 0 && (
             <button onClick={() => { setSearch(''); setShowSuggestions(false) }}
