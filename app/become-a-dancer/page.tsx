@@ -9,20 +9,14 @@ const supabase = createClient(
 
 const FANSLY_REF = 'tittymaps'
 const FANSLY_SIGNUP = `https://fansly.com/application/form?r=${FANSLY_REF}`
-const FANSLY_CREATE = 'https://fansly.com/'
+const TWITTER_DM = 'https://x.com/messages/compose?recipient_id=TittyMaps'
 
-function TwitterBanner({ message }: { message: string }) {
+function TwitterDMButton() {
   return (
-    <a href="https://x.com/TittyMaps" target="_blank" rel="noopener noreferrer"
-      style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#131629', borderRadius: 12, border: '1px solid #1e2140', padding: '14px 16px', textDecoration: 'none' }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 2 }}>Have questions? DM us</div>
-        <div style={{ color: '#8890c0', fontSize: 12 }}>{message} <span style={{ color: '#FF2D78', fontWeight: 600 }}>@TittyMaps</span></div>
-      </div>
-      <div style={{ background: '#000', color: 'white', fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 20, flexShrink: 0 }}>Follow</div>
+    <a href={TWITTER_DM} target="_blank" rel="noopener noreferrer"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: '#000', color: 'white', borderRadius: 12, padding: '13px', fontSize: 15, fontWeight: 700, textDecoration: 'none', width: '100%', boxSizing: 'border-box' }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      DM us on X @TittyMaps
     </a>
   )
 }
@@ -39,12 +33,21 @@ export default function BecomeADancer() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [totalDancers, setTotalDancers] = useState(0)
 
-  useEffect(() => { fetchClubs() }, [])
+  useEffect(() => {
+    fetchClubs()
+    fetchDancerCount()
+  }, [])
 
   async function fetchClubs() {
     const { data } = await supabase.from('clubs').select('id, name, city, state').order('name')
     setClubs(data || [])
+  }
+
+  async function fetchDancerCount() {
+    const { count } = await supabase.from('dancers').select('*', { count: 'exact', head: true })
+    setTotalDancers(count || 0)
   }
 
   function toggleClub(name: string) {
@@ -69,8 +72,8 @@ export default function BecomeADancer() {
   }
 
   async function handleSubmit() {
-    if (!stageName || !fanslyUsername || selectedClubs.length === 0) {
-      setError('Please fill out your stage name, Fansly link and select at least one club.')
+    if (!stageName || !fanslyUsername) {
+      setError('Please fill out your stage name and Fansly link.')
       return
     }
     setLoading(true)
@@ -95,7 +98,7 @@ export default function BecomeADancer() {
     const { error: dbError } = await supabase.from('dancer_applications').insert({
       stage_name: stageName,
       fansly_url: fanslyUsername,
-      club_names: selectedClubs,
+      club_names: selectedClubs.length > 0 ? selectedClubs : null,
       email: email || null,
       photo_url: uploadedUrls[0] || null,
       photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
@@ -131,9 +134,9 @@ export default function BecomeADancer() {
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'sans-serif' }}>
       <div style={{ fontSize: 56, marginBottom: 16 }}>💃</div>
       <h2 style={{ color: 'white', fontSize: 22, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>You are on the list!</h2>
-      <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', maxWidth: 300, marginBottom: 24 }}>We will review your application and get your profile live soon!</p>
-      <div style={{ width: '100%', maxWidth: 360, marginBottom: 24 }}>
-        <TwitterBanner message="We respond to every DM —" />
+      <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', maxWidth: 300, marginBottom: 24 }}>We will review your application and get your profile live soon. DM us on X if you have any questions!</p>
+      <div style={{ width: '100%', maxWidth: 360, marginBottom: 16 }}>
+        <TwitterDMButton />
       </div>
       <button onClick={() => window.location.href = '/'} style={{ background: 'transparent', border: 'none', color: '#8890c0', fontSize: 13, cursor: 'pointer', marginTop: 8 }}>
         Back to map
@@ -150,101 +153,67 @@ export default function BecomeADancer() {
       </div>
 
       {/* Hero */}
-      <div style={{ background: '#131629', padding: '32px 20px 24px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
+      <div style={{ background: '#131629', padding: '32px 20px 28px', textAlign: 'center', borderBottom: '1px solid #1e2140' }}>
         <div style={{ fontSize: 44, marginBottom: 12 }}>💃</div>
         <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>Get Featured on TittyMaps</h1>
-        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>Your customers want to subscribe to you! Let them find your links! 🔗</p>
+        <p style={{ color: '#8890c0', fontSize: 14, maxWidth: 320, margin: '0 auto 16px' }}>
+          Free to list. You keep 100% of your earnings. We earn from Fansly&apos;s cut — not yours.
+        </p>
 
-        <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', maxWidth: 360, margin: '0 auto', textAlign: 'left' }}>
-          <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>⭐ What you get with a Featured badge</div>
+        {/* Social proof */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#1a0d2e', border: '1px solid #FF2D78', borderRadius: 20, padding: '6px 16px', marginBottom: 20 }}>
+          <span style={{ fontSize: 14 }}>💃</span>
+          <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>Join {totalDancers}+ featured performers</span>
+        </div>
+
+        {/* Benefits — compact */}
+        <div style={{ background: '#1a0d2e', border: '1px solid #FF2D78', borderRadius: 14, padding: '14px', maxWidth: 360, margin: '0 auto', textAlign: 'left' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>🔝</span>
-              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>Always at the top</strong> — your profile shows up first on every applicable club and dancer list</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>⭐</span>
-              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>Featured badge</strong> — a gold star badge that signals you are a verified featured performer</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>💰</span>
-              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>We are incentivized to promote you</strong> — we earn a referral bonus from Fansly so we have every reason to drive fans to your profile</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <span style={{ fontSize: 16, flexShrink: 0 }}>🔗</span>
-              <div style={{ color: 'white', fontSize: 13, lineHeight: 1.5 }}><strong>Direct Fansly link</strong> — every visitor to your profile gets a direct link to your Fansly content</div>
-            </div>
-          </div>
-          <div style={{ marginTop: 12, background: '#0D0F1E', borderRadius: 10, padding: '10px 12px', border: '1px solid #3a3d60' }}>
-            <div style={{ color: '#FFD700', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>⚠️ How to unlock Featured</div>
-            <div style={{ color: '#ccc', fontSize: 12, lineHeight: 1.6 }}>Featured placements are <strong style={{ color: 'white' }}>only available</strong> to dancers who sign up as a Fansly creator <strong style={{ color: 'white' }}>through our referral link</strong> in Step 2 below. This is free and takes less than a minute.</div>
+            {[
+              { icon: '🔝', text: 'Top placement on every club and dancer list' },
+              { icon: '⭐', text: 'Gold Featured badge on your profile' },
+              { icon: '🔗', text: 'Direct link to your Fansly from your profile' },
+              { icon: '💰', text: 'We promote you — we earn from Fansly\'s cut, never yours' },
+            ].map((b, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>{b.icon}</span>
+                <span style={{ color: 'white', fontSize: 13 }}>{b.text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Steps */}
-      <div style={{ padding: '24px 20px', borderBottom: '1px solid #1e2140' }}>
-        <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>How to get featured</div>
-
-        {/* Step 1 */}
-        <div style={{ display: 'flex', gap: 14, marginBottom: 20 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>1</div>
-          <div>
-            <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Create a Fansly account</div>
-            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>You do not need a special link or code for this step. Simply go to Fansly and create a free account.</div>
-            <a href={FANSLY_CREATE} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-block', background: '#131629', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '6px 16px', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-              Create Fansly account →
-            </a>
-          </div>
+      {/* Fansly referral — prominent but concise */}
+      <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', margin: '16px 20px', borderRadius: 14, padding: '16px 14px' }}>
+        <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>⭐ Unlock your Featured badge</div>
+        <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Apply as a Fansly creator through our link</div>
+        <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5, marginBottom: 12 }}>
+          Free to apply. We get a cut from Fansly&apos;s standard fee — it never touches your earnings. This is what unlocks your Featured badge.
         </div>
-
-        {/* Step 2 */}
-        <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '16px 14px', marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>2</div>
-            <div>
-              <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Most important step ⭐</div>
-              <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Apply to be a Fansly creator through our link</div>
-              <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Apply through our link once you have an account. We get a referral bonus from Fansly&apos;s standard cut — it never touches your earnings. Same money for you, and now we have every reason to send you as many fans as possible.</div>
-            </div>
-          </div>
-          <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '10px 14px', fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', outline: '3px solid rgba(255,45,120,0.4)', outlineOffset: 3 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3, opacity: 0.85 }}>👆 Tap to unlock your Featured badge</div>
-            <div>Apply as creator through our link →</div>
-          </a>
-        </div>
-
-        {/* Step 3 */}
-        <div style={{ display: 'flex', gap: 14, marginBottom: 4 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>3</div>
-          <div>
-            <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Submit your info below</div>
-            <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Fill out the form below and we will get your profile live on TittyMaps. You will get a Featured badge, your profile will show up at the top of all applicable lists, and a direct link to your Fansly driving real fans to your content!</div>
-          </div>
-        </div>
-
-        <div style={{ background: '#131629', borderRadius: 12, border: '1px solid #3a3d60', padding: '12px 16px', marginTop: 16 }}>
-          <div style={{ color: '#FFD700', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>Already on Fansly?</div>
-          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>Already have a Fansly account? You can still get your dancer profile listed on TittyMaps — just fill out the form below with your existing Fansly link. You will be listed as a dancer without the Featured badge.</div>
-        </div>
+        <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '12px 14px', fontSize: 14, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(255,45,120,0.4)' }}>
+          👆 Apply as Fansly creator — unlock Featured
+        </a>
+        <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginTop: 8 }}>Already on Fansly? Skip this and fill the form below</div>
       </div>
 
-      {/* Form section */}
-      <div style={{ padding: '20px', background: '#0a0b14', borderTop: '2px solid #FF2D78' }}>
+      {/* DM option */}
+      <div style={{ margin: '0 20px 16px', background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px' }}>
+        <div style={{ color: 'white', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Prefer to DM us instead? 💬</div>
+        <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>Send us your stage name and Fansly link on X — we respond to every DM and will get you listed fast.</div>
+        <TwitterDMButton />
+      </div>
 
-        <div style={{ background: '#131629', borderRadius: 14, border: '2px solid #FF2D78', padding: '14px 16px', marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>📋</div>
-            <div style={{ color: 'white', fontSize: 18, fontWeight: 700 }}>Dancer Info</div>
-          </div>
-          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.5 }}>This takes less than 2 minutes and gets your profile live on TittyMaps.</div>
-        </div>
+      {/* Form */}
+      <div style={{ padding: '4px 20px 20px', background: '#0a0b14', borderTop: '1px solid #1e2140' }}>
 
-        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
-          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📷 Photos <span style={{ color: '#8890c0', fontWeight: 400 }}>(up to 3)</span></div>
-          <div style={{ color: '#555', fontSize: 11, marginBottom: 12 }}>First photo becomes your profile picture. All photos appear on your profile page.</div>
+        <div style={{ color: '#8890c0', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, margin: '20px 0 16px' }}>Or fill out the form</div>
+
+        {/* Photos */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 12 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📷 Photos <span style={{ color: '#8890c0', fontWeight: 400, fontSize: 11 }}>(optional, up to 3)</span></div>
+          <div style={{ color: '#555', fontSize: 11, marginBottom: 12 }}>First photo becomes your profile picture.</div>
           <div style={{ display: 'flex', gap: 10 }}>
             {photoPreviews.map((preview, i) => (
               <div key={i} style={{ position: 'relative', width: 80, height: 80, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
@@ -266,30 +235,34 @@ export default function BecomeADancer() {
           </div>
         </div>
 
-        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
-          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>💃 Stage name</div>
+        {/* Stage name */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 12 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>💃 Stage name <span style={{ color: '#FF2D78', fontSize: 11 }}>*</span></div>
           <input value={stageName} onChange={e => setStageName(e.target.value)} placeholder="Your stage name"
-            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
-          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>🔗 Fansly profile link</div>
+        {/* Fansly link */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 12 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>🔗 Fansly profile link <span style={{ color: '#FF2D78', fontSize: 11 }}>*</span></div>
           <input value={fanslyUsername} onChange={e => setFanslyUsername(e.target.value)} placeholder="https://fansly.com/yourname"
-            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 14 }}>
+        {/* Email */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 12 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📧 Email <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional</span></div>
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 8 }}>We will notify you when your profile goes live</div>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="text"
-            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14, boxSizing: 'border-box' }} />
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }} />
         </div>
 
-        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 24 }}>
-          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>🏛️ Where do you perform? <span style={{ color: '#8890c0', fontSize: 11, fontWeight: 400 }}>pick up to 3</span></div>
-          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>Select the clubs or venues you work at</div>
+        {/* Club selection — optional and collapsible feel */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 20 }}>
+          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>🏛️ Where do you perform? <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional, pick up to 3</span></div>
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>Helps us link you to the right club pages</div>
           <input value={clubSearch} onChange={e => setClubSearch(e.target.value)} placeholder="Search clubs by name or city..."
-            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 13, boxSizing: 'border-box', marginBottom: 10 }} />
+            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box', marginBottom: 10 }} />
           {selectedClubs.length > 0 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
               {selectedClubs.map(name => (
@@ -299,23 +272,25 @@ export default function BecomeADancer() {
               ))}
             </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
-            {filteredClubs.length === 0
-              ? <div style={{ color: '#8890c0', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>No clubs found</div>
-              : filteredClubs.map(club => {
-                const selected = selectedClubs.includes(club.name)
-                return (
-                  <div key={club.id} onClick={() => toggleClub(club.name)}
-                    style={{ background: selected ? '#1a0d2e' : '#0D0F1E', border: `1px solid ${selected ? '#FF2D78' : '#2a2d50'}`, borderRadius: 10, padding: '10px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1 }}>
-                    <div>
-                      <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
-                      <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+          {clubSearch.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
+              {filteredClubs.length === 0
+                ? <div style={{ color: '#8890c0', fontSize: 13, padding: '12px 0', textAlign: 'center' }}>No clubs found</div>
+                : filteredClubs.map(club => {
+                  const selected = selectedClubs.includes(club.name)
+                  return (
+                    <div key={club.id} onClick={() => toggleClub(club.name)}
+                      style={{ background: selected ? '#1a0d2e' : '#0D0F1E', border: `1px solid ${selected ? '#FF2D78' : '#2a2d50'}`, borderRadius: 10, padding: '10px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1 }}>
+                      <div>
+                        <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
+                        <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+                      </div>
+                      {selected && <span style={{ color: '#FF2D78', fontSize: 18 }}>✓</span>}
                     </div>
-                    {selected && <span style={{ color: '#FF2D78', fontSize: 18 }}>✓</span>}
-                  </div>
-                )
-              })}
-          </div>
+                  )
+                })}
+            </div>
+          )}
         </div>
 
         {error && (
@@ -325,15 +300,15 @@ export default function BecomeADancer() {
         )}
 
         <button onClick={handleSubmit} disabled={loading}
-          style={{ width: '100%', background: loading ? '#333' : 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', border: 'none', borderRadius: 12, padding: '16px', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 4px 20px rgba(255,45,120,0.4)' }}>
-          {loading ? 'Submitting...' : '💃 Submit Dancer Application'}
+          style={{ width: '100%', background: loading ? '#333' : 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', border: 'none', borderRadius: 12, padding: '16px', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', boxShadow: loading ? 'none' : '0 4px 20px rgba(255,45,120,0.4)', marginBottom: 12 }}>
+          {loading ? 'Submitting...' : '💃 Get Featured on TittyMaps'}
         </button>
 
-        <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginTop: 12, marginBottom: 20 }}>
-          By applying you confirm you are 18 or older and agree to our terms.
+        <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginBottom: 20 }}>
+          By applying you confirm you are 18 or older and agree to our terms. Only 2 required fields — takes under a minute.
         </div>
 
-        <TwitterBanner message="We respond to every DM —" />
+        <TwitterDMButton />
 
       </div>
     </div>
