@@ -34,36 +34,6 @@ export default function DancerProfile() {
     }
   }, [slideDirection])
 
-  useEffect(() => {
-    if (fullPhotoIndex === null) return
-    const currentIndex = fullPhotoIndex
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'ArrowRight' && currentIndex < allPhotos.length - 1) {
-        const track = document.getElementById('lightbox-track')
-        const newIndex = currentIndex + 1
-        setFullPhotoIndex(newIndex)
-        if (track) {
-          track.style.transition = 'transform 0.25s ease'
-          track.style.transform = `translateX(${-(newIndex * window.innerWidth)}px)`
-          setTimeout(() => { if (track) track.style.transition = '' }, 260)
-        }
-      }
-      if (e.key === 'ArrowLeft' && currentIndex > 0) {
-        const track = document.getElementById('lightbox-track')
-        const newIndex = currentIndex - 1
-        setFullPhotoIndex(newIndex)
-        if (track) {
-          track.style.transition = 'transform 0.25s ease'
-          track.style.transform = `translateX(${-(newIndex * window.innerWidth)}px)`
-          setTimeout(() => { if (track) track.style.transition = '' }, 260)
-        }
-      }
-      if (e.key === 'Escape') setFullPhotoIndex(null)
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [fullPhotoIndex, allPhotos.length])
-
   async function fetchDancer() {
     const { data } = await supabase.from('dancers').select('*').eq('id', id).single()
     setDancer(data)
@@ -95,6 +65,40 @@ export default function DancerProfile() {
   const allPhotos: string[] = dancer.photo_urls && dancer.photo_urls.length > 0
     ? dancer.photo_urls
     : dancer.photo_url ? [dancer.photo_url] : []
+
+  const allPhotos: string[] = dancer.photo_urls && dancer.photo_urls.length > 0
+    ? dancer.photo_urls
+    : dancer.photo_url ? [dancer.photo_url] : []
+
+  useEffect(() => {
+    if (fullPhotoIndex === null) return
+    const currentIndex = fullPhotoIndex
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight' && currentIndex < allPhotos.length - 1) {
+        const track = document.getElementById('lightbox-track')
+        const newIndex = currentIndex + 1
+        setFullPhotoIndex(newIndex)
+        if (track) {
+          track.style.transition = 'transform 0.25s ease'
+          track.style.transform = `translateX(${-(newIndex * window.innerWidth)}px)`
+          setTimeout(() => { if (track) track.style.transition = '' }, 260)
+        }
+      }
+      if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        const track = document.getElementById('lightbox-track')
+        const newIndex = currentIndex - 1
+        setFullPhotoIndex(newIndex)
+        if (track) {
+          track.style.transition = 'transform 0.25s ease'
+          track.style.transform = `translateX(${-(newIndex * window.innerWidth)}px)`
+          setTimeout(() => { if (track) track.style.transition = '' }, 260)
+        }
+      }
+      if (e.key === 'Escape') setFullPhotoIndex(null)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [fullPhotoIndex, allPhotos.length])
 
   const isBikiniBarista = clubs.length > 0 && clubs.every((c: any) => c.nude_level === 'bikini' && c.bar_type === 'cafe')
   const roleLabel = isBikiniBarista ? 'Barista' : 'Dancer'
