@@ -164,6 +164,15 @@ export default function Dancers() {
         <ProfileButton />
       </div>
 
+      <a href="/become-a-dancer" style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderBottom: '1px solid #FF2D78', padding: '14px 20px', textDecoration: 'none' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FF2D78', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>💃</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Are you a dancer or barista?</div>
+          <div style={{ color: '#8890c0', fontSize: 12 }}>Get your profile listed free — drive fans to your Fansly</div>
+        </div>
+        <div style={{ background: '#FF2D78', color: 'white', fontSize: 12, fontWeight: 700, padding: '7px 14px', borderRadius: 20, flexShrink: 0 }}>Get Featured →</div>
+      </a>
+
       <div style={{ padding: '16px 16px 8px' }}>
         <div ref={searchRef} style={{ position: 'relative' }}>
           <input
