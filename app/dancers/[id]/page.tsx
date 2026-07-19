@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { useParams, useRouter } from 'next/navigation'
 
@@ -16,11 +16,23 @@ export default function DancerProfile() {
   const [dancer, setDancer] = useState<any>(null)
   const [clubs, setClubs] = useState<any[]>([])
   const [fullPhotoIndex, setFullPhotoIndex] = useState<number | null>(null)
-  const [touchStartX, setTouchStartX] = useState(0)
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const touchStartX = useRef(0)
 
   useEffect(() => {
     if (id) fetchDancer()
   }, [id])
+
+  useEffect(() => {
+    if (slideDirection) {
+      const timer = setTimeout(() => {
+        setSlideDirection(null)
+        setIsAnimating(false)
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [slideDirection])
 
   async function fetchDancer() {
     const { data } = await supabase.from('dancers').select('*').eq('id', id).single()
@@ -29,6 +41,15 @@ export default function DancerProfile() {
       const { data: clubData } = await supabase.from('clubs').select('id, name, city, state, nude_level, bar_type').in('id', data.club_ids)
       setClubs(clubData || [])
     }
+  }
+
+  function goToPhoto(newIndex: number, direction: 'left' | 'right') {
+    if (isAnimating) return
+    setIsAnimating(true)
+    setSlideDirection(direction)
+    setTimeout(() => {
+      setFullPhotoIndex(newIndex)
+    }, 150)
   }
 
   if (!dancer) return (
@@ -48,46 +69,86 @@ export default function DancerProfile() {
   const isBikiniBarista = clubs.length > 0 && clubs.every((c: any) => c.nude_level === 'bikini' && c.bar_type === 'cafe')
   const roleLabel = isBikiniBarista ? 'Barista' : 'Dancer'
 
+  const slideStyle = slideDirection === 'left'
+    ? { transform: 'translateX(-60px)', opacity: 0, transition: 'transform 0.15s ease, opacity 0.15s ease' }
+    : slideDirection === 'right'
+    ? { transform: 'translateX(60px)', opacity: 0, transition: 'transform 0.15s ease, opacity 0.15s ease' }
+    : { transform: 'translateX(0)', opacity: 1, transition: 'transform 0.15s ease, opacity 0.15s ease' }
+
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 90 }}>
 
       {/* Lightbox */}
       {fullPhotoIndex !== null && allPhotos.length > 0 && (
         <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
-          onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.97)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+          onTouchStart={e => { touchStartX.current = e.touches[0].clientX }}
           onTouchEnd={e => {
-            const diff = touchStartX - e.changedTouches[0].clientX
-            if (Math.abs(diff) > 50) {
-              if (diff > 0) setFullPhotoIndex(prev => prev !== null ? Math.min(prev + 1, allPhotos.length - 1) : null)
-              else setFullPhotoIndex(prev => prev !== null ? Math.max(prev - 1, 0) : null)
+            const diff = touchStartX.current - e.changedTouches[0].clientX
+            if (Math.abs(diff) > 40) {
+              if (diff > 0 && fullPhotoIndex < allPhotos.length - 1) {
+                goToPhoto(fullPhotoIndex + 1, 'left')
+              } else if (diff < 0 && fullPhotoIndex > 0) {
+                goToPhoto(fullPhotoIndex - 1, 'right')
+              }
             }
           }}>
-          <img src={allPhotos[fullPhotoIndex]} alt="full size" onClick={() => setFullPhotoIndex(null)} style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain', cursor: 'pointer' }} />
+
+          {/* Photo with slide animation */}
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, boxSizing: 'border-box' }}>
+            <img
+              key={fullPhotoIndex}
+              src={allPhotos[fullPhotoIndex]}
+              alt="full size"
+              onClick={() => setFullPhotoIndex(null)}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '90vh',
+                borderRadius: 12,
+                objectFit: 'contain',
+                cursor: 'pointer',
+                ...slideStyle
+              }}
+            />
+          </div>
+
+          {/* Close button */}
           <button onClick={() => setFullPhotoIndex(null)}
-            style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: 'white', width: 36, height: 36, fontSize: 16, cursor: 'pointer' }}>
+            style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 40, height: 40, fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             ✕
           </button>
+
+          {/* Prev button */}
           {fullPhotoIndex > 0 && (
-            <button onClick={() => setFullPhotoIndex(prev => prev !== null ? prev - 1 : null)}
-              style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 40, height: 40, fontSize: 24, cursor: 'pointer' }}>
+            <button onClick={() => goToPhoto(fullPhotoIndex - 1, 'right')}
+              style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 44, height: 44, fontSize: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ‹
             </button>
           )}
+
+          {/* Next button */}
           {fullPhotoIndex < allPhotos.length - 1 && (
-            <button onClick={() => setFullPhotoIndex(prev => prev !== null ? prev + 1 : null)}
-              style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 40, height: 40, fontSize: 24, cursor: 'pointer' }}>
+            <button onClick={() => goToPhoto(fullPhotoIndex + 1, 'left')}
+              style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', color: 'white', width: 44, height: 44, fontSize: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ›
             </button>
           )}
+
+          {/* Dot indicators */}
           {allPhotos.length > 1 && (
-            <div style={{ position: 'absolute', bottom: 24, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
+            <div style={{ position: 'absolute', bottom: 24, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8 }}>
               {allPhotos.map((_, i) => (
-                <div key={i} onClick={() => setFullPhotoIndex(i)}
-                  style={{ width: 6, height: 6, borderRadius: '50%', background: i === fullPhotoIndex ? 'white' : 'rgba(255,255,255,0.4)', cursor: 'pointer' }} />
+                <div key={i}
+                  onClick={() => goToPhoto(i, i > fullPhotoIndex ? 'left' : 'right')}
+                  style={{ width: i === fullPhotoIndex ? 20 : 6, height: 6, borderRadius: 3, background: i === fullPhotoIndex ? '#FF2D78' : 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'width 0.2s ease, background 0.2s ease' }} />
               ))}
             </div>
           )}
+
+          {/* Photo counter */}
+          <div style={{ position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center' }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>{fullPhotoIndex + 1} / {allPhotos.length}</span>
+          </div>
         </div>
       )}
 
@@ -124,7 +185,7 @@ export default function DancerProfile() {
 
       <div style={{ padding: '16px' }}>
 
-        {/* Photo gallery first */}
+        {/* Photo gallery */}
         {allPhotos.length > 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Photos</div>
@@ -139,9 +200,7 @@ export default function DancerProfile() {
 
             {/* Mid-page CTA after photos */}
             <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
-              <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
-                Want to see more? 🔥
-              </div>
+              <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Want to see more? 🔥</div>
               <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>
                 {dancer.is_featured
                   ? `${dancer.stage_name} posts exclusive content on Fansly that isn't available anywhere else.`
@@ -159,9 +218,7 @@ export default function DancerProfile() {
         {allPhotos.length === 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ background: 'linear-gradient(135deg, #1a0d2e, #0d1a2e)', borderRadius: 14, border: '1px solid #FF2D78', padding: '16px', textAlign: 'center' }}>
-              <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
-                Want to see more? 🔥
-              </div>
+              <div style={{ color: 'white', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Want to see more? 🔥</div>
               <div style={{ color: '#8890c0', fontSize: 13, marginBottom: 12 }}>
                 {dancer.is_featured
                   ? 'Subscribe for exclusive photos and videos.'
