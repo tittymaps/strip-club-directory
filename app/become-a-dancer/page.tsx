@@ -283,7 +283,7 @@ export default function BecomeADancer() {
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700 }}>⭐ Featured Badge</span>
         </div>
-        <h2 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 8px', textAlign: 'center' }}>Want to show up at the Top of every List?</h2>
+       <h2 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 8px', textAlign: 'center' }}>Don&apos;t have a Fansly yet? Apply through our Link!</h2>
         <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', margin: '0 auto 20px', maxWidth: 320, lineHeight: 1.6 }}>
           Featured performers get top placement, a gold badge, and a direct link to their Fansly — driving real paying fans to your content.
         </p>
