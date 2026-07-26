@@ -175,7 +175,7 @@ export default function BecomeADancer() {
           Free to list. Reach club-goers in your city who are actively looking for performers like you.
         </p>
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#131629', border: '1px solid #1e2140', borderRadius: 20, padding: '6px 16px', marginBottom: 28, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#131629', border: '1px solid #1e2140', borderRadius: 20, padding: '6px 16px', marginBottom: 28 }}>
           <span style={{ fontSize: 14 }}>💃</span>
           <span style={{ color: '#8890c0', fontSize: 13 }}>Join <strong style={{ color: 'white' }}>{totalDancers}+ performers</strong> already listed</span>
         </div>
