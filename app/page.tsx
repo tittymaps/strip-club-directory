@@ -407,30 +407,30 @@ export default function Home() {
         {/* Map container — always rendered so Mapbox can initialize */}
         <div ref={mapContainer} style={{ height: '44vh', width: '100%', background: '#131629' }} />
 
-        {/* Splash overlay */}
+       {/* Splash overlay */}
         {showSplash && (
           <div style={{
             position: 'absolute', inset: 0, zIndex: 10,
             background: 'linear-gradient(160deg, #0D0F1E 0%, #1a0d2e 50%, #0D0F1E 100%)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            padding: '24px 20px', textAlign: 'center',
+            padding: '16px 20px', textAlign: 'center', overflow: 'hidden',
           }}>
-            <img src="/logo-pins.png" alt="TittyMaps" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', marginBottom: 16, border: '3px solid #FF2D78', boxShadow: '0 0 30px rgba(255,45,120,0.4)' }} />
-            <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 6px' }}>TittyMaps</h1>
-            <p style={{ color: '#8890c0', fontSize: 14, margin: '0 0 20px' }}>The strip club directory</p>
+            <img src="/logo-pins.png" alt="TittyMaps" style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', marginBottom: 10, border: '3px solid #FF2D78', boxShadow: '0 0 30px rgba(255,45,120,0.4)' }} />
+            <h1 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 4px' }}>TittyMaps</h1>
+            <p style={{ color: '#8890c0', fontSize: 13, margin: '0 0 14px' }}>The strip club directory</p>
 
-            <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 12, padding: '12px 20px', textAlign: 'center' }}>
-                <div style={{ color: '#FF2D78', fontSize: 22, fontWeight: 700 }}>{clubCount}</div>
-                <div style={{ color: '#8890c0', fontSize: 11 }}>Clubs</div>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+                <div style={{ color: '#FF2D78', fontSize: 18, fontWeight: 700 }}>{clubCount}</div>
+                <div style={{ color: '#8890c0', fontSize: 10 }}>Clubs</div>
               </div>
-              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 12, padding: '12px 20px', textAlign: 'center' }}>
-                <div style={{ color: '#FF2D78', fontSize: 22, fontWeight: 700 }}>{dancerCount}</div>
-                <div style={{ color: '#8890c0', fontSize: 11 }}>Dancers</div>
+              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+                <div style={{ color: '#FF2D78', fontSize: 18, fontWeight: 700 }}>{dancerCount}</div>
+                <div style={{ color: '#8890c0', fontSize: 10 }}>Dancers</div>
               </div>
-              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 12, padding: '12px 20px', textAlign: 'center' }}>
-                <div style={{ color: '#FF2D78', fontSize: 22, fontWeight: 700 }}>50</div>
-                <div style={{ color: '#8890c0', fontSize: 11 }}>States</div>
+              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+                <div style={{ color: '#FF2D78', fontSize: 18, fontWeight: 700 }}>50</div>
+                <div style={{ color: '#8890c0', fontSize: 10 }}>States</div>
               </div>
             </div>
 
@@ -439,7 +439,7 @@ export default function Home() {
               style={{
                 background: 'linear-gradient(135deg, #FF2D78, #cc0055)',
                 color: 'white', border: 'none', borderRadius: 30,
-                padding: '14px 36px', fontSize: 16, fontWeight: 700,
+                padding: '12px 32px', fontSize: 15, fontWeight: 700,
                 cursor: 'pointer', boxShadow: '0 4px 20px rgba(255,45,120,0.5)',
                 letterSpacing: 0.5,
               }}>
