@@ -293,7 +293,7 @@ export default function BecomeADancer() {
           <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>How to unlock Featured</div>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Apply as a Fansly creator through our link</div>
           <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
-            Apply through our Fansly creator link to get your Featured badge. It&apos;s free — Fansly takes their standard cut and shares a portion with us. Your earnings are never touched.
+            Once you have a Fansly account come back here and Apply to be a Fansly creator through our link to get your Featured badge! It&apos;s free — Fansly takes their standard cut and shares a portion with us. Your earnings are never touched.
           </div>
           <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
             style={{ display: 'block', background: '#FF2D78', color: 'white', borderRadius: 10, padding: '14px', fontSize: 15, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(255,45,120,0.4)' }}>
