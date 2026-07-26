@@ -29,9 +29,11 @@ export default function Home() {
   const mapContainer = useRef<any>(null)
   const map = useRef<any>(null)
   const mapboxgl = useRef<any>(null)
-  const [mapLoading, setMapLoading] = useState(true)
+  const [mapReady, setMapReady] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
+  const [clubCount, setClubCount] = useState(0)
+  const [dancerCount, setDancerCount] = useState(0)
   const [clubs, setClubs] = useState<any[]>([])
-  const [dancers, setDancers] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const filterRef = useRef<string>('all')
   const [userLocation, setUserLocation] = useState<{ lat: number, lon: number } | null>(null)
@@ -45,17 +47,27 @@ export default function Home() {
   useEffect(() => {
     fetchData()
     loadMapbox()
+    fetchCounts()
   }, [])
 
   useEffect(() => {
     selectedClubRef.current = selectedClub
   }, [selectedClub])
 
+  async function fetchCounts() {
+    const [{ count: clubs }, { count: dancers }] = await Promise.all([
+      supabase.from('clubs').select('*', { count: 'exact', head: true }),
+      supabase.from('dancers').select('*', { count: 'exact', head: true }),
+    ])
+    setClubCount(clubs || 0)
+    setDancerCount(dancers || 0)
+  }
+
   async function loadMapbox() {
     const mod = await import('mapbox-gl')
     mapboxgl.current = mod.default
     mapboxgl.current.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
-    setMapLoading(false)
+    setMapReady(true)
     if (pendingMapInit.current) {
       const { clubData, lat, lon } = pendingMapInit.current
       initMap(clubData, lat, lon)
@@ -93,7 +105,6 @@ export default function Home() {
       if (d.club_ids) d.club_ids.forEach((cid: string) => withDancers.add(cid))
     })
     clubsWithDancersRef.current = withDancers
-    setDancers(dancerList)
     allClubsForMap.current = clubList
 
     if (navigator.geolocation) {
@@ -393,15 +404,51 @@ export default function Home() {
       </div>
 
       <div style={{ position: 'relative' }}>
-        <div ref={mapContainer} style={{ height: '44vh', width: '100%', background: '#131629' }}>
-          {mapLoading && (
-            <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ color: '#FF2D78', fontSize: 14 }}>Loading map...</div>
-            </div>
-          )}
-        </div>
+        {/* Map container — always rendered so Mapbox can initialize */}
+        <div ref={mapContainer} style={{ height: '44vh', width: '100%', background: '#131629' }} />
 
-        {selectedClub && (
+        {/* Splash overlay */}
+        {showSplash && (
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 10,
+            background: 'linear-gradient(160deg, #0D0F1E 0%, #1a0d2e 50%, #0D0F1E 100%)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: '24px 20px', textAlign: 'center',
+          }}>
+            <img src="/logo-pins.png" alt="TittyMaps" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', marginBottom: 16, border: '3px solid #FF2D78', boxShadow: '0 0 30px rgba(255,45,120,0.4)' }} />
+            <h1 style={{ color: 'white', fontSize: 24, fontWeight: 700, margin: '0 0 6px' }}>TittyMaps</h1>
+            <p style={{ color: '#8890c0', fontSize: 14, margin: '0 0 20px' }}>The strip club directory</p>
+
+            <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 12, padding: '12px 20px', textAlign: 'center' }}>
+                <div style={{ color: '#FF2D78', fontSize: 22, fontWeight: 700 }}>{clubCount}</div>
+                <div style={{ color: '#8890c0', fontSize: 11 }}>Clubs</div>
+              </div>
+              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 12, padding: '12px 20px', textAlign: 'center' }}>
+                <div style={{ color: '#FF2D78', fontSize: 22, fontWeight: 700 }}>{dancerCount}</div>
+                <div style={{ color: '#8890c0', fontSize: 11 }}>Dancers</div>
+              </div>
+              <div style={{ background: '#131629', border: '1px solid #1e2140', borderRadius: 12, padding: '12px 20px', textAlign: 'center' }}>
+                <div style={{ color: '#FF2D78', fontSize: 22, fontWeight: 700 }}>50</div>
+                <div style={{ color: '#8890c0', fontSize: 11 }}>States</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSplash(false)}
+              style={{
+                background: 'linear-gradient(135deg, #FF2D78, #cc0055)',
+                color: 'white', border: 'none', borderRadius: 30,
+                padding: '14px 36px', fontSize: 16, fontWeight: 700,
+                cursor: 'pointer', boxShadow: '0 4px 20px rgba(255,45,120,0.5)',
+                letterSpacing: 0.5,
+              }}>
+              🗺️ Explore Map
+            </button>
+          </div>
+        )}
+
+        {selectedClub && !showSplash && (
           <div style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 10 }}>
             <div
               onClick={() => window.location.href = `/clubs/${selectedClub.id}`}
@@ -455,49 +502,49 @@ export default function Home() {
         ))}
       </div>
 
-     <div style={{ padding: '8px 12px', paddingBottom: 100 }}>
+      <div style={{ padding: '8px 12px', paddingBottom: 100 }}>
         <div style={{ color: '#8890c0', fontSize: 12, marginBottom: 8 }}>
           {userLocation ? `${filtered.length} clubs within 215 miles` : `${filtered.length} clubs`}
         </div>
         <div className="state-clubs-grid">
-        {filtered.map((club) => (
-          <div key={club.id}
-            onClick={() => window.location.href = `/clubs/${club.id}`}
-            style={{
-              background: selectedClub?.id === club.id ? '#1a0d20' : '#131629',
-              borderRadius: 12, marginBottom: 8, padding: 12,
-              border: `1px solid ${selectedClub?.id === club.id ? '#FF2D78' : club.is_featured ? '#FFD700' : clubsWithDancersRef.current.has(club.id) ? '#FF2D78' : '#1e2140'}`,
-              display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
-            }}>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
-              {club.photo_url
-                ? <img src={`${club.photo_url}?width=250&quality=70`} alt={club.name} loading="lazy" width={250} height={250} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : (club.is_featured ? '🌟' : '💜')
-              }
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
-              <div style={{ fontSize: 11, marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#8890c0' }}>{club.city}, {club.state}</span>
-                {userLocation && club.latitude && club.longitude && (
-                  <span style={{ color: '#8890c0' }}>
-                    {getDistance(userLocation.lat, userLocation.lon, club.latitude, club.longitude).toFixed(1)} mi
+          {filtered.map((club) => (
+            <div key={club.id}
+              onClick={() => window.location.href = `/clubs/${club.id}`}
+              style={{
+                background: selectedClub?.id === club.id ? '#1a0d20' : '#131629',
+                borderRadius: 12, marginBottom: 8, padding: 12,
+                border: `1px solid ${selectedClub?.id === club.id ? '#FF2D78' : club.is_featured ? '#FFD700' : clubsWithDancersRef.current.has(club.id) ? '#FF2D78' : '#1e2140'}`,
+                display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer'
+              }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
+                {club.photo_url
+                  ? <img src={`${club.photo_url}?width=250&quality=70`} alt={club.name} loading="lazy" width={250} height={250} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : (club.is_featured ? '🌟' : '💜')
+                }
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{club.name}</div>
+                <div style={{ fontSize: 11, marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#8890c0' }}>{club.city}, {club.state}</span>
+                  {userLocation && club.latitude && club.longitude && (
+                    <span style={{ color: '#8890c0' }}>
+                      {getDistance(userLocation.lat, userLocation.lon, club.latitude, club.longitude).toFixed(1)} mi
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                  {clubsWithDancersRef.current.has(club.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
+                  <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                    {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                   </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
-                {clubsWithDancersRef.current.has(club.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
-                <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.nude_level === 'full_nude' ? '🐱 Full nude' : club.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
-                </span>
-                <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
-                  {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
-                </span>
+                  <span style={{ background: club.bar_type === 'none' ? '#2e1a1a' : '#1a2a3d', color: club.bar_type === 'none' ? '#ff6b6b' : '#7ab8ff', border: `1px solid ${club.bar_type === 'none' ? '#ff4444' : '#3a7acd'}`, borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
+                    {club.bar_type === 'full_bar' ? '🍾 Full bar' : club.bar_type === 'cafe' ? '🧋 Cafe' : club.bar_type === 'byob' ? '🍺 BYOB' : '❌ No bar'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
         </div>
 
         <div style={{ paddingTop: 8 }}>
