@@ -42,6 +42,8 @@ export default function Home() {
   const allClubs = useRef<any[]>([])
   const allClubsForMap = useRef<any[]>([])
   const clubsWithDancersRef = useRef<Set<string>>(new Set())
+  const featuredDancerCountRef = useRef<Record<string, number>>({})
+  const regularDancerCountRef = useRef<Record<string, number>>({})
   const pendingMapInit = useRef<{ clubData: any[], lat: number, lon: number } | null>(null)
 
   useEffect(() => {
@@ -85,26 +87,45 @@ export default function Home() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   }
 
-  function getClubPriority(club: any): number {
-    if (club.is_featured) return 0
-    if (clubsWithDancersRef.current.has(club.id)) return 1
-    return 2
+  function getClubScore(club: any): number {
+    const featuredCount = featuredDancerCountRef.current[club.id] || 0
+    const regularCount = regularDancerCountRef.current[club.id] || 0
+    if (club.is_featured && featuredCount > 0) return 3000 + featuredCount * 100 + Math.random()
+    if (club.is_featured) return 2000 + Math.random()
+    if (featuredCount > 0) return 1000 + featuredCount * 100 + Math.random()
+    if (regularCount > 0) return regularCount * 10 + Math.random()
+    return Math.random()
   }
 
   async function fetchData() {
     const [{ data: clubData }, { data: dancerData }] = await Promise.all([
       supabase.from('clubs').select('*'),
-      supabase.from('dancers').select('club_ids').not('club_ids', 'is', null)
+      supabase.from('dancers').select('club_ids, is_featured').not('club_ids', 'is', null)
     ])
 
     const clubList = clubData || []
     const dancerList = dancerData || []
 
     const withDancers = new Set<string>()
+    const featuredDancerCount: Record<string, number> = {}
+    const regularDancerCount: Record<string, number> = {}
+
     dancerList.forEach((d: any) => {
-      if (d.club_ids) d.club_ids.forEach((cid: string) => withDancers.add(cid))
+      if (d.club_ids) {
+        d.club_ids.forEach((cid: string) => {
+          withDancers.add(cid)
+          if (d.is_featured) {
+            featuredDancerCount[cid] = (featuredDancerCount[cid] || 0) + 1
+          } else {
+            regularDancerCount[cid] = (regularDancerCount[cid] || 0) + 1
+          }
+        })
+      }
     })
+
     clubsWithDancersRef.current = withDancers
+    featuredDancerCountRef.current = featuredDancerCount
+    regularDancerCountRef.current = regularDancerCount
     allClubsForMap.current = clubList
 
     if (navigator.geolocation) {
@@ -118,12 +139,7 @@ export default function Home() {
             .filter(c => c.latitude && c.longitude)
             .map(c => ({ ...c, distance: getDistance(userLat, userLon, c.latitude, c.longitude) }))
             .filter(c => c.distance <= 215)
-            .sort((a, b) => {
-              const pa = getClubPriority(a)
-              const pb = getClubPriority(b)
-              if (pa !== pb) return pa - pb
-              return a.distance - b.distance
-            })
+            .sort((a, b) => getClubScore(b) - getClubScore(a))
 
           allClubs.current = withDistance
           setClubs(withDistance)
@@ -134,7 +150,7 @@ export default function Home() {
           }
         },
         () => {
-          const sorted = [...clubList].sort((a, b) => getClubPriority(a) - getClubPriority(b))
+          const sorted = [...clubList].sort((a, b) => getClubScore(b) - getClubScore(a))
           const top20 = sorted.slice(0, 20)
           allClubs.current = top20
           setClubs(top20)
@@ -146,7 +162,7 @@ export default function Home() {
         }
       )
     } else {
-      const sorted = [...clubList].sort((a, b) => getClubPriority(a) - getClubPriority(b))
+      const sorted = [...clubList].sort((a, b) => getClubScore(b) - getClubScore(a))
       const top20 = sorted.slice(0, 20)
       allClubs.current = top20
       setClubs(top20)
@@ -404,10 +420,9 @@ export default function Home() {
       </div>
 
       <div style={{ position: 'relative' }}>
-        {/* Map container — always rendered so Mapbox can initialize */}
         <div ref={mapContainer} style={{ height: '44vh', width: '100%', background: '#131629' }} />
 
-       {/* Splash overlay */}
+        {/* Splash overlay */}
         {showSplash && (
           <div style={{
             position: 'absolute', inset: 0, zIndex: 10,
