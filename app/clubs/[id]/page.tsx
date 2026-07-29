@@ -72,7 +72,6 @@ export default function ClubDetail() {
   const [reviewTitle, setReviewTitle] = useState('')
   const [reviewRating, setReviewRating] = useState(0)
   const [reviewText, setReviewText] = useState('')
-  const [reviewHover, setReviewHover] = useState(0)
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewError, setReviewError] = useState('')
   const [reviewSuccess, setReviewSuccess] = useState(false)
@@ -149,11 +148,27 @@ export default function ClubDetail() {
 
   async function fetchNearbyClubs(club: any) {
     if (!club.latitude || !club.longitude) return
-    const { data } = await supabase.from('clubs').select('*').neq('id', club.id)
+    const [{ data }, { data: dancerData }] = await Promise.all([
+      supabase.from('clubs').select('*').neq('id', club.id),
+      supabase.from('dancers').select('club_ids, is_featured').not('club_ids', 'is', null)
+    ])
     if (!data) return
+    const withDancers = new Set<string>()
+    const featuredDancers = new Set<string>()
+    ;(dancerData || []).forEach((d: any) => {
+      if (d.club_ids) d.club_ids.forEach((cid: string) => {
+        withDancers.add(cid)
+        if (d.is_featured) featuredDancers.add(cid)
+      })
+    })
     const withDistance = data
       .filter(c => c.latitude && c.longitude)
-      .map(c => ({ ...c, distance: getDistance(club.latitude, club.longitude, c.latitude, c.longitude) }))
+      .map(c => ({
+        ...c,
+        distance: getDistance(club.latitude, club.longitude, c.latitude, c.longitude),
+        hasDancers: withDancers.has(c.id),
+        hasFeaturedDancers: featuredDancers.has(c.id)
+      }))
       .sort((a, b) => a.distance - b.distance)
       .slice(0, 5)
     setNearbyClubs(withDistance)
@@ -388,11 +403,11 @@ export default function ClubDetail() {
       </div>
 
       <div style={{ background: '#131629', borderBottom: '1px solid #1e2140', padding: '24px 16px' }}>
-       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
           <div onClick={() => club.photo_url && setFullPhoto(club.photo_url)}
             style={{ width: 90, height: 90, borderRadius: 16, background: club.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, flexShrink: 0, cursor: club.photo_url ? 'pointer' : 'default' }}>
             {club.photo_url
-              ? <img src={`${club.photo_url}?width=400&quality=75`} alt={club.name} width={90} height={90} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <img src={`${club.photo_url}?width=400&quality=75`} alt={club.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : (club.is_featured ? '🌟' : '💜')}
           </div>
           <div style={{ flex: 1 }}>
@@ -473,7 +488,7 @@ export default function ClubDetail() {
           <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
             {sectionLabel}
           </div>
-         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="performers-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }} className="performers-grid">
             {dancers.map(dancer => {
               const photo = dancer.photo_urls?.[0] || dancer.photo_url
               return (
@@ -596,10 +611,14 @@ export default function ClubDetail() {
             {nearbyClubs.map(nearby => (
               <div key={nearby.id}
                 onClick={() => window.location.href = `/clubs/${nearby.id}`}
-                style={{ background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12, border: `1px solid ${nearby.is_featured ? '#FFD700' : '#1e2140'}`, display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
+                style={{
+                  background: '#131629', borderRadius: 12, marginBottom: 8, padding: 12,
+                  border: `1px solid ${nearby.is_featured ? '#FFD700' : nearby.hasDancers ? '#FF2D78' : '#1e2140'}`,
+                  display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer'
+                }}>
                 <div style={{ width: 44, height: 44, borderRadius: 10, background: nearby.is_featured ? '#2a1f00' : '#1a1530', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
                   {nearby.photo_url
-                    ? <img src={`${nearby.photo_url}?width=400&quality=75`} alt={nearby.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={`${nearby.photo_url}?width=250&quality=70`} alt={nearby.name} width={44} height={44} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : (nearby.is_featured ? '🌟' : '💜')}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -607,6 +626,7 @@ export default function ClubDetail() {
                   <div style={{ fontSize: 11, color: '#8890c0', marginBottom: 4 }}>{nearby.city}, {nearby.state}</div>
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                     {nearby.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>★ Featured</span>}
+                    {nearby.hasDancers && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>💃</span>}
                     <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '2px 8px', fontSize: 10 }}>
                       {nearby.nude_level === 'full_nude' ? '🐱 Full nude' : nearby.nude_level === 'bikini' ? '👙 Bikini' : '🍒 Topless'}
                     </span>
