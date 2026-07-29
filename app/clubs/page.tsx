@@ -52,6 +52,9 @@ export default function ClubsPage() {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const searchRef = useRef<any>(null)
+  const featuredDancerCount = useRef<Record<string, number>>({})
+  const regularDancerCount = useRef<Record<string, number>>({})
+  const clubsWithDancers = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     fetchData()
@@ -69,24 +72,44 @@ export default function ClubsPage() {
 
   async function fetchData() {
     const [{ data: clubData }, { data: dancerData }] = await Promise.all([
-      supabase.from('clubs').select('*').order('is_featured', { ascending: false }),
-      supabase.from('dancers').select('club_ids').not('club_ids', 'is', null)
+      supabase.from('clubs').select('*'),
+      supabase.from('dancers').select('club_ids, is_featured').not('club_ids', 'is', null)
     ])
+
+    const dancerList = dancerData || []
+    const withDancers = new Set<string>()
+    const featuredCount: Record<string, number> = {}
+    const regularCount: Record<string, number> = {}
+
+    dancerList.forEach((d: any) => {
+      if (d.club_ids) {
+        d.club_ids.forEach((cid: string) => {
+          withDancers.add(cid)
+          if (d.is_featured) {
+            featuredCount[cid] = (featuredCount[cid] || 0) + 1
+          } else {
+            regularCount[cid] = (regularCount[cid] || 0) + 1
+          }
+        })
+      }
+    })
+
+    clubsWithDancers.current = withDancers
+    featuredDancerCount.current = featuredCount
+    regularDancerCount.current = regularCount
+
     setClubs(clubData || [])
     setDancers(dancerData || [])
   }
 
-  const clubsWithDancers = new Set<string>()
-  dancers.forEach(dancer => {
-    if (dancer.club_ids) {
-      dancer.club_ids.forEach((cid: string) => clubsWithDancers.add(cid))
-    }
-  })
-
-  function getClubPriority(club: any): number {
-    if (club.is_featured) return 0
-    if (clubsWithDancers.has(club.id)) return 1
-    return 2
+  function getClubScore(club: any): number {
+    const fc = featuredDancerCount.current[club.id] || 0
+    const rc = regularDancerCount.current[club.id] || 0
+    if (club.is_featured && fc > 0) return 3000 + fc * 100 + Math.random()
+    if (club.is_featured) return 2000 + Math.random()
+    if (fc > 0) return 1000 + fc * 100 + Math.random()
+    if (rc > 0) return rc * 10 + Math.random()
+    return Math.random()
   }
 
   function handleSearchChange(value: string) {
@@ -99,7 +122,6 @@ export default function ClubsPage() {
     const q = value.toLowerCase()
     const results: any[] = []
 
-    // Near me suggestions
     const nearMeTerms = ['near me', 'near', 'close', 'location', 'nearby']
     const stripClubTerms = ['strip club', 'strip', 'gentlemen', 'nude', 'topless']
     const bikiniTerms = ['bikini', 'barista', 'coffee']
@@ -120,14 +142,12 @@ export default function ClubsPage() {
       if (showLingerie) results.push({ type: 'near me', label: NEAR_ME_PAGES[2].label, sublabel: NEAR_ME_PAGES[2].sublabel, href: NEAR_ME_PAGES[2].href, icon: NEAR_ME_PAGES[2].icon })
     }
 
-    // Club name suggestions
     clubs.forEach(club => {
       if (club.name.toLowerCase().includes(q)) {
         results.push({ type: 'club', label: club.name, sublabel: `${club.city}, ${STATE_NAMES[club.state] || club.state}`, href: `/clubs/${club.id}`, icon: '🏛️' })
       }
     })
 
-    // City suggestions
     const cityMap: Record<string, boolean> = {}
     clubs.forEach(c => { cityMap[c.city] = true })
     Object.keys(cityMap).forEach(city => {
@@ -140,7 +160,6 @@ export default function ClubsPage() {
       }
     })
 
-    // State suggestions
     Object.entries(STATE_NAMES).forEach(([code, name]) => {
       if (name.toLowerCase().includes(q) || code.toLowerCase().includes(q)) {
         if (clubs.some(c => c.state === code)) {
@@ -186,7 +205,7 @@ export default function ClubsPage() {
       filter === 'none' ? c.bar_type === 'none' :
       filter === 'featured' ? c.is_featured : true
     return matchesSearch && matchesFilter
-  }).sort((a, b) => getClubPriority(a) - getClubPriority(b))
+  }).sort((a, b) => getClubScore(b) - getClubScore(a))
 
   return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', color: 'white', fontFamily: 'sans-serif', paddingBottom: 80 }}>
@@ -205,7 +224,7 @@ export default function ClubsPage() {
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             onKeyDown={e => { if (e.key === 'Enter') { setShowSuggestions(false); (e.target as HTMLInputElement).blur() } }}
             placeholder="Search clubs, cities, or states..."
-           style={{ width: '100%', background: '#131629', border: '2px solid #FF2D78', borderRadius: showSuggestions ? '10px 10px 0 0' : 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
+            style={{ width: '100%', background: '#131629', border: '2px solid #FF2D78', borderRadius: showSuggestions ? '10px 10px 0 0' : 10, padding: '11px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }}
           />
           {search.length > 0 && (
             <button onClick={() => { handleSearchChange(''); setShowSuggestions(false) }}
@@ -267,7 +286,7 @@ export default function ClubsPage() {
                   borderRadius: 12, overflow: 'hidden', cursor: 'pointer',
                   position: 'relative', aspectRatio: '5/3',
                   background: '#131629',
-                  border: `1px solid ${club.is_featured ? '#FFD700' : clubsWithDancers.has(club.id) ? '#FF2D78' : '#1e2140'}`
+                  border: `1px solid ${club.is_featured ? '#FFD700' : clubsWithDancers.current.has(club.id) ? '#FF2D78' : '#1e2140'}`
                 }}>
                 {club.photo_url
                   ? <img
@@ -287,7 +306,7 @@ export default function ClubsPage() {
                   <div style={{ color: '#8890c0', fontSize: 10, marginBottom: 5 }}>{club.city}, {STATE_NAMES[club.state] || club.state}</div>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     {club.is_featured && <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>★ Featured</span>}
-                    {clubsWithDancers.has(club.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>💃</span>}
+                    {clubsWithDancers.current.has(club.id) && <span style={{ background: '#3d1a2e', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>💃</span>}
                     <span style={{ background: 'rgba(255,45,120,0.2)', color: '#FF2D78', border: '1px solid #FF2D78', borderRadius: 20, padding: '1px 6px', fontSize: 9 }}>
                       {club.nude_level === 'full_nude' ? '🐱' : club.nude_level === 'bikini' ? '👙' : '🍒'}
                     </span>
