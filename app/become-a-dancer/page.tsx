@@ -27,7 +27,6 @@ export default function BecomeADancer() {
   const [selectedClubs, setSelectedClubs] = useState<string[]>([])
   const [stageName, setStageName] = useState('')
   const [fanslyUsername, setFanslyUsername] = useState('')
-  const [email, setEmail] = useState('')
   const [photos, setPhotos] = useState<File[]>([])
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
   const [submitted, setSubmitted] = useState(false)
@@ -99,7 +98,7 @@ export default function BecomeADancer() {
       stage_name: stageName,
       fansly_url: fanslyUsername,
       club_names: selectedClubs.length > 0 ? selectedClubs : null,
-      email: email || null,
+      email: null,
       photo_url: uploadedUrls[0] || null,
       photo_urls: uploadedUrls.length > 0 ? uploadedUrls : null,
     })
@@ -111,7 +110,7 @@ export default function BecomeADancer() {
         body: JSON.stringify({
           stage_name: stageName,
           fansly_url: fanslyUsername,
-          email: email || 'No email provided',
+          email: 'No email provided',
           club_names: selectedClubs,
         })
       })
@@ -218,14 +217,6 @@ export default function BecomeADancer() {
             style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '13px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }} />
         </div>
 
-        {/* Email */}
-        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 12 }}>
-          <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>📧 Email <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional</span></div>
-          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 8 }}>We will notify you when your profile goes live</div>
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com"
-            style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box' }} />
-        </div>
-
         {/* Clubs */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 20 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>🏛️ Where do you perform? <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional, up to 3</span></div>
@@ -283,12 +274,11 @@ export default function BecomeADancer() {
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <span style={{ background: '#3d3000', color: '#FFD700', border: '1px solid #FFD700', borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700 }}>⭐ Featured Badge</span>
         </div>
-       <h2 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 8px', textAlign: 'center' }}>Don&apos;t have a Fansly yet? Apply through our Link!</h2>
+        <h2 style={{ color: 'white', fontSize: 20, fontWeight: 700, margin: '0 0 8px', textAlign: 'center' }}>Don&apos;t have a Fansly yet? Apply through our Link!</h2>
         <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', margin: '0 auto 20px', maxWidth: 320, lineHeight: 1.6 }}>
           Featured performers get top placement, a gold badge, and a direct link to their Fansly — driving real paying fans to your content.
         </p>
 
-        {/* Fansly referral CTA */}
         <div style={{ background: '#1a0d2e', border: '2px solid #FF2D78', borderRadius: 14, padding: '20px', marginBottom: 20 }}>
           <div style={{ color: '#FF2D78', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>How to unlock Featured</div>
           <div style={{ color: 'white', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Apply as a Fansly creator through our link</div>
@@ -302,7 +292,6 @@ export default function BecomeADancer() {
           <div style={{ color: '#555', fontSize: 11, textAlign: 'center', marginTop: 8 }}>Free to apply. Your earnings are 100% yours.</div>
         </div>
 
-        {/* Benefits */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
             { icon: '🔝', title: 'Always at the top', desc: 'Your profile shows first on every club page and dancer list in your city' },
