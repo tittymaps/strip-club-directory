@@ -11,6 +11,20 @@ const FANSLY_REF = 'tittymaps'
 const FANSLY_SIGNUP = `https://fansly.com/application/form?r=${FANSLY_REF}`
 const TWITTER_DM = 'https://x.com/messages/compose?recipient_id=TittyMaps'
 
+const STATE_NAMES: Record<string, string> = {
+  AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+  CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+  MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+  NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+  SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+  VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+  DC: 'Washington D.C.'
+}
+
 function TwitterDMButton() {
   return (
     <a href={TWITTER_DM} target="_blank" rel="noopener noreferrer"
@@ -124,10 +138,16 @@ export default function BecomeADancer() {
     }
   }
 
-  const filteredClubs = clubs.filter(c =>
-    c.name.toLowerCase().includes(clubSearch.toLowerCase()) ||
-    c.city.toLowerCase().includes(clubSearch.toLowerCase())
-  )
+  const filteredClubs = clubs.filter(c => {
+    const q = clubSearch.toLowerCase()
+    const stateName = STATE_NAMES[c.state] || c.state
+    return (
+      c.name.toLowerCase().includes(q) ||
+      c.city.toLowerCase().includes(q) ||
+      c.state.toLowerCase().includes(q) ||
+      stateName.toLowerCase().includes(q)
+    )
+  })
 
   if (submitted) return (
     <div style={{ background: '#0D0F1E', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24, fontFamily: 'sans-serif' }}>
@@ -220,8 +240,8 @@ export default function BecomeADancer() {
         {/* Clubs */}
         <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #1e2140', padding: '16px', marginBottom: 20 }}>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600, marginBottom: 4 }}>🏛️ Where do you perform? <span style={{ color: '#555', fontSize: 11, fontWeight: 400 }}>optional, up to 3</span></div>
-          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>Helps us link you to the right club pages</div>
-          <input value={clubSearch} onChange={e => setClubSearch(e.target.value)} placeholder="Search clubs by name or city..."
+          <div style={{ color: '#8890c0', fontSize: 11, marginBottom: 10 }}>Search by club name, city or state</div>
+          <input value={clubSearch} onChange={e => setClubSearch(e.target.value)} placeholder="Search by club, city, or state..."
             style={{ width: '100%', background: '#0D0F1E', border: '1px solid #2a2d50', borderRadius: 10, padding: '10px 14px', color: 'white', fontSize: 16, boxSizing: 'border-box', marginBottom: 10 }} />
           {selectedClubs.length > 0 && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -243,7 +263,7 @@ export default function BecomeADancer() {
                       style={{ background: selected ? '#1a0d2e' : '#0D0F1E', border: `1px solid ${selected ? '#FF2D78' : '#2a2d50'}`, borderRadius: 10, padding: '10px 14px', cursor: selectedClubs.length >= 3 && !selected ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: selectedClubs.length >= 3 && !selected ? 0.4 : 1 }}>
                       <div>
                         <div style={{ color: 'white', fontSize: 13 }}>{club.name}</div>
-                        <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state}</div>
+                        <div style={{ color: '#8890c0', fontSize: 11 }}>{club.city}, {club.state} — {STATE_NAMES[club.state] || club.state}</div>
                       </div>
                       {selected && <span style={{ color: '#FF2D78', fontSize: 18 }}>✓</span>}
                     </div>
@@ -310,8 +330,23 @@ export default function BecomeADancer() {
         </div>
       </div>
 
-      {/* SECTION 3 — DM option */}
+      {/* SECTION 3 — Featured reminder + DM */}
       <div style={{ padding: '28px 20px' }}>
+
+        {/* Featured reminder */}
+        <div style={{ background: '#131629', borderRadius: 14, border: '1px solid #FFD700', padding: '18px', marginBottom: 20, textAlign: 'center' }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>⭐</div>
+          <div style={{ color: '#FFD700', fontSize: 14, fontWeight: 700, marginBottom: 6 }}>Remember — Featured requires our Fansly link</div>
+          <div style={{ color: '#8890c0', fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
+            Submitting the form above gets you listed. But to unlock the Featured badge, top placement, and a direct Fansly link — you must apply as a Fansly creator through our referral link below.
+          </div>
+          <a href={FANSLY_SIGNUP} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'block', background: 'linear-gradient(135deg, #FF2D78, #cc0055)', color: 'white', borderRadius: 10, padding: '13px', fontSize: 14, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxShadow: '0 4px 20px rgba(255,45,120,0.3)', marginBottom: 8 }}>
+            👆 Apply as Fansly creator — unlock Featured
+          </a>
+          <div style={{ color: '#555', fontSize: 11 }}>Free to apply. Your earnings are 100% yours.</div>
+        </div>
+
         <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', textAlign: 'center' }}>Prefer to reach out directly? 💬</h2>
         <p style={{ color: '#8890c0', fontSize: 14, textAlign: 'center', margin: '0 auto 20px', maxWidth: 300, lineHeight: 1.6 }}>
           Send us your stage name and Fansly link on X. We respond to every DM and will get you listed fast.
